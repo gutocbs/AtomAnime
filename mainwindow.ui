@@ -1072,8 +1072,8 @@ color: rgb(220, 220, 220);</string>
      <rect>
       <x>10</x>
       <y>890</y>
-      <width>256</width>
-      <height>31</height>
+      <width>250</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -1921,69 +1921,57 @@ QPushButton#clickAnime1:hover:!pressed
      <string/>
     </property>
    </widget>
-   <widget class="QPushButton" name="OrdenarBotao">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>930</y>
-      <width>93</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Ordenar</string>
-    </property>
-   </widget>
-   <widget class="QListWidget" name="OrdenarEscolha">
+   <widget class="QComboBox" name="OrdemAnime">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>930</y>
-      <width>256</width>
-      <height>31</height>
+      <width>250</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background: white;</string>
+     <string notr="true">background: white;
+</string>
     </property>
     <item>
      <property name="text">
-      <string>Ordem alfabética</string>
+      <string>Ordem alfabética crescente</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Ordem alfabética invertida</string>
+      <string>Ordem alfabética decrescente</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Nota cresccente</string>
+      <string>Progresso crescente</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Progresso decrescente</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Season crescente</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Season decrescente</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Nota crescente</string>
      </property>
     </item>
     <item>
      <property name="text">
       <string>Nota decrescente</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Episódios assistidos crescente</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Episódios assistidos decrescente</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Data de lançamento crescente</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Data de lançamento decrescente</string>
      </property>
     </item>
    </widget>
@@ -2089,8 +2077,7 @@ QPushButton#clickAnime1:hover:!pressed
    <zorder>clickAnime19</zorder>
    <zorder>clickAnime21</zorder>
    <zorder>clickAnime25</zorder>
-   <zorder>OrdenarBotao</zorder>
-   <zorder>OrdenarEscolha</zorder>
+   <zorder>OrdemAnime</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

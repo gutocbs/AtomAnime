@@ -108,7 +108,6 @@ int Organizador::AbreArquivo(int progresso, int id, QString nome, QString nome2)
     }
     //Caso não tenha pasta específica, começa a procurar por todas as pastas, vendo qual é a pasta do anime certo
     for(int i = 0; i < conf->diretorioAnimes.length(); i++){
-//        qDebug() << "veio pra cá?2";
         QDirIterator iteradorPasta(conf->diretorioAnimes[i], QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
         while(iteradorPasta.hasNext()){
             //Iterador
@@ -141,7 +140,6 @@ int Organizador::AbreArquivo(int progresso, int id, QString nome, QString nome2)
         //Começa a procurar por arquivos soltos dentro da pasta
         QDirIterator it(iteradorPasta.filePath(), QDir::Files);
         //Lê o nome de toods os episódisos da pasta
-//        qDebug() << "ops";
         while(it.hasNext()){
             QFile f(it.next());
             //Caso ache o episódio que eu quero, o próximo após o progresso

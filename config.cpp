@@ -24,11 +24,12 @@ void Config::ParseTaiga(){
     QString arquivoEscrever = "Configurações/confTaiga.txt";
     QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
-    qDebug() << arquivoLer1;
+//    qDebug() << arquivoLer1;
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
     //Checa se todos os arquivos do taiga podem ser abertos
+    escrever.remove();
     if (lerUser.open(QIODevice::ReadOnly) && lerDB.open(QIODevice::ReadOnly))
     {
         //Cria variáveis pra ler os arquivos do taiga
@@ -250,6 +251,7 @@ void Config::ParseCompleted(){
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
+    escrever.remove();
     //Checa se todos os arquivos do taiga podem ser abertos
     if (lerUser.open(QIODevice::ReadOnly) && lerDB.open(QIODevice::ReadOnly))
     {
@@ -470,6 +472,7 @@ void Config::ParseOnHold(){
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
+    escrever.remove();
     //Checa se todos os arquivos do taiga podem ser abertos
     if (lerUser.open(QIODevice::ReadOnly) && lerDB.open(QIODevice::ReadOnly))
     {
@@ -690,6 +693,7 @@ void Config::ParseDropped(){
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
+    escrever.remove();
     //Checa se todos os arquivos do taiga podem ser abertos
     if (lerUser.open(QIODevice::ReadOnly) && lerDB.open(QIODevice::ReadOnly))
     {
@@ -910,6 +914,7 @@ void Config::ParsePlanToWatch(){
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
+    escrever.remove();
     //Checa se todos os arquivos do taiga podem ser abertos
     if (lerUser.open(QIODevice::ReadOnly) && lerDB.open(QIODevice::ReadOnly))
     {

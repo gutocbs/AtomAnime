@@ -2,7 +2,6 @@
 
 configPC::configPC()
 {
-//    QString homedir = ;
     anitomy = new anitomy::Anitomy;
     diretorioImagensMedio = "Configurações/Imagens/Medio/";
     diretorioImagensGrandes = "Configurações/Imagens/Grande/";
@@ -29,8 +28,6 @@ void configPC::CriaPastasBase(){
 
 
 void configPC::EscreveArquivo(){
-    //Se a pasta não existir, ela vai ser criada
-
     QString filename = "Configurações/conf.txt";
     QFile file(filename);
     if (file.open(QIODevice::ReadWrite)) {
@@ -39,7 +36,6 @@ void configPC::EscreveArquivo(){
             stream << "D01>diretorioAnime[" << i << "]>" << diretorioAnimes[i] << endl;
         }
         for(int i = 0; i < diretorioAnimeEspecifico.length(); i++){
-//            qDebug() << i << "-" << diretorioAnimeEspecifico[i];
             stream << "D02>" << idAnime[i] << ">" << diretorioAnimeEspecifico[i] << endl;
         }
     }
@@ -87,14 +83,7 @@ int configPC::BuscaPastasAnimesEspecificos(QString nome, QString nomeAlternativo
             nomeArquivoPelado = nomeArquivoPelado.simplified();
             //Compara o nome da pasta com o nome do anime
             //Compara os dois nomes em letras minusculas, pra evitar erros
-//            pelado1 = nomeArquivoPelado;
-//            pelado1.chop(nomeArquivoPelado.length()-nomeAnime.length());
-//            pelado2 = nomeArquivoPelado;
-//            pelado2.chop(nomeArquivoPelado.length()-nome2Anime.length());
-//            qDebug() << nomeAnime  << "-" << nomeArquivoPelado << "-" << pelado1 << "-" << pelado2;
             if(nomeAnime.contains(nomeArquivoPelado) == true || nome2Anime.contains(nomeArquivoPelado) == true){// || pelado2.compare(nomeAnime) == 0 || pelado2.compare(nome2Anime) == 0){
-//                qDebug() << nomeArquivoPelado << "-" << nomeAnime << "-" << nome2Anime;
-//                qDebug() << id << " - " << nomeAnime << it.filePath();
                 idAnime.append(id);
                 diretorioAnimeEspecifico.append(it.filePath());
                 return 0;

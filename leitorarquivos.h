@@ -46,6 +46,8 @@ public:
     int retornaScore(int);
 
 public slots:
+
+    void OrdenaVetor(QString);
     void OrdenaVetorNome();
     void OrdenaVetorNota();
     void OrdenaVetorProgresso();

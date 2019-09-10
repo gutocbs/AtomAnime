@@ -97,6 +97,34 @@ void leitorarquivos::arrumaProgresso(int i){
     }
 }
 
+
+void leitorarquivos::OrdenaVetor(QString ordem){
+    if(ordem.compare("Ordem alfabética crescente") == 0){
+        OrdenaVetorNome();
+    }
+    else if(ordem.compare("Ordem alfabética decrescente") == 0){
+        OrdenaVetorNomeInverso();
+    }
+    else if(ordem.compare("Progresso crescente") == 0){
+        OrdenaVetorProgresso();
+    }
+    else if(ordem.compare("Progresso decrescente") == 0){
+        OrdenaVetorProgressoInverso();
+    }
+    else if(ordem.compare("Season crescente") == 0){
+        OrdenaVetorData();
+    }
+    else if(ordem.compare("Season decrescente") == 0){
+        OrdenaVetorDataInverso();
+    }
+    else if(ordem.compare("Nota crescente") == 0){
+        OrdenaVetorNota();
+    }
+    else if(ordem.compare("Nota decrescente") == 0){
+        OrdenaVetorNotaInverso();
+    }
+}
+
 void leitorarquivos::OrdenaVetorDataInverso(){
     QString AnimeTemp;
     for(int a = 0; a < NomeLista; a++){
@@ -237,7 +265,7 @@ void leitorarquivos::OrdenaVetorProgressoInverso(){
     QString AnimeTemp;
     for(int a = 0; a < NomeLista; a++){
         for(int i = a+1; i < NomeLista; i++){
-            if(progresso[a] < progresso[i]){
+            if(progresso[a].toInt() < progresso[i].toInt()){
                 nomeAnime.move(a,i);
                 nomeAnime.move(i-1,a);
                 nomeIngles.move(a,i);
@@ -271,7 +299,7 @@ void leitorarquivos::OrdenaVetorProgresso(){
     QString AnimeTemp;
     for(int a = 0; a < NomeLista; a++){
         for(int i = a+1; i < NomeLista; i++){
-            if(progresso[a] > progresso[i]){
+            if(progresso[a].toInt() > progresso[i].toInt()){
                 nomeAnime.move(a,i);
                 nomeAnime.move(i-1,a);
                 nomeIngles.move(a,i);
@@ -303,8 +331,6 @@ void leitorarquivos::OrdenaVetorProgresso(){
 
 void leitorarquivos::OrdenaVetorNome(){
     QString AnimeTemp;
-    qDebug() << nomeAnime.length();
-    qDebug() << NomeLista;
     for(int a = 0; a < NomeLista; a++){
         for(int i = a+1; i < NomeLista; i++){
             if(nomeAnime[a] > nomeAnime[i]){
@@ -339,8 +365,6 @@ void leitorarquivos::OrdenaVetorNome(){
 
 void leitorarquivos::OrdenaVetorNomeInverso(){
     QString AnimeTemp;
-    qDebug() << nomeAnime.length();
-    qDebug() << NomeLista;
     for(int a = 0; a < NomeLista; a++){
         for(int i = a+1; i < NomeLista; i++){
             if(nomeAnime[a] < nomeAnime[i]){

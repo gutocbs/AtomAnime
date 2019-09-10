@@ -74,9 +74,7 @@ private:
 
     bool primeiraLeitura;
 
-
     QPixmap pix;
-
 
 public slots:
     void InstauraPrimeiraJanela();
@@ -130,7 +128,7 @@ public slots:
     void BotaoOnHold();
     void BotaoDropped();
     void BotaoPlanToWatch();
-    void OrdenaVetorNome();
+    void OrdenaVetor();
 
 private slots:
     void Configurar();

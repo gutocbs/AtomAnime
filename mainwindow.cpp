@@ -30,17 +30,13 @@ MainWindow::MainWindow(QWidget *parent) :
     cThread.start();
 
     configuracoes = new configPC;
-//    configuracoes->IniciaThread(confThread);
-//    configuracoes->moveToThread(&confThread);
-//    confThread.start();
 
     connect(runArquivo, SIGNAL(terminouSetArquivo()),this,SLOT(InstauraPrimeiraJanela()));
     connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(LiberaBotaoCompleted()));
     connect(runArquivo, SIGNAL(terminouOnHold()),this,SLOT(LiberaBotaoOnHold()));
     connect(runArquivo, SIGNAL(terminouDropped()),this,SLOT(LiberaBotaoDropped()));
     connect(runArquivo, SIGNAL(terminouPlanToWatch()),this,SLOT(LiberaBotaoPlanToWatch()));
-//    connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(BotoesCompleted()));//Quando terminar a coisa, o botão é liberado
-    //Fazer com que o botão mude de cor e tenha uma barra carregando
+
     anime0 = -1;
     numEpisodios = 0;
     ui->setupUi(this);
@@ -64,7 +60,6 @@ MainWindow::~MainWindow()
 void MainWindow::keyPressEvent(QKeyEvent * event){
     if(event->key() == Qt::Key_U){
         mudaImagem();
-//        qDebug() << "oi";
     }
     else if(event->key() == Qt::Key_X){
         AbreEpisodio();
@@ -106,7 +101,7 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime27, SIGNAL(clicked()),this,SLOT(carregaAnime27()));
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
-    connect(ui->OrdenarBotao, SIGNAL(clicked()), this,SLOT(OrdenaVetorNome()));
+    connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
 }
 
 
@@ -214,8 +209,8 @@ void MainWindow::BotaoCompleted(){
     RestauraJanela();
 }
 
-void MainWindow::OrdenaVetorNome(){
-    leitorA->OrdenaVetorNome();
+void MainWindow::OrdenaVetor(){
+    leitorA->OrdenaVetor(ui->OrdemAnime->currentText());
     carregaInfo();
 }
 
