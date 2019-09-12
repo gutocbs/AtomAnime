@@ -18,6 +18,7 @@ class Config : public QObject
     Q_OBJECT
 public:
     explicit Config(QObject *parent = nullptr);
+//    Config(config)
     ~Config();
     void IniciaThread(QThread &cThread);
 
@@ -28,6 +29,7 @@ public:
     void ParsePlanToWatch();
 
     void organizaArquivo();
+    void setConfigs(configPC *Configura);
 
     QString arrumaSeason(QString);
 
@@ -52,7 +54,13 @@ private:
         bool qAnimeId;
         bool qPrimeiraEntrada;
 
+        QString arquivoLer1;
+        QString arquivoLer2;
+
+        QString user;
+
 signals:
+    void mensagemConfig(QString);
     void terminouSetArquivo();
     void terminouCompleted();
     void terminouOnHold();

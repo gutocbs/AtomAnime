@@ -2,7 +2,9 @@
 #include "filedownloader.h"
 
 Config::Config(QObject *parent) : QObject(parent)
+//Config::Config(QObject *parent, configPC *configura) : QObject(parent)
 {
+    pastas = new configPC;
     qWatching = false;
     qAnimeId = false;
     qFinished = false;
@@ -18,13 +20,17 @@ void Config::IniciaThread(QThread &cThread){
     connect(&cThread, SIGNAL(started()), this, SLOT(run()));
 }
 
+void Config::setConfigs(configPC *Configura){
+    pastas = Configura;
+    user = pastas->retornaUser();
+//    user = "oi";
+}
 
 
 void Config::ParseTaiga(){
     QString arquivoEscrever = "Configurações/confTaiga.txt";
-    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
+    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
-//    qDebug() << arquivoLer1;
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
     QFile escrever(arquivoEscrever);
@@ -246,7 +252,7 @@ void Config::ParseTaiga(){
 
 void Config::ParseCompleted(){
     QString arquivoEscrever = "Configurações/confCompleted.txt";
-    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
+    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
@@ -467,7 +473,7 @@ void Config::ParseCompleted(){
 }
 void Config::ParseOnHold(){
     QString arquivoEscrever = "Configurações/confOnHold.txt";
-    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
+    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
@@ -688,7 +694,7 @@ void Config::ParseOnHold(){
 }
 void Config::ParseDropped(){
     QString arquivoEscrever = "Configurações/confDropped.txt";
-    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
+    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
@@ -909,7 +915,7 @@ void Config::ParseDropped(){
 }
 void Config::ParsePlanToWatch(){
     QString arquivoEscrever = "Configurações/confPlanToWatch.txt";
-    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/gutocbs@anilist/anime.xml";
+    QString arquivoLer1 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist/anime.xml";
     QString arquivoLer2 = QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/db/anime.xml";
     QFile lerUser(arquivoLer1);
     QFile lerDB(arquivoLer2);
@@ -1147,25 +1153,35 @@ QString Config::arrumaSeason(QString season){
 }
 
 void Config::run(){
-    pastas = new configPC;
-    ParseTaiga();
-    emit terminouSetArquivo();
+    QDir diretorio;
     while(true){
-//        organizaArquivo();
-        ParseCompleted();
-        emit terminouCompleted();
-        ParseOnHold();
-        emit terminouOnHold();
-        ParseDropped();
-        qWatching = false;
-        qAnimeId = false;
-        emit terminouDropped();
-        ParsePlanToWatch();
-        emit terminouPlanToWatch();
-//        cThread.sleep(3000);
-        this->thread()->sleep(300);
-        ParseTaiga();
-//        this->sleep(5);
-//        qDebug() << "Deu certo";
+        if(pastas->retornaUser().compare(user) == 0 && pastas->retornaUser() != ""){
+            ParseTaiga();
+            emit terminouSetArquivo();
+            while(true){
+                ParseCompleted();
+                emit terminouCompleted();
+                ParseOnHold();
+                emit terminouOnHold();
+                ParseDropped();
+                qWatching = false;
+                qAnimeId = false;
+                emit terminouDropped();
+                ParsePlanToWatch();
+                emit terminouPlanToWatch();
+                this->thread()->sleep(300);
+                ParseTaiga();
+            }
+        }
+        else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){
+            diretorio.setPath(QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist");
+            if(diretorio.exists()){
+                user = pastas->retornaUser();
+                emit mensagemConfig("AUsr");
+            }
+            else{
+                emit mensagemConfig("EUsr");
+            }
+        }
     }
 }

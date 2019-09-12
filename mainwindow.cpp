@@ -1,15 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "janelaconfiguracao.h"
 #include <QObject>
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-//    bool operator<(const vetorAnimes& a, const vetorAnimes& b) { return a.intensity < b.intensity; }
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -23,14 +19,16 @@ MainWindow::MainWindow(QWidget *parent) :
     leitorDropped = new leitorarquivos;
     leitorPlanToWatch = new leitorarquivos;
     leitorA = leitorWatching;
-    runArquivo = new Config;
+    configuracoes = new configPC();
+    configuracoes->recebeJConfig(&jConfig);
 
+    runArquivo = new Config();
+    runArquivo->setConfigs(configuracoes);
     runArquivo->IniciaThread(cThread);
     runArquivo->moveToThread(&cThread);
     cThread.start();
 
-    configuracoes = new configPC;
-
+    connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
     connect(runArquivo, SIGNAL(terminouSetArquivo()),this,SLOT(InstauraPrimeiraJanela()));
     connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(LiberaBotaoCompleted()));
     connect(runArquivo, SIGNAL(terminouOnHold()),this,SLOT(LiberaBotaoOnHold()));
@@ -39,13 +37,19 @@ MainWindow::MainWindow(QWidget *parent) :
 
     anime0 = -1;
     numEpisodios = 0;
+
     ui->setupUi(this);
+//    ui->janela->setCurrentIndex(0);
+    ui->janela->addWidget(&jConfig);
+//    ui->janela->insertWidget(1, jConfig);
+
     ui->label->setText("Carregando lista de animes");
     Botoes();
 }
 
 MainWindow::~MainWindow()
 {
+    configuracoes->EscreveConfig();
     delete leitorA;
     delete qdown;
     delete configuracoes;
@@ -100,8 +104,8 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime26, SIGNAL(clicked()),this,SLOT(carregaAnime26()));
     connect(ui->clickAnime27, SIGNAL(clicked()),this,SLOT(carregaAnime27()));
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
-    connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
     connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
+    connect(&jConfig, SIGNAL(cancelado()), this, SLOT(ConfigCancelada()));
 }
 
 
@@ -129,7 +133,7 @@ void MainWindow::LiberaBotaoPlanToWatch(){
 void MainWindow::InstauraPrimeiraJanela(){
     ui->label->setText("Carregando!");
     leitorA->leLinha("watching");
-//    leitorA->OrdenaVetorNome();
+    leitorA->OrdenaVetor(configuracoes->getOrdem());
 //    qDebug() << "oi";
     qdown = new QDownloader[leitorA->retornaTamanhoLista()];
     downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
@@ -151,10 +155,14 @@ void MainWindow::InstauraPrimeiraJanela(){
         vetorAnimes.append(w);
     }
     carregaInfo();
+    ui->Watching->setStyleSheet("background: white;");
+    connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 //    RestauraJanela();
 }
 
 void MainWindow::BotaoWatching(){
+    ui->OrdemAnime->setCurrentIndex(0);
+//    leitorA->OrdenaVetor();
     ui->label->setText("Carregando!");
     lista = "watching";
     ui->Dropped->setStyleSheet("background: white;");
@@ -184,6 +192,7 @@ void MainWindow::BotaoWatching(){
 }
 
 void MainWindow::BotaoCompleted(){
+    ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "completed";
     ui->Dropped->setStyleSheet("background: white;");
@@ -209,12 +218,9 @@ void MainWindow::BotaoCompleted(){
     RestauraJanela();
 }
 
-void MainWindow::OrdenaVetor(){
-    leitorA->OrdenaVetor(ui->OrdemAnime->currentText());
-    carregaInfo();
-}
 
 void MainWindow::BotaoOnHold(){
+    ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "onhold";
     ui->Dropped->setStyleSheet("background: white;");
@@ -240,6 +246,7 @@ void MainWindow::BotaoOnHold(){
     RestauraJanela();
 }
 void MainWindow::BotaoDropped(){
+    ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "dropped";
     ui->Completed->setStyleSheet("background: white;");
@@ -265,6 +272,7 @@ void MainWindow::BotaoDropped(){
     RestauraJanela();
 }
 void MainWindow::BotaoPlanToWatch(){
+    ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "plantowatch";
     ui->Dropped->setStyleSheet("background: white;");
@@ -288,6 +296,15 @@ void MainWindow::BotaoPlanToWatch(){
         vetorAnimes.append(w);
     }
     RestauraJanela();
+}
+
+void MainWindow::OrdenaVetor(){
+    if(ui->OrdemAnime->currentIndex() != 0){
+        if(lista == "watching")
+            configuracoes->setOrdem(ui->OrdemAnime->currentText());
+        leitorA->OrdenaVetor(ui->OrdemAnime->currentText());
+        carregaInfo();
+    }
 }
 
 void MainWindow::RestauraJanela(){
@@ -440,10 +457,12 @@ void MainWindow::ConfiguraArquivos(){
 }
 
 void MainWindow::Configurar(){
-    JanelaConfiguracao jConfig;
-    jConfig.setModal(true);
-    jConfig.exec();
+    ui->janela->setCurrentIndex(1);
 }
+void MainWindow::ConfigCancelada(){
+    ui->janela->setCurrentIndex(0);
+}
+
 
 void MainWindow::carregaAnime1(){
     if(idAnime <= tamanhoLista){

@@ -18,6 +18,9 @@
 #include "configpc.h"
 
 
+#include "janelaconfiguracao.h"
+
+
 namespace Ui {
 class MainWindow;
 }
@@ -33,6 +36,8 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    JanelaConfiguracao jConfig;
+
     //Download de imagens
     QDownloader *qdown;
     QDownloader *qdownload;
@@ -132,6 +137,7 @@ public slots:
 
 private slots:
     void Configurar();
+    void ConfigCancelada();
     void AbreEpisodio();
     void keyPressEvent(QKeyEvent * event);
 };

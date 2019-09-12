@@ -2,13 +2,39 @@
 
 configPC::configPC()
 {
+//    arquivo = new leitorarquivos;
     anitomy = new anitomy::Anitomy;
     diretorioImagensMedio = "Configurações/Imagens/Medio/";
     diretorioImagensGrandes = "Configurações/Imagens/Grande/";
-    diretorioAnimes.append("E:/Animes");
-    diretorioAnimes.append(QDir::homePath() + "/Downloads/Animes");
+//    diretorioAnimes.append("E:/Animes");
+//    diretorioAnimes.append(QDir::homePath() + "/Downloads/Animes");
     diretorioTaiga = QDir::homePath() + "/AppData/Roaming/Taiga/data";
     CriaPastasBase();
+}
+
+void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
+    jconfig = JanelaConfg;
+    this->diretorioAnimes = jconfig->retornaDiretorioAnime();
+    setUser();
+    this->ordemLista = jconfig->returnOrdemLista();
+    connect(jconfig, SIGNAL(user()), this, SLOT(setUser()));
+    connect(jconfig, SIGNAL(dirAdd(QString)), this, SLOT(addDir(QString)));
+    connect(jconfig, SIGNAL(dirRem(QString)), this, SLOT(rmvDir(QString)));
+}
+
+void configPC::addDir(QString dir){
+    diretorioAnimes.append(dir);
+    EscreveArquivo();
+}
+
+void configPC::rmvDir(QString dir){
+    for(int i = 0; i < diretorioAnimes.length(); i++){
+        if(diretorioAnimes[i] == dir){
+            diretorioAnimes.remove(i);
+            break;
+        }
+    }
+    EscreveArquivo();
 }
 
 void configPC::CriaPastasBase(){
@@ -26,10 +52,26 @@ void configPC::CriaPastasBase(){
     }
 }
 
+void configPC::setUser(){
+    usernameAnilist = jconfig->returnUserAnilist();
+}
+
+void configPC::setOrdem(QString ordem){
+    ordemLista = ordem;
+}
+
+QString configPC::getOrdem(){
+    return ordemLista;
+}
+
+QString configPC::retornaUser(){
+    return usernameAnilist;
+}
 
 void configPC::EscreveArquivo(){
     QString filename = "Configurações/conf.txt";
     QFile file(filename);
+    file.remove();
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         for(int i = 0; i < diretorioAnimes.length(); i++){
@@ -41,6 +83,16 @@ void configPC::EscreveArquivo(){
     }
 }
 
+void configPC::EscreveConfig(){
+    QString filename = "Configurações/user.txt";
+    QFile file(filename);
+    file.remove();
+    if (file.open(QIODevice::ReadWrite)) {
+        QTextStream stream(&file);
+        stream << "user>" << usernameAnilist << endl;
+        stream << "ordem>" << ordemLista;
+    }
+}
 
 std::string configPC::RetornaDiretorioTaiga(){
     return diretorioTaiga.toStdString();
