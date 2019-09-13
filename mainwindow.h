@@ -44,11 +44,13 @@ private:
     QDownloader *baixaOnHold;
     QDownloader *baixaDropped;
     QDownloader *baixaPlanToWatch;
+    QDownloader *baixaBusca;
     QDownloader *downImagemGrandeWatching;
     QDownloader *downImagemGrandeCompleted;
     QDownloader *downImagemGrandeOnHold;
     QDownloader *downImagemGrandeDropped;
     QDownloader *downImagemGrandePlanToWatch;
+    QDownloader *downImagemGrandeBusca;
 
     //Leitores
     leitorarquivos *leitorA;
@@ -135,6 +137,7 @@ public slots:
     void BotaoOnHold();
     void BotaoDropped();
     void BotaoPlanToWatch();
+    void BotaoBusca();
     void OrdenaVetor();
 
 private slots:

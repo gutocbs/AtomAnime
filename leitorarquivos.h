@@ -41,9 +41,11 @@ public:
     QStringList retornaGeneros(int);
 
     int retornaTamanhoLista();
+
     int retornaProgresso(int);
     int setProgress(int);
     int retornaScore(int);
+    int busca(QString);
 
 public slots:
 

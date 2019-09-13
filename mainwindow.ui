@@ -2441,6 +2441,35 @@ color: rgb(220, 220, 220);</string>
        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
      </widget>
+     <widget class="QPlainTextEdit" name="StringBusca">
+      <property name="geometry">
+       <rect>
+        <x>850</x>
+        <y>450</y>
+        <width>391</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="Busca">
+      <property name="geometry">
+       <rect>
+        <x>1260</x>
+        <y>450</y>
+        <width>93</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Busca</string>
+      </property>
+     </widget>
      <zorder>sinopse</zorder>
      <zorder>anime7_2</zorder>
      <zorder>anime19_2</zorder>
@@ -2550,6 +2579,8 @@ color: rgb(220, 220, 220);</string>
      <zorder>clickAnime28</zorder>
      <zorder>EpiDisponivel</zorder>
      <zorder>qEpiDisponivel</zorder>
+     <zorder>StringBusca</zorder>
+     <zorder>Busca</zorder>
     </widget>
    </widget>
    <widget class="QLabel" name="NumPagina">

@@ -20,8 +20,6 @@ void leitorarquivos::leLinha(QString lista)
         watching = "Configurações/confPlanToWatch.txt";
     }
     NomeLista = 0;
-//    QFile inputFile("C://Users//Guto//Documents//Programação//QT//TaigaSkin//assistindo.h");
-//    QFile inputFile();
     QFile inputFile(watching);
     if (inputFile.open(QIODevice::ReadOnly))
     {
@@ -551,4 +549,65 @@ int leitorarquivos::setProgress(int i){
         return 100;
     }
     return 0;
+}
+
+int leitorarquivos::busca(QString busca)
+{
+    QString lista[5];
+    lista[0] = "Configurações/confTaiga.txt";
+    lista[1] = "Configurações/confCompleted.txt";
+    lista[2] = "Configurações/confOnHold.txt";
+    lista[3] = "Configurações/confDropped.txt";
+    lista[4] = "Configurações/confPlanToWatch.txt";
+    NomeLista = 0;
+    //Procura em todas as listas
+    //Quando lista de not in the list estiver pronta, mudar pra 6
+    for(int i = 0; i < 5; i++){
+        QFile inputFile(lista[i]);
+        if (inputFile.open(QIODevice::ReadOnly))
+        {
+           QTextStream in(&inputFile);
+           while (!in.atEnd())
+           {
+                QString linha = in.readLine();
+                QString linha2 = in.readLine();
+                if(linha.toLower().contains(busca.toLower()) || linha2.toLower().contains(busca.toLower())){
+                    qDebug() << linha;
+                    nomeAnime.append(linha);
+                    nomeIngles.append(linha2);
+                    progresso.append(in.readLine());
+                    arrumaProgresso(NomeLista);
+                    numEpi.append(in.readLine());
+                    score.append(in.readLine());
+                    scoreGeral.append(in.readLine());
+                    date.append(in.readLine());
+                    season.append(in.readLine());
+                    status.append(in.readLine());
+                    produtores.append(in.readLine().split(','));
+                    link.append(in.readLine());
+                    genero.append(in.readLine().split(','));
+                    sinopse.append(in.readLine());
+                    arrumaSinopse(NomeLista);
+                    id.append(in.readLine());
+                    NomeLista++;
+                }
+                else{
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                    in.readLine();
+                }
+           }
+           inputFile.close();
+        }
+    }
+    return NomeLista;
 }
