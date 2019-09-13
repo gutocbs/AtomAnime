@@ -8,6 +8,7 @@ Config::Config(QObject *parent) : QObject(parent)
     qWatching = false;
     qAnimeId = false;
     qFinished = false;
+    qStartDateOk = false;
 //    qPrimeiraEntrada = true;
 }
 
@@ -154,6 +155,7 @@ void Config::ParseTaiga(){
                                 linha2 = linha2.simplified();
                                 //Salva link da imagem
                                 qSeason = linha2;
+                                qStartDateOk = true;
                             }
                             else if(linha2.contains("<date_end>"))
                             {
@@ -171,7 +173,7 @@ void Config::ParseTaiga(){
                             }
                             else if(linha2.contains("<genres>"))
                             {
-                                //Remove dados desnecessários da linha e salva no vetor
+                                //Remove da dos desnecessários da linha e salva no vetor
                                 linha2.remove("<genres>");
                                 linha2.remove("</genres>");
                                 //Remove espaços inúteis
@@ -223,11 +225,23 @@ void Config::ParseTaiga(){
                     stream << qProgresso << endl;
                     stream << qEpiCount << endl;
                     stream << qScore << endl;
-                    stream << qScoreGeral << endl;
-                    stream << qSeason << endl;
+                    if(qStartDateOk == true){
+                        stream << qScoreGeral << endl;
+                        stream << qSeason << endl;
+                    }
+                    else{
+                        stream << "0" << endl;
+                        qSeason = "2050-01-01";
+                        stream << qSeason << endl;
+                    }
                     stream << arrumaSeason(qSeason) << endl;
                     if(qFinished == false){
-                        stream << "Ongoing" << endl;
+                        if(comparaData(qSeason) == true){
+                            stream << "Ongoing" << endl;
+                        }
+                        else{
+                            stream << "Not aired yet" << endl;
+                        }
                     }
                     else{
                         stream << "Finished Airing" << endl;
@@ -240,6 +254,7 @@ void Config::ParseTaiga(){
                 }
                 qWatching = false;
                 qFinished = false;
+                qStartDateOk = false;
             }
             //Após terminar de ler e escrever os arquivos, começa a salvar e fechar
             escrever.close();
@@ -377,6 +392,7 @@ void Config::ParseCompleted(){
                                 linha2 = linha2.simplified();
                                 //Salva link da imagem
                                 qSeason = linha2;
+                                qStartDateOk = true;
                             }
                             else if(linha2.contains("<date_end>"))
                             {
@@ -446,11 +462,23 @@ void Config::ParseCompleted(){
                     stream << qProgresso << endl;
                     stream << qEpiCount << endl;
                     stream << qScore << endl;
-                    stream << qScoreGeral << endl;
-                    stream << qSeason << endl;
+                    if(qStartDateOk == true){
+                        stream << qScoreGeral << endl;
+                        stream << qSeason << endl;
+                    }
+                    else{
+                        stream << "0" << endl;
+                        qSeason = "2050-01-01";
+                        stream << qSeason << endl;
+                    }
                     stream << arrumaSeason(qSeason) << endl;
                     if(qFinished == false){
-                        stream << "Ongoing" << endl;
+                        if(comparaData(qSeason) == true){
+                            stream << "Ongoing" << endl;
+                        }
+                        else{
+                            stream << "Not aired yet" << endl;
+                        }
                     }
                     else{
                         stream << "Finished Airing" << endl;
@@ -463,6 +491,7 @@ void Config::ParseCompleted(){
                 }
                 qWatching = false;
                 qFinished = false;
+                qStartDateOk = false;
             }
             //Após terminar de ler e escrever os arquivos, começa a salvar e fechar
             escrever.close();
@@ -598,6 +627,7 @@ void Config::ParseOnHold(){
                                 linha2 = linha2.simplified();
                                 //Salva link da imagem
                                 qSeason = linha2;
+                                qStartDateOk = true;
                             }
                             else if(linha2.contains("<date_end>"))
                             {
@@ -667,11 +697,23 @@ void Config::ParseOnHold(){
                     stream << qProgresso << endl;
                     stream << qEpiCount << endl;
                     stream << qScore << endl;
-                    stream << qScoreGeral << endl;
-                    stream << qSeason << endl;
+                    if(qStartDateOk == true){
+                        stream << qScoreGeral << endl;
+                        stream << qSeason << endl;
+                    }
+                    else{
+                        stream << "0" << endl;
+                        qSeason = "2050-01-01";
+                        stream << qSeason << endl;
+                    }
                     stream << arrumaSeason(qSeason) << endl;
                     if(qFinished == false){
-                        stream << "Ongoing" << endl;
+                        if(comparaData(qSeason) == true){
+                            stream << "Ongoing" << endl;
+                        }
+                        else{
+                            stream << "Not aired yet" << endl;
+                        }
                     }
                     else{
                         stream << "Finished Airing" << endl;
@@ -684,6 +726,7 @@ void Config::ParseOnHold(){
                 }
                 qWatching = false;
                 qFinished = false;
+                qStartDateOk = false;
             }
             //Após terminar de ler e escrever os arquivos, começa a salvar e fechar
             escrever.close();
@@ -889,10 +932,21 @@ void Config::ParseDropped(){
                     stream << qEpiCount << endl;
                     stream << qScore << endl;
                     stream << qScoreGeral << endl;
-                    stream << qSeason << endl;
+                    if(qStartDateOk == true){
+                        stream << qSeason << endl;
+                    }
+                    else{
+                        qSeason = "2050-01-01";
+                        stream << qSeason << endl;
+                    }
                     stream << arrumaSeason(qSeason) << endl;
                     if(qFinished == false){
-                        stream << "Ongoing" << endl;
+                        if(comparaData(qSeason) == true){
+                            stream << "Ongoing" << endl;
+                        }
+                        else{
+                            stream << "Not aired yet" << endl;
+                        }
                     }
                     else{
                         stream << "Finished Airing" << endl;
@@ -905,6 +959,7 @@ void Config::ParseDropped(){
                 }
                 qWatching = false;
                 qFinished = false;
+                qStartDateOk = false;
             }
             //Após terminar de ler e escrever os arquivos, começa a salvar e fechar
             escrever.close();
@@ -1041,6 +1096,7 @@ void Config::ParsePlanToWatch(){
                                 linha2 = linha2.simplified();
                                 //Salva link da imagem
                                 qSeason = linha2;
+                                qStartDateOk = true;
                             }
                             else if(linha2.contains("<date_end>"))
                             {
@@ -1110,11 +1166,23 @@ void Config::ParsePlanToWatch(){
                     stream << qProgresso << endl;
                     stream << qEpiCount << endl;
                     stream << qScore << endl;
-                    stream << qScoreGeral << endl;
-                    stream << qSeason << endl;
+                    if(qStartDateOk == true){
+                        stream << qScoreGeral << endl;
+                        stream << qSeason << endl;
+                    }
+                    else{
+                        stream << "0" << endl;
+                        qSeason = "2050-01-01";
+                        stream << qSeason << endl;
+                    }
                     stream << arrumaSeason(qSeason) << endl;
                     if(qFinished == false){
-                        stream << "Ongoing" << endl;
+                        if(comparaData(qSeason) == true){
+                            stream << "Ongoing" << endl;
+                        }
+                        else{
+                            stream << "Not aired yet" << endl;
+                        }
                     }
                     else{
                         stream << "Finished Airing" << endl;
@@ -1127,6 +1195,7 @@ void Config::ParsePlanToWatch(){
                 }
                 qWatching = false;
                 qFinished = false;
+                qStartDateOk = false;
             }
             //Após terminar de ler e escrever os arquivos, começa a salvar e fechar
             escrever.close();
@@ -1137,6 +1206,9 @@ void Config::ParsePlanToWatch(){
 }
 
 QString Config::arrumaSeason(QString season){
+    if(season == "2050-01-01"){
+        return "Not defined";
+    }
     QStringList listaSeason = season.split('-');
 
     if(listaSeason.at(1) == "01" || listaSeason.at(1) == "02" || listaSeason.at(1) == "03")
@@ -1149,7 +1221,15 @@ QString Config::arrumaSeason(QString season){
         season = "Fall ";
     season.append(listaSeason.at(0));
     return season;
-//    qDebug() << season[i];
+}
+
+bool Config::comparaData(QString season){
+    QStringList data = season.split('-');
+    QDate estreia(data.at(0).toInt(), data.at(1).toInt(), data.at(2).toInt());
+    if(estreia <= QDate::currentDate()){
+        return true;
+    }
+    return false;
 }
 
 void Config::run(){

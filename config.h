@@ -33,6 +33,8 @@ public:
 
     QString arrumaSeason(QString);
 
+    bool comparaData(QString);
+
 private:
     configPC *pastas;
 
@@ -53,7 +55,7 @@ private:
         bool qWatching;
         bool qAnimeId;
         bool qPrimeiraEntrada;
-
+        bool qStartDateOk;
         QString arquivoLer1;
         QString arquivoLer2;
 

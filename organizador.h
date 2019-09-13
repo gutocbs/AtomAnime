@@ -28,8 +28,8 @@ public:
     QString retornaEpisodeNumber(QString);
     QString retornaNomeAnime(QString nome);
 
-    int retornaNumEpiNaPasta(int, int);
-
+    int retornaNumEpiNaPasta(int, int, int);
+    QVector<int> retornaEpisodiosDisponiveis();
 
     void abre(QString); ///DELETAR!
 
@@ -38,6 +38,7 @@ public:
 private:
     anitomy::Anitomy *anitomy;
     configPC *conf;
+    QVector<int> epiDis;
 };
 
 #endif // ORGANIZADOR_H

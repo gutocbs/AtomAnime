@@ -648,8 +648,45 @@ void MainWindow::carregaInfo(){
     ui->sinopse->setText(leitorA->retornaSinopse(anime0));
     ui->sinopse->setWordWrap(true);
     numEpisodios = 0;
-    numEpisodios = organiza->retornaNumEpiNaPasta(numEpisodios, leitorA->retornaId(anime0).toInt());
-    ui->ProxEpi->setText(QString::number(leitorA->retornaProgresso(anime0)));
+    numEpisodios = organiza->retornaNumEpiNaPasta(numEpisodios, leitorA->retornaId(anime0).toInt(), leitorA->retornaNumEpi(anime0).toInt());
+    qEpiDisponivel = organiza->retornaEpisodiosDisponiveis();
+    //Caso tenham episódios disponíveis na pasta
+    if(qEpiDisponivel.empty() == false){
+        //Caso todos os episódios estejam disponíveis, organiza o texto e mostra no label
+        //Isso poupa memória, já que não tem que passar pelo loop
+        if(qEpiDisponivel.length() == leitorA->retornaNumEpi(anime0).toInt()){
+            //Mostra como EPI1 to ULTIMO EPI
+            ui->qEpiDisponivel->setText("1-" + leitorA->retornaNumEpi(anime0));
+        }
+        //Caso não sejam todos que estejam disponíveis, mas tiver mais de um episódio
+        else if(qEpiDisponivel.length() >= 1){
+            //Passa primeiro episódio encontrado pra string
+            QString epidis = QString::number(qEpiDisponivel[0]);
+            //Começa a ver quais episódios estão disponíveis
+            for(int i = 1; i < qEpiDisponivel.length(); i++){
+                //Caso ache algum erro no vetor de episódios, exclui
+                //Erros são sempre mostrados como 0
+                if(qEpiDisponivel[i] == 0){
+                    qEpiDisponivel.remove(i);
+                }
+                //Compara os episódios. Caso sejam seguidos, ele ignora
+                //Caso não sejam seguidos, é adicionado na string " TO XXX EPIDODE", onde o próximo episódio está faltando
+                if(qEpiDisponivel[i-1]+1 != qEpiDisponivel[i]){
+                    epidis.append("-" + QString::number(qEpiDisponivel[i-1]) + ", " + QString::number(qEpiDisponivel[i]));
+                }
+                //Caso chegue no fim do vetor, ele adiciona o último episódio disponível à string
+                else if(i == qEpiDisponivel.length()-1){
+                    epidis.append("-" + QString::number(qEpiDisponivel[i]));
+                }
+            }
+            ui->qEpiDisponivel->setText(epidis);
+        }
+    }
+    //Caso não tenham episódios na pasta, o vetor está vazio
+    else{
+        ui->qEpiDisponivel->setText("Nenhum episódio disponível");
+    }
+    ui->ProxEpi->setText(QString::number(leitorA->retornaProgresso(anime0)) + "/" + leitorA->retornaNumEpi(anime0));
     if(numEpisodios > 1){
         ui->EpiDisponivel->setText(QString::number(numEpisodios) + " episódios baixados");
     }
@@ -680,18 +717,21 @@ void MainWindow::carregaInfo(){
                 ui->picBig->setPixmap(pix);
             }
         }
+        ui->anime1->setScaledContents(true);
+        ui->anime1_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime1_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime1->setScaledContents(true);
             ui->anime1->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime1->setScaledContents(true);
             ui->anime1->setPixmap(pix);
         }
     }
     else{
         ui->anime1->clear();
         ui->anime1->setStyleSheet("background: transparent;");
+        ui->anime1_2->setStyleSheet("background: transparent;");
+        ui->anime1_2->clear();
     }
     if(i+1 < tamanhoLista){
 //        if(configuracoes->RetornaDiretorioAnimeEspecifico(i+1) != "0"){
@@ -702,389 +742,462 @@ void MainWindow::carregaInfo(){
 //            pix.load(":/Imagens/C:/Users/Guto/Desktop/ballR.png");
 //            ui->DisponibilidadeAnime2->setPixmap(pix);
 //        }
+        ui->anime2->setScaledContents(true);
+        ui->anime2_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime2_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "jpg")){
-                ui->anime2->setScaledContents(true);
-                ui->anime2->setPixmap(pix);
+            ui->anime2->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime2->setScaledContents(true);
             ui->anime2->setPixmap(pix);
         }
     }
     else{
         ui->anime2->clear();
         ui->anime2->setStyleSheet("background: transparent;");
+        ui->anime2_2->setStyleSheet("background: transparent;");
+        ui->anime2_2->clear();
     }
     if(i+2 < tamanhoLista){
-//        if(configuracoes->RetornaDiretorioAnimeEspecifico(i+2) != "0"){
-//            pix.load(":/Imagens/C:/Users/Guto/Desktop/ballG.png");
-//            ui->DisponibilidadeAnime3->setPixmap(pix);
-//        }
-//        else {
-//            pix.load(":/Imagens/C:/Users/Guto/Desktop/ballR.png");
-//            ui->DisponibilidadeAnime3->setPixmap(pix);
-//        }
+        ui->anime3->setScaledContents(true);
+        ui->anime3_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime3_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime3->setScaledContents(true);
             ui->anime3->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime3->setScaledContents(true);
             ui->anime3->setPixmap(pix);
         }
     }
     else{
         ui->anime3->clear();
         ui->anime3->setStyleSheet("background: transparent;");
+        ui->anime3_2->setStyleSheet("background: transparent;");
+        ui->anime3_2->clear();
     }
     if(i+3 < tamanhoLista){
+        ui->anime4->setScaledContents(true);
+        ui->anime4_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime4_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime4->setScaledContents(true);
             ui->anime4->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime4->setScaledContents(true);
             ui->anime4->setPixmap(pix);
         }
     }
     else{
         ui->anime4->clear();
         ui->anime4->setStyleSheet("background: transparent;");
+        ui->anime4_2->setStyleSheet("background: transparent;");
+        ui->anime4_2->clear();
     }
     if(i+4 < tamanhoLista){
+        ui->anime5->setScaledContents(true);
+        ui->anime5_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime5_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime5->setScaledContents(true);
             ui->anime5->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime5->setScaledContents(true);
             ui->anime5->setPixmap(pix);
         }
     }
     else{
         ui->anime5->clear();
         ui->anime5->setStyleSheet("background: transparent;");
+        ui->anime5_2->setStyleSheet("background: transparent;");
+        ui->anime5_2->clear();
     }
     if(i+5 < tamanhoLista){
+        ui->anime6->setScaledContents(true);
+        ui->anime6_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime6_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime6->setScaledContents(true);
             ui->anime6->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime6->setScaledContents(true);
             ui->anime6->setPixmap(pix);
         }
     }
     else{
         ui->anime6->clear();
         ui->anime6->setStyleSheet("background: transparent;");
+        ui->anime6_2->setStyleSheet("background: transparent;");
+        ui->anime6_2->clear();
     }
     if(i+6 < tamanhoLista){
+        ui->anime7->setScaledContents(true);
+        ui->anime7_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime7_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime7->setScaledContents(true);
             ui->anime7->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime7->setScaledContents(true);
             ui->anime7->setPixmap(pix);
         }
     }
     else{
         ui->anime7->clear();
         ui->anime7->setStyleSheet("background: transparent;");
+        ui->anime7_2->setStyleSheet("background: transparent;");
+        ui->anime7_2->clear();
     }
     if(i+7 < tamanhoLista){
+        ui->anime8->setScaledContents(true);
+        ui->anime8_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime8_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime8->setScaledContents(true);
             ui->anime8->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime8->setScaledContents(true);
             ui->anime8->setPixmap(pix);
         }
     }
     else{
         ui->anime8->clear();
         ui->anime8->setStyleSheet("background: transparent;");
+        ui->anime8_2->setStyleSheet("background: transparent;");
+        ui->anime8_2->clear();
     }
     if(i+8 < tamanhoLista){
+        ui->anime9->setScaledContents(true);
+        ui->anime9_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime9_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime9->setScaledContents(true);
             ui->anime9->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime9->setScaledContents(true);
             ui->anime9->setPixmap(pix);
         }
     }
     else{
         ui->anime9->clear();
         ui->anime9->setStyleSheet("background: transparent;");
+        ui->anime9_2->setStyleSheet("background: transparent;");
+        ui->anime9_2->clear();
     }
     if(i+9 < tamanhoLista){
+        ui->anime10->setScaledContents(true);
+        ui->anime10_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime10_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime10->setScaledContents(true);
             ui->anime10->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime10->setScaledContents(true);
             ui->anime10->setPixmap(pix);
         }
     }
     else{
         ui->anime10->clear();
         ui->anime10->setStyleSheet("background: transparent;");
+        ui->anime10_2->setStyleSheet("background: transparent;");
+        ui->anime10_2->clear();
     }
     if(i+10 < tamanhoLista){
+        ui->anime11->setScaledContents(true);
+        ui->anime11_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime11_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime11->setScaledContents(true);
             ui->anime11->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime11->setScaledContents(true);
             ui->anime11->setPixmap(pix);
         }
     }
     else{
         ui->anime11->clear();
         ui->anime11->setStyleSheet("background: transparent;");
+        ui->anime11_2->setStyleSheet("background: transparent;");
+        ui->anime11_2->clear();
     }
     if(i+11 < tamanhoLista){
+        ui->anime12->setScaledContents(true);
+        ui->anime12_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime12_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime12->setScaledContents(true);
             ui->anime12->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime12->setScaledContents(true);
             ui->anime12->setPixmap(pix);
         }
     }
     else{
         ui->anime12->clear();
         ui->anime12->setStyleSheet("background: transparent;");
+        ui->anime12_2->setStyleSheet("background: transparent;");
+        ui->anime12_2->clear();
     }
     if(i+12 < tamanhoLista){
+        ui->anime13->setScaledContents(true);
+        ui->anime13_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime13_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime13->setScaledContents(true);
             ui->anime13->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime13->setScaledContents(true);
             ui->anime13->setPixmap(pix);
         }
     }
     else{
         ui->anime13->clear();
         ui->anime13->setStyleSheet("background: transparent;");
+        ui->anime13_2->setStyleSheet("background: transparent;");
+        ui->anime13_2->clear();
     }
     if(i+13 < tamanhoLista){
+        ui->anime14->setScaledContents(true);
+        ui->anime14_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime14_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime14->setScaledContents(true);
             ui->anime14->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime14->setScaledContents(true);
             ui->anime14->setPixmap(pix);
         }
     }
     else{
         ui->anime14->clear();
         ui->anime14->setStyleSheet("background: transparent;");
+        ui->anime14_2->setStyleSheet("background: transparent;");
+        ui->anime14_2->clear();
     }
     if(i+14 < tamanhoLista){
+        ui->anime15->setScaledContents(true);
+        ui->anime15_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime15_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime15->setScaledContents(true);
             ui->anime15->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime15->setScaledContents(true);
             ui->anime15->setPixmap(pix);
         }
     }
     else{
         ui->anime15->clear();
         ui->anime15->setStyleSheet("background: transparent;");
+        ui->anime15_2->setStyleSheet("background: transparent;");
+        ui->anime15_2->clear();
     }
     if(i+15 < tamanhoLista){
+        ui->anime16_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime16_2->setText(leitorA->retornaNome(i));
+        ui->anime16->setScaledContents(true);
         if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime16->setScaledContents(true);
             ui->anime16->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime16->setScaledContents(true);
             ui->anime16->setPixmap(pix);
         }
     }
     else{
         ui->anime16->clear();
         ui->anime16->setStyleSheet("background: transparent;");
+        ui->anime16_2->setStyleSheet("background: transparent;");
+        ui->anime16_2->clear();
     }
     if(i+16 < tamanhoLista){
+        ui->anime17->setScaledContents(true);
+        ui->anime17_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime17_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime17->setScaledContents(true);
             ui->anime17->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime17->setScaledContents(true);
             ui->anime17->setPixmap(pix);
         }
     }
     else{
         ui->anime17->clear();
         ui->anime17->setStyleSheet("background: transparent;");
+        ui->anime17_2->setStyleSheet("background: transparent;");
+        ui->anime17_2->clear();
     }
     if(i+17 < tamanhoLista){
+        ui->anime18->setScaledContents(true);
+        ui->anime18_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime18_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime18->setScaledContents(true);
             ui->anime18->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime18->setScaledContents(true);
             ui->anime18->setPixmap(pix);
         }
     }
     else{
         ui->anime18->clear();
         ui->anime18->setStyleSheet("background: transparent;");
+        ui->anime18_2->setStyleSheet("background: transparent;");
+        ui->anime18_2->clear();
     }
     if(i+18 < tamanhoLista){
+        ui->anime19->setScaledContents(true);
+        ui->anime19_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime19_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime19->setScaledContents(true);
             ui->anime19->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime19->setScaledContents(true);
             ui->anime19->setPixmap(pix);
         }
     }
     else{
         ui->anime19->clear();
         ui->anime19->setStyleSheet("background: transparent;");
+        ui->anime19_2->setStyleSheet("background: transparent;");
+        ui->anime19_2->clear();
     }
     if(i+19 < tamanhoLista){
+        ui->anime20->setScaledContents(true);
+        ui->anime20_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime20_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime20->setScaledContents(true);
             ui->anime20->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime20->setScaledContents(true);
             ui->anime20->setPixmap(pix);
         }
     }
     else{
         ui->anime20->clear();
         ui->anime20->setStyleSheet("background: transparent;");
+        ui->anime20_2->setStyleSheet("background: transparent;");
+        ui->anime20_2->clear();
     }
     if(i+20 < tamanhoLista){
+        ui->anime21->setScaledContents(true);
+        ui->anime21_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime21_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime21->setScaledContents(true);
             ui->anime21->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime21->setScaledContents(true);
             ui->anime21->setPixmap(pix);
         }
     }
     else{
         ui->anime21->clear();
         ui->anime21->setStyleSheet("background: transparent;");
+        ui->anime21_2->setStyleSheet("background: transparent;");
+        ui->anime21_2->clear();
     }
     if(i+21 < tamanhoLista){
+        ui->anime22->setScaledContents(true);
+        ui->anime22_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime22_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime22->setScaledContents(true);
             ui->anime22->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime22->setScaledContents(true);
             ui->anime22->setPixmap(pix);
         }
     }
     else{
         ui->anime22->clear();
         ui->anime22->setStyleSheet("background: transparent;");
+        ui->anime22_2->setStyleSheet("background: transparent;");
+        ui->anime22_2->clear();
     }
     if(i+22 < tamanhoLista){
+        ui->anime23->setScaledContents(true);
+        ui->anime23_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime23_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime23->setScaledContents(true);
             ui->anime23->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime23->setScaledContents(true);
             ui->anime23->setPixmap(pix);
         }
     }
     else{
         ui->anime23->clear();
         ui->anime23->setStyleSheet("background: transparent;");
+        ui->anime23_2->setStyleSheet("background: transparent;");
+        ui->anime23_2->clear();
     }
     if(i+23 < tamanhoLista){
+        ui->anime24->setScaledContents(true);
+        ui->anime24_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime24_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime24->setScaledContents(true);
             ui->anime24->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime24->setScaledContents(true);
             ui->anime24->setPixmap(pix);
         }
     }
     else{
         ui->anime24->clear();
         ui->anime24->setStyleSheet("background: transparent;");
+        ui->anime24_2->setStyleSheet("background: transparent;");
+        ui->anime24_2->clear();
     }
     if(i+24 < tamanhoLista){
+        ui->anime25->setScaledContents(true);
+        ui->anime25_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime25_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime25->setScaledContents(true);
             ui->anime25->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime25->setScaledContents(true);
             ui->anime25->setPixmap(pix);
         }
     }
     else{
         ui->anime25->clear();
         ui->anime25->setStyleSheet("background: transparent;");
+        ui->anime25_2->setStyleSheet("background: transparent;");
+        ui->anime25_2->clear();
     }
     if(i+25 < tamanhoLista){
+        ui->anime26->setScaledContents(true);
+        ui->anime26_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime26_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime26->setScaledContents(true);
             ui->anime26->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime26->setScaledContents(true);
             ui->anime26->setPixmap(pix);
         }
     }
     else{
         ui->anime26->clear();
         ui->anime26->setStyleSheet("background: transparent;");
+        ui->anime26_2->setStyleSheet("background: transparent;");
+        ui->anime26_2->clear();
     }
     if(i+26 < tamanhoLista){
+        ui->anime27->setScaledContents(true);
+        ui->anime27_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime27_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime27->setScaledContents(true);
             ui->anime27->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime27->setScaledContents(true);
             ui->anime27->setPixmap(pix);
         }
     }
     else{
         ui->anime27->clear();
         ui->anime27->setStyleSheet("background: transparent;");
+        ui->anime27_2->setStyleSheet("background: transparent;");
+        ui->anime27_2->clear();
     }
     if(i+27 < tamanhoLista){
+        ui->anime28->setScaledContents(true);
+        ui->anime28_2->setStyleSheet("background-color : rgb(181, 181, 181);");
+        ui->anime28_2->setText(leitorA->retornaNome(i));
         if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime28->setScaledContents(true);
             ui->anime28->setPixmap(pix);
         }
         else if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime28->setScaledContents(true);
             ui->anime28->setPixmap(pix);
         }
     }
     else{
         ui->anime28->clear();
         ui->anime28->setStyleSheet("background: transparent;");
+        ui->anime28_2->setStyleSheet("background: transparent;");
+        ui->anime28_2->clear();
     }
 }

@@ -57,15 +57,23 @@ QString Organizador::retornaNomeAnime(QString nome){
 }
 
 //Checa quantos episódios tem na pasta
-int Organizador::retornaNumEpiNaPasta(int numEpisodios, int animeAtual){//Vou usar o anime atual depois, para buscar pastas de animes especificos
+int Organizador::retornaNumEpiNaPasta(int numEpisodios, int animeAtual, int epiMax){
+    epiDis.clear();
     QDirIterator it(conf->RetornaDiretorioAnimeEspecifico(animeAtual));
     while(it.hasNext()){
         QFile f(it.next());
         if(retornaEpisodeNumber(f.fileName()) != "" && (f.fileName().right(3) == "mkv" || f.fileName().right(3) == "mp4")){
+            epiDis.append(retornaEpisodeNumber(f.fileName()).toInt());
             numEpisodios++;
+            if(numEpisodios == epiMax)
+                break;
         }
     }
     return numEpisodios;
+}
+
+QVector<int> Organizador::retornaEpisodiosDisponiveis(){
+    return epiDis;
 }
 
 void Organizador::MoveArquivoDeDownloadPraPasta(QString pastaDownloads, QString nome){

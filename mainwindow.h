@@ -75,6 +75,8 @@ private:
     int pagina;
     int downl;
 
+    QVector<int> qEpiDisponivel;
+
     QString lista;
 
     bool primeiraLeitura;
