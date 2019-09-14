@@ -57,7 +57,7 @@ void QDownloader::setFile(QString fileURL, QString w)
 }
 
 void QDownloader::setURL(QString url){
-    QString saveFilePath = "E:/rss.xml";
+    QString saveFilePath = "Configurações/rss.xml";
     qDebug() << url;
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
     QFile::remove(saveFilePath);

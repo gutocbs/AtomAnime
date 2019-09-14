@@ -40,7 +40,8 @@ QString JanelaConfiguracao::returnOrdemLista(){
 
 QString JanelaConfiguracao::returnRSS(){
 //    https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D
-    return "https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D";
+//    https://www.tokyotosho.info/rss.php?filter=1,11&zwnj=0
+    return "https://www.tokyotosho.info/rss.php?filter=1,11&zwnj=0";
 }
 
 void JanelaConfiguracao::on_DiretorioAnimesAdiciona_clicked()
