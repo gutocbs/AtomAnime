@@ -20,6 +20,8 @@ public:
     explicit QDownloader(QObject *parent = 0);
     virtual ~QDownloader();
     void setFile(QString fileURL, QString);
+    void setURL(QString);
+    void setTorrent(QString, QString);
     void setFileBig(QString fileURL, QString);
 //    void setFile(leitorarquivos *, int);
     void IniciaThread(QThread &dThread);

@@ -23,11 +23,13 @@ public:
     QVector<QString> retornaDiretorioAnime();
     QString returnUserAnilist();
     QString returnOrdemLista();
+    QString returnRSS();
 private:
     Ui::JanelaConfiguracao *ui;
     QVector<QString> diretorioAnime;
     QString userAnilist;
     QString ordem;
+    QString rss;
 
 signals:
     void save();

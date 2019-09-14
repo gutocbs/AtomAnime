@@ -39,11 +39,13 @@ MainWindow::MainWindow(QWidget *parent) :
     numEpisodios = 0;
 
     ui->setupUi(this);
-//    ui->janela->setCurrentIndex(0);
     ui->janela->addWidget(&jConfig);
-//    ui->janela->insertWidget(1, jConfig);
+    ui->janela->addWidget(&jtorrent);
+
+    ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
+
     Botoes();
 }
 
@@ -74,7 +76,8 @@ void MainWindow::Botoes(){
     connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(mudaImagem()));
     connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(RestauraJanela()));
     connect(ui->PaginaAnterior, SIGNAL(clicked()),this,SLOT(voltaPagina()));
-    connect(ui->configteste , SIGNAL(clicked()),this,SLOT(Configurar()));
+    connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
+    connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));
     connect(ui->AbreEpi, SIGNAL(clicked()),this,SLOT(AbreEpisodio()));
     connect(ui->clickAnime1, SIGNAL(clicked()),this,SLOT(carregaAnime1()));
     connect(ui->clickAnime2, SIGNAL(clicked()),this,SLOT(carregaAnime2()));
@@ -105,9 +108,13 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime27, SIGNAL(clicked()),this,SLOT(carregaAnime27()));
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
     connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
-    connect(&jConfig, SIGNAL(cancelado()), this, SLOT(ConfigCancelada()));
     connect(ui->Busca, SIGNAL(clicked()), this,SLOT(BotaoBusca()));
     connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(RestauraJanela()));
+    connect(ui->BotaoPasta, SIGNAL(clicked()), this,SLOT(abrePasta()));
+    connect(ui->BotaoAnilist, SIGNAL(clicked()), this,SLOT(abreAnilist()));
+
+    connect(&jConfig, SIGNAL(cancelado()), this, SLOT(ConfigCancelada()));
+    connect(&jtorrent, SIGNAL(volta()), this, SLOT(voltaTorrent()));
 }
 
 
@@ -307,10 +314,11 @@ void MainWindow::BotaoPlanToWatch(){
 }
 
 void MainWindow::BotaoBusca(){
+    bool achou = false;
     int numEncontros;
     if(ui->StringBusca->toPlainText() != ""){
         ui->OrdemAnime->setCurrentIndex(0);
-        ui->label->setText("Carregando!");
+        ui->label->setText("Buscando " + ui->StringBusca->toPlainText());
         lista = "busca";
         ui->PlanToWatch->setStyleSheet("background: white;");
         ui->Dropped->setStyleSheet("background: white;");
@@ -335,8 +343,16 @@ void MainWindow::BotaoBusca(){
                 vetorAnimes.append(w);
             }
             carregaInfo();
+            ui->label->setText("Todos os animes foram encontrados");
+            ui->StringBusca->clear();
+            achou = true;
         }
     }
+    else{
+        ui->label->setText("Nada foi procurado");
+    }
+    if(achou == false)
+        ui->label->setText("Nenhum anime com essa palavra chave foi encontrado");
 }
 
 void MainWindow::OrdenaVetor(){
@@ -372,6 +388,22 @@ void MainWindow::voltaPagina(){
     carregaInfo();
 }
 
+void MainWindow::abrePasta(){
+    ui->label->clear();
+    if(organiza->abrePasta(configuracoes->RetornaDiretorioAnimeEspecifico(leitorA->retornaId(anime0).toInt())) == 1)
+        ui->label->setText("Pasta não encontrada");
+}
+
+void MainWindow::abreAnilist(){
+//    organiza->abreAnilist(leitorA->retornaId(anime0));
+//    jtorrent.getRss();
+    QDownloader *qDop = new QDownloader;
+//    qDop->setURL("https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D");
+//    qDop->setTorrent("https://ddl.erai-raws.info/Torrent/2019/Summer/Uchi no Musume no Tame naraba/[Erai-raws] Uchi no Musume n o Tame naraba - 11 [1080p][Multiple Subtitle].mkv.torrent");
+    QString a = "C:\\Users\\Guto\\AppData\\Roaming\\uTorrent\\uTorrent.exe /DIRECTORY C:\\Download C:\\Users\\Guto\\Desktop\\nome.torrent";
+    QProcess process;
+    process.execute("C:\\Users\\Guto\\AppData\\Roaming\\uTorrent\\uTorrent.exe", QStringList() << "/DIRECTORY" << "C:\\Download" << "C:\\Users\\Guto\\Downloads\\ff.torrent");
+}
 
 void MainWindow::AbreEpisodio()
 {
@@ -487,7 +519,14 @@ void MainWindow::ConfiguraArquivos(){
 void MainWindow::Configurar(){
     ui->janela->setCurrentIndex(1);
 }
+void MainWindow::Torrent(){
+    ui->janela->setCurrentIndex(2);
+}
+
 void MainWindow::ConfigCancelada(){
+    ui->janela->setCurrentIndex(0);
+}
+void MainWindow::voltaTorrent(){
     ui->janela->setCurrentIndex(0);
 }
 

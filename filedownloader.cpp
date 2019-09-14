@@ -56,6 +56,49 @@ void QDownloader::setFile(QString fileURL, QString w)
     }
 }
 
+void QDownloader::setURL(QString url){
+    QString saveFilePath = "E:/rss.xml";
+    qDebug() << url;
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+    QFile::remove(saveFilePath);
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(url));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+
+//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
+    }
+}
+
+void QDownloader::setTorrent(QString url, QString nome){
+    QString saveFilePath = "Configuração/Torrent/" + nome + ".torrent";
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(url));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+
+//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
+    }
+}
+
 void QDownloader::setFileBig(QString fileURL, QString w)
 {
     QString filePath = fileURL;

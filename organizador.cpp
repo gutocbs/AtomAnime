@@ -88,8 +88,18 @@ void Organizador::MoveArquivoDeDownloadPraPasta(QString pastaDownloads, QString 
     }
 }
 
-void Organizador::abre(QString caminho){
-    QDesktopServices::openUrl(QUrl("file:///"+caminho,QUrl::TolerantMode));
+int Organizador::abrePasta(QString diretorio){
+    QDir it(diretorio);
+    if(it.exists() == true)
+        QDesktopServices::openUrl(QUrl("file:///"+diretorio,QUrl::TolerantMode));
+    else{
+        return 1;
+    }
+    return 0;
+}
+
+void Organizador::abreAnilist(QString id){
+    QDesktopServices::openUrl(QUrl("https://anilist.co/anime/" + id,QUrl::TolerantMode));
 }
 
 int Organizador::AbreArquivo(int progresso, int id, QString nome, QString nome2)

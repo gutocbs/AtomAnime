@@ -17,7 +17,7 @@
    <string notr="true">background-image: url(:/Imagens/C:/Users/Guto/Desktop/Menus.jpg);</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="configteste">
+   <widget class="QPushButton" name="BotaoConfig">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -151,7 +151,7 @@ color: rgb(220, 220, 220);</string>
      <string>Progresso</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Watching_2">
+   <widget class="QPushButton" name="BotaoPasta">
     <property name="geometry">
      <rect>
       <x>600</x>
@@ -164,10 +164,10 @@ color: rgb(220, 220, 220);</string>
      <string notr="true">background: white;</string>
     </property>
     <property name="text">
-     <string>Abrir pasta anime</string>
+     <string>Pasta</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Watching_3">
+   <widget class="QPushButton" name="BotaoAnilist">
     <property name="geometry">
      <rect>
       <x>600</x>
@@ -180,7 +180,7 @@ color: rgb(220, 220, 220);</string>
      <string notr="true">background: white;</string>
     </property>
     <property name="text">
-     <string>Ir anilist</string>
+     <string>Anilist</string>
     </property>
    </widget>
    <widget class="QLabel" name="Nota_2">
@@ -284,10 +284,10 @@ color: rgb(220, 220, 220);</string>
      <string>Progresso</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="Watching_4">
+   <widget class="QPushButton" name="BotaoTorrent">
     <property name="geometry">
      <rect>
-      <x>260</x>
+      <x>240</x>
       <y>40</y>
       <width>88</width>
       <height>34</height>
@@ -2449,6 +2449,9 @@ color: rgb(220, 220, 220);</string>
         <width>391</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="acceptDrops">
+       <bool>false</bool>
       </property>
       <property name="styleSheet">
        <string notr="true">background: white;</string>

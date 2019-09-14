@@ -7,8 +7,8 @@
 #include <QKeyEvent>
 #include <QTimer>
 #include <QVector>
-//#include <QFuture>
 #include <QtConcurrent>
+#include <QProcess>
 
 #include "infoanime.h"
 #include "config.h"
@@ -19,6 +19,7 @@
 
 
 #include "janelaconfiguracao.h"
+#include "torrent.h"
 
 
 namespace Ui {
@@ -37,6 +38,7 @@ public:
 private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
+    torrent jtorrent;
 
     //Download de imagens
     QDownloader *qdown;
@@ -94,6 +96,8 @@ public slots:
     void carregaInfo();
     void baixaImagens(QString);
     void imagemBig();
+    void abrePasta();
+    void abreAnilist();
 
     ///Carrega botões
     void Botoes();
@@ -143,6 +147,8 @@ public slots:
 private slots:
     void Configurar();
     void ConfigCancelada();
+    void Torrent();
+    void voltaTorrent();
     void AbreEpisodio();
     void keyPressEvent(QKeyEvent * event);
 };

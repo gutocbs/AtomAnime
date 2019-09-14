@@ -38,6 +38,11 @@ QString JanelaConfiguracao::returnOrdemLista(){
     return ordem;
 }
 
+QString JanelaConfiguracao::returnRSS(){
+//    https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D
+    return "https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D";
+}
+
 void JanelaConfiguracao::on_DiretorioAnimesAdiciona_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);

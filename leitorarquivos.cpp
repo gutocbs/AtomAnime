@@ -572,7 +572,6 @@ int leitorarquivos::busca(QString busca)
                 QString linha = in.readLine();
                 QString linha2 = in.readLine();
                 if(linha.toLower().contains(busca.toLower()) || linha2.toLower().contains(busca.toLower())){
-                    qDebug() << linha;
                     nomeAnime.append(linha);
                     nomeIngles.append(linha2);
                     progresso.append(in.readLine());
