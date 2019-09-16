@@ -102,6 +102,76 @@ void Organizador::abreAnilist(QString id){
     QDesktopServices::openUrl(QUrl("https://anilist.co/anime/" + id,QUrl::TolerantMode));
 }
 
+//Usado pra checar se o episódio existe na pasta
+int Organizador::buscaArquivo(int progresso, int id, QString nome, QString nome2){
+    QString nomeAlternativo;
+    nomeAlternativo = nome;
+    //Primeiro verifica se o anime tem uma pasta específica definida
+    QString direct = conf->RetornaDiretorioAnimeEspecifico(id);
+    if(direct != "0"){
+        QDirIterator it(direct, QDirIterator::Subdirectories);
+        //Lê o nome de todos os episódisos da pasta
+        while(it.hasNext()){
+            QFile f(it.next());
+            if(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower().contains(nome.toLower()) || nome.toLower().contains(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower()) || retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower().contains(nome2.toLower()) || nome2.toLower().contains(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower())){
+                nomeAlternativo = retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1));
+            }
+            if(nome == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)) || nomeAlternativo == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1))){
+                if(retornaEpisodeNumber(f.fileName()).toInt() == progresso+1  && (f.fileName().right(3) == "mkv" || f.fileName().right(3) == "mp4")){
+                    return 0;
+                }
+            }
+        }
+    }
+    //Caso não tenha pasta específica, começa a procurar por todas as pastas, vendo qual é a pasta do anime certo
+    for(int i = 0; i < conf->diretorioAnimes.length(); i++){
+        QDirIterator iteradorPasta(conf->diretorioAnimes[i], QDir::Dirs | QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
+        while(iteradorPasta.hasNext()){
+            //Iterador
+            iteradorPasta.next();
+
+            //Parse no nome da pasta
+            anitomy->Parse(iteradorPasta.fileName().toStdWString());
+            const auto& elements = anitomy->elements();
+            std::wstring a = elements.get(anitomy::kElementAnimeTitle);
+
+            //Compara o nome da pasta com o nome do anime
+            if(QString::fromStdWString(a).toLower().contains(nome.toLower()) || nome.toLower().contains(QString::fromStdWString(a).toLower())) {
+                QDirIterator it(iteradorPasta.filePath(), QDirIterator::Subdirectories);
+                //Lê o nome de toods os episódisos da pasta
+                while(it.hasNext()){
+                    QFile f(it.next());
+                    //Caso ache o episódio que eu quero, o próximo após o progresso
+                    if(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower().contains(nome.toLower()) || nome.toLower().contains(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower())){
+                        nomeAlternativo = retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1));
+                    }
+                    if(nome == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)) || nomeAlternativo == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1))){
+                        if(retornaEpisodeNumber(f.fileName()).toInt() == progresso+1  && (f.fileName().right(3) == "mkv" || f.fileName().right(3) == "mp4")){
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+        //Começa a procurar por arquivos soltos dentro da pasta
+        QDirIterator it(iteradorPasta.filePath(), QDir::Files);
+        //Lê o nome de toods os episódisos da pasta
+        while(it.hasNext()){
+            QFile f(it.next());
+            //Caso ache o episódio que eu quero, o próximo após o progresso
+            if(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower().contains(nome.toLower()) || nome.toLower().contains(retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)).toLower())){
+                nomeAlternativo = retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1));
+            }
+            if(nome == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1)) || nomeAlternativo == retornaNomeAnime(f.fileName().mid(f.fileName().lastIndexOf(QChar('/'))+1))){
+                if(retornaEpisodeNumber(f.fileName()).toInt() == progresso+1  && (f.fileName().right(3) == "mkv" || f.fileName().right(3) == "mp4")){
+                    return 0;
+                }
+            }
+        }
+    }
+    return 1;
+}
+
 int Organizador::AbreArquivo(int progresso, int id, QString nome, QString nome2)
 {
     QString nomeAlternativo;

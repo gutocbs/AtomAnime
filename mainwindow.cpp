@@ -6,6 +6,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    int height = screenGeometry.height();
+    int width = screenGeometry.width();
+    qDebug() << height << " - " << width;
+
+
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -21,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     leitorA = leitorWatching;
     configuracoes = new configPC();
     configuracoes->recebeJConfig(&jConfig);
-
+    configuracoes->CriaPastasBase();
     runArquivo = new Config();
     runArquivo->setConfigs(configuracoes);
     runArquivo->IniciaThread(cThread);
@@ -41,7 +48,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
     ui->janela->addWidget(&jtorrent);
+//    ui->janela768->addWidget(&main768);
+//    if(height == 1080){
+//        ui->janela768->hide();
+//    }
+//    else if(height == 768){
+//        ui->janela768->setCurrentIndex(1);
+//    }
 
+    jtorrent.getLeitorArquivos(leitorA);
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
@@ -166,6 +181,8 @@ void MainWindow::InstauraPrimeiraJanela(){
     }
     carregaInfo();
     ui->Watching->setStyleSheet("background: red;");
+//    qDebug() << organiza->retornaEpisodiosDisponiveis();
+    jtorrent.getOrganizador(organiza);
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 //    RestauraJanela();
 }
@@ -395,14 +412,7 @@ void MainWindow::abrePasta(){
 }
 
 void MainWindow::abreAnilist(){
-//    organiza->abreAnilist(leitorA->retornaId(anime0));
-//    jtorrent.getRss();
-    QDownloader *qDop = new QDownloader;
-//    qDop->setURL("https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D");
-//    qDop->setTorrent("https://ddl.erai-raws.info/Torrent/2019/Summer/Uchi no Musume no Tame naraba/[Erai-raws] Uchi no Musume n o Tame naraba - 11 [1080p][Multiple Subtitle].mkv.torrent");
-    QString a = "C:\\Users\\Guto\\AppData\\Roaming\\uTorrent\\uTorrent.exe /DIRECTORY C:\\Download C:\\Users\\Guto\\Desktop\\nome.torrent";
-    QProcess process;
-    process.execute("C:\\Users\\Guto\\AppData\\Roaming\\uTorrent\\uTorrent.exe", QStringList() << "/DIRECTORY" << "C:\\Download" << "C:\\Users\\Guto\\Downloads\\ff.torrent");
+    QDesktopServices::openUrl(QUrl("https://anilist.co/anime/"+ leitorA->retornaId(anime0),QUrl::TolerantMode));
 }
 
 void MainWindow::AbreEpisodio()
@@ -751,9 +761,10 @@ void MainWindow::carregaInfo(){
     }
     //Caso não tenham episódios na pasta, o vetor está vazio
     else{
-        ui->qEpiDisponivel->setText("Nenhum episódio disponível");
+        ui->qEpiDisponivel->clear();//setText("Nenhum episódio disponível");
     }
     ui->ProxEpi->setText(QString::number(leitorA->retornaProgresso(anime0)) + "/" + leitorA->retornaNumEpi(anime0));
+    ui->Progresso_2->setText(QString::number(leitorA->retornaProgresso(anime0)) + "/" + leitorA->retornaNumEpi(anime0));
     if(numEpisodios > 1){
         ui->EpiDisponivel->setText(QString::number(numEpisodios) + " episódios baixados");
     }
@@ -764,6 +775,7 @@ void MainWindow::carregaInfo(){
         ui->EpiDisponivel->setText("Nenhum episódio baixado");
     }
     ui->Nota->setText(QString::number(leitorA->retornaScore(anime0)));
+    ui->Nota_2->setText(QString::number(leitorA->retornaScore(anime0)));
     int i = idAnime;
     if(i <= tamanhoLista && tamanhoLista > 0){
         if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensGrandes), "jpg")){
@@ -1266,5 +1278,40 @@ void MainWindow::carregaInfo(){
         ui->anime28->setStyleSheet("background: transparent;");
         ui->anime28_2->setStyleSheet("background: transparent;");
         ui->anime28_2->clear();
+    }
+}
+
+void MainWindow::on_NotaMais_clicked()
+{
+    if(ui->Nota->text().toInt() < 100){
+        ui->Nota->setText(QString::number(ui->Nota->text().toInt()+10));
+        ui->Nota_2->setText(ui->Nota->text());
+    }
+}
+
+void MainWindow::on_NotaMenos_clicked()
+{
+    if(ui->Nota->text().toInt() > 0){
+        ui->Nota->setText(QString::number(ui->Nota->text().toInt()-10));
+        ui->Nota_2->setText(ui->Nota->text());
+    }
+}
+
+void MainWindow::on_ProgressoMais_clicked()
+{
+    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
+    if(progressoQuebrado.at(0).toInt() < leitorA->retornaNumEpi(anime0).toInt()){
+        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()+1) + "/" + progressoQuebrado.at(1));
+        ui->Progresso_2->setText(ui->ProxEpi->text());
+    }
+
+}
+
+void MainWindow::on_ProgressoMenos_clicked()
+{
+    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
+    if(progressoQuebrado.at(0).toInt() > 0){
+        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()-1) + "/" + progressoQuebrado.at(1));
+        ui->Progresso_2->setText(ui->ProxEpi->text());
     }
 }

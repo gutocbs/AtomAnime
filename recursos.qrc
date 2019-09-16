@@ -1,9 +1,9 @@
 <RCC>
     <qresource prefix="/Imagens">
-        <file>Imagens/fundo/fundo.png</file>
         <file>C:/Users/Guto/Desktop/ballG.png</file>
         <file>C:/Users/Guto/Desktop/ballR.png</file>
         <file>C:/Users/Guto/Desktop/Yellow_Star.png</file>
         <file>C:/Users/Guto/Desktop/Menus.jpg</file>
+        <file>Imagens/fundo/MainBackground.jpg</file>
     </qresource>
 </RCC>

@@ -20,12 +20,7 @@ void QDownloader::IniciaThread(QThread &dThread){
 
 
 void QDownloader::setFile(QString fileURL, QString w)
-//void QDownloader::setFile(leitorarquivos *leitor, int anime)
 {
-//    A = leitor;
-//    i = anime;
-//    QString fileURL = leitor->retornaLink(i);
-//    QString w = leitor->retornaId(i);
     QString filePath = fileURL;
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
@@ -37,6 +32,8 @@ void QDownloader::setFile(QString fileURL, QString w)
 //    right(fileURL.lastIndexOf(QChar('.')))
 
     saveFilePath = arquivo;
+    if(QFile(saveFilePath).size() == 0)
+        QFile(saveFilePath).remove();
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
 
     if(!fileExists){
@@ -58,7 +55,6 @@ void QDownloader::setFile(QString fileURL, QString w)
 
 void QDownloader::setURL(QString url){
     QString saveFilePath = "Configurações/rss.xml";
-    qDebug() << url;
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
     QFile::remove(saveFilePath);
     if(!fileExists){
@@ -79,9 +75,9 @@ void QDownloader::setURL(QString url){
 }
 
 void QDownloader::setTorrent(QString url, QString nome){
-    QString saveFilePath = "Configuração/Torrent/" + nome + ".torrent";
+    QString saveFilePath = "Configurações/Temp/Torrents/" + nome + ".torrent";
+    QFile::remove(saveFilePath);
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-
     if(!fileExists){
         QNetworkRequest request;
         request.setUrl(QUrl(url));

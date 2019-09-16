@@ -9,6 +9,7 @@
 #include <QVector>
 #include <QtConcurrent>
 #include <QProcess>
+#include <QScreen>
 
 #include "infoanime.h"
 #include "config.h"
@@ -20,6 +21,7 @@
 
 #include "janelaconfiguracao.h"
 #include "torrent.h"
+#include "mainwindow1366768.h"
 
 
 namespace Ui {
@@ -39,6 +41,7 @@ private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
     torrent jtorrent;
+    mainwindow1366768 main768;
 
     //Download de imagens
     QDownloader *qdown;
@@ -151,6 +154,10 @@ private slots:
     void voltaTorrent();
     void AbreEpisodio();
     void keyPressEvent(QKeyEvent * event);
+    void on_NotaMais_clicked();
+    void on_NotaMenos_clicked();
+    void on_ProgressoMais_clicked();
+    void on_ProgressoMenos_clicked();
 };
 
 #endif // MAINWINDOW_H

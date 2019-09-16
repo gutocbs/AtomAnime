@@ -22,6 +22,7 @@ public:
     void abreAnilist(QString);
     int AbreArquivo(int, int, QString, QString);
     int abrePasta(QString);
+    int buscaArquivo(int, int, QString, QString);
     //Chamar essa função para mover os arquivos. As outras não devem ser chamadas
     //Chamar a função com
     //MoveArquivoDeDownloadPraPasta(diretorio, nome do anime);

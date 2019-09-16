@@ -1,0 +1,1993 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>mainwindow1366768</class>
+ <widget class="QWidget" name="mainwindow1366768">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1366</width>
+    <height>768</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">background: black;</string>
+  </property>
+  <widget class="QComboBox" name="OrdemAnime">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>900</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;
+</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>List Order</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Ordem alfabética crescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Ordem alfabética decrescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Progresso crescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Progresso decrescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Season crescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Season decrescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Nota crescente</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Nota decrescente</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="Dropped">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>100</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: rgb(121, 121, 121);</string>
+   </property>
+   <property name="text">
+    <string>Dropped</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="PlanToWatch">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>100</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: rgb(121, 121, 121);</string>
+   </property>
+   <property name="text">
+    <string>Plan to Watch</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>910</y>
+     <width>61</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+   </property>
+   <property name="text">
+    <string>Progresso</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_3">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>930</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>850</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="BotaoAnilist">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>910</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>Anilist</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Watching">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>100</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: rgb(121, 121, 121);</string>
+   </property>
+   <property name="text">
+    <string>Watching</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Completed">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>100</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: rgb(121, 121, 121);</string>
+   </property>
+   <property name="text">
+    <string>Completed</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="MudarListaBotao">
+   <property name="geometry">
+    <rect>
+     <x>270</x>
+     <y>860</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;
+</string>
+   </property>
+   <property name="text">
+    <string>Mudar pra lista</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="NumPagina">
+   <property name="geometry">
+    <rect>
+     <x>720</x>
+     <y>910</y>
+     <width>131</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+   </property>
+   <property name="text">
+    <string>1/x</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_4">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>910</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="MudarListaEscolha">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>860</y>
+     <width>250</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Watching</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Complete</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Paused</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Dropped</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Gay</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="BotaoConfig">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>Configurações</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="OnHold">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>100</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: rgb(121, 121, 121);</string>
+   </property>
+   <property name="text">
+    <string>On Hold</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="Refresh">
+   <property name="geometry">
+    <rect>
+     <x>130</x>
+     <y>10</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_3">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>910</y>
+     <width>61</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+   </property>
+   <property name="text">
+    <string>Progresso</string>
+   </property>
+  </widget>
+  <widget class="QStackedWidget" name="janela">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>170</y>
+     <width>1911</width>
+     <height>661</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <widget class="QWidget" name="home">
+    <property name="styleSheet">
+     <string notr="true">background: transparent;</string>
+    </property>
+    <widget class="QPushButton" name="PaginaAnterior">
+     <property name="geometry">
+      <rect>
+       <x>527</x>
+       <y>182</y>
+       <width>51</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: blue;</string>
+     </property>
+     <property name="text">
+      <string>Anterior</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime9">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>202</x>
+       <y>612</y>
+       <width>831</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>TextLabel</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime23">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="NotaGeral">
+     <property name="geometry">
+      <rect>
+       <x>781</x>
+       <y>122</y>
+       <width>121</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 18pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>30</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime22">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime24">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="EpiTotal2">
+     <property name="geometry">
+      <rect>
+       <x>760</x>
+       <y>398</y>
+       <width>47</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 16pt &quot;MS Shell Dlg 2&quot;;
+color: white;</string>
+     </property>
+     <property name="text">
+      <string>24</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="EpiJaSaiu">
+     <property name="geometry">
+      <rect>
+       <x>740</x>
+       <y>370</y>
+       <width>47</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(85, 255, 127);</string>
+     </property>
+     <property name="text">
+      <string>10</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime15">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Season_2">
+     <property name="geometry">
+      <rect>
+       <x>891</x>
+       <y>92</y>
+       <width>121</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Season</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Nota2">
+     <property name="geometry">
+      <rect>
+       <x>691</x>
+       <y>92</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Nota</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="picBig">
+     <property name="geometry">
+      <rect>
+       <x>1030</x>
+       <y>0</y>
+       <width>328</width>
+       <height>459</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime10">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime24">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime17">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime16">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Nota">
+     <property name="geometry">
+      <rect>
+       <x>711</x>
+       <y>122</y>
+       <width>61</width>
+       <height>51</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 18pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>30</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="NomeIngles">
+     <property name="geometry">
+      <rect>
+       <x>605</x>
+       <y>43</y>
+       <width>581</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 10pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Nome</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Sinopse">
+     <property name="geometry">
+      <rect>
+       <x>605</x>
+       <y>182</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Sinopse</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime8">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="labelEpiBaixados">
+     <property name="geometry">
+      <rect>
+       <x>820</x>
+       <y>372</y>
+       <width>241</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Episódios disponíveis</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime8">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime11">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime18">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Nota2_2">
+     <property name="geometry">
+      <rect>
+       <x>781</x>
+       <y>92</y>
+       <width>121</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Nota Geral</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime4">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime25">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime25">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="sinopse">
+     <property name="geometry">
+      <rect>
+       <x>605</x>
+       <y>212</y>
+       <width>561</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime22">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime18">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Status">
+     <property name="geometry">
+      <rect>
+       <x>605</x>
+       <y>122</y>
+       <width>100</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Finished Airing</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Season">
+     <property name="geometry">
+      <rect>
+       <x>910</x>
+       <y>122</y>
+       <width>81</width>
+       <height>60</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Fall 2012</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime15">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Status_6">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>334</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(0, 170, 255);</string>
+     </property>
+     <property name="text">
+      <string>Assistidos</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime9">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime4">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime17">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime3">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime11">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Status_3">
+     <property name="geometry">
+      <rect>
+       <x>710</x>
+       <y>334</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Lançados</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="ProxEpi">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>370</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>10</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime1">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>78</width>
+       <height>108</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime10">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime23">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Nome">
+     <property name="geometry">
+      <rect>
+       <x>605</x>
+       <y>2</y>
+       <width>581</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 11pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Nome</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="PaginaProxima">
+     <property name="geometry">
+      <rect>
+       <x>527</x>
+       <y>82</y>
+       <width>51</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: red;</string>
+     </property>
+     <property name="text">
+      <string>Proxima</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime1">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>78</width>
+       <height>108</height>
+      </rect>
+     </property>
+     <property name="mouseTracking">
+      <bool>false</bool>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime16">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="Status_2">
+     <property name="geometry">
+      <rect>
+       <x>604</x>
+       <y>92</y>
+       <width>100</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Status</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignHCenter|Qt::AlignTop</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="AbreEpi">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>-5</x>
+       <y>612</y>
+       <width>201</width>
+       <height>46</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: white;</string>
+     </property>
+     <property name="text">
+      <string>Próximo Episódio</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="clickAnime3">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime15_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime25_2">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime9_2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime10_2">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime24_2">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime11_2">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime2_2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime8_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>152</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime18_2">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime23_2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime3_2">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime17_2">
+     <property name="geometry">
+      <rect>
+       <x>224</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : green;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime4_2">
+     <property name="geometry">
+      <rect>
+       <x>336</x>
+       <y>0</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : white;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime16_2">
+     <property name="geometry">
+      <rect>
+       <x>112</x>
+       <y>304</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : blue;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime1_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>78</width>
+       <height>108</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : rgb(181, 181, 181);</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="anime22_2">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>456</y>
+       <width>110</width>
+       <height>150</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color : red;</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="EpiDisponivel">
+     <property name="geometry">
+      <rect>
+       <x>820</x>
+       <y>334</y>
+       <width>261</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>EpiDisponível</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="qEpiDisponivel">
+     <property name="geometry">
+      <rect>
+       <x>845</x>
+       <y>402</y>
+       <width>321</width>
+       <height>141</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: transparent;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(220, 220, 220);</string>
+     </property>
+     <property name="text">
+      <string>Episódio disponível</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="StringBusca">
+     <property name="geometry">
+      <rect>
+       <x>600</x>
+       <y>450</y>
+       <width>391</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="acceptDrops">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: white;</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="Busca">
+     <property name="geometry">
+      <rect>
+       <x>1010</x>
+       <y>450</y>
+       <width>93</width>
+       <height>28</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: white;</string>
+     </property>
+     <property name="text">
+      <string>Busca</string>
+     </property>
+    </widget>
+    <zorder>sinopse</zorder>
+    <zorder>anime3_2</zorder>
+    <zorder>anime9_2</zorder>
+    <zorder>anime4_2</zorder>
+    <zorder>anime18_2</zorder>
+    <zorder>anime24_2</zorder>
+    <zorder>anime17_2</zorder>
+    <zorder>anime11_2</zorder>
+    <zorder>anime1_2</zorder>
+    <zorder>anime15_2</zorder>
+    <zorder>anime10_2</zorder>
+    <zorder>anime2_2</zorder>
+    <zorder>anime16_2</zorder>
+    <zorder>anime8_2</zorder>
+    <zorder>anime22_2</zorder>
+    <zorder>anime23_2</zorder>
+    <zorder>anime25_2</zorder>
+    <zorder>anime16</zorder>
+    <zorder>anime22</zorder>
+    <zorder>anime18</zorder>
+    <zorder>anime9</zorder>
+    <zorder>anime15</zorder>
+    <zorder>anime4</zorder>
+    <zorder>PaginaAnterior</zorder>
+    <zorder>clickAnime9</zorder>
+    <zorder>label</zorder>
+    <zorder>anime23</zorder>
+    <zorder>NotaGeral</zorder>
+    <zorder>clickAnime22</zorder>
+    <zorder>anime24</zorder>
+    <zorder>EpiTotal2</zorder>
+    <zorder>EpiJaSaiu</zorder>
+    <zorder>clickAnime15</zorder>
+    <zorder>Season_2</zorder>
+    <zorder>Nota2</zorder>
+    <zorder>picBig</zorder>
+    <zorder>anime10</zorder>
+    <zorder>clickAnime24</zorder>
+    <zorder>anime17</zorder>
+    <zorder>clickAnime16</zorder>
+    <zorder>Nota</zorder>
+    <zorder>NomeIngles</zorder>
+    <zorder>Sinopse</zorder>
+    <zorder>anime8</zorder>
+    <zorder>labelEpiBaixados</zorder>
+    <zorder>clickAnime8</zorder>
+    <zorder>anime11</zorder>
+    <zorder>clickAnime18</zorder>
+    <zorder>Nota2_2</zorder>
+    <zorder>clickAnime4</zorder>
+    <zorder>anime25</zorder>
+    <zorder>anime2</zorder>
+    <zorder>clickAnime25</zorder>
+    <zorder>Status</zorder>
+    <zorder>Season</zorder>
+    <zorder>Status_6</zorder>
+    <zorder>clickAnime2</zorder>
+    <zorder>clickAnime17</zorder>
+    <zorder>anime3</zorder>
+    <zorder>clickAnime11</zorder>
+    <zorder>Status_3</zorder>
+    <zorder>ProxEpi</zorder>
+    <zorder>anime1</zorder>
+    <zorder>clickAnime10</zorder>
+    <zorder>clickAnime23</zorder>
+    <zorder>Nome</zorder>
+    <zorder>PaginaProxima</zorder>
+    <zorder>clickAnime1</zorder>
+    <zorder>Status_2</zorder>
+    <zorder>AbreEpi</zorder>
+    <zorder>clickAnime3</zorder>
+    <zorder>EpiDisponivel</zorder>
+    <zorder>qEpiDisponivel</zorder>
+    <zorder>StringBusca</zorder>
+    <zorder>Busca</zorder>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="Nota_2">
+   <property name="geometry">
+    <rect>
+     <x>480</x>
+     <y>860</y>
+     <width>101</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: transparent;
+font-weight: bold; 
+color: white</string>
+   </property>
+   <property name="text">
+    <string>Nota</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="BotaoTorrent">
+   <property name="geometry">
+    <rect>
+     <x>240</x>
+     <y>10</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>Baixar torrent</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>850</y>
+     <width>81</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: transparent;
+font: 75 8pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+   </property>
+   <property name="text">
+    <string>Mudar nota</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="BotaoPasta">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>860</y>
+     <width>88</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>Pasta</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_2">
+   <property name="geometry">
+    <rect>
+     <x>550</x>
+     <y>870</y>
+     <width>20</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <property name="text">
+    <string>PushButton</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

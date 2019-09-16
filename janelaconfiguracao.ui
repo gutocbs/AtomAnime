@@ -26,7 +26,7 @@
     <string notr="true">background: white;</string>
    </property>
    <property name="text">
-    <string>Canelar</string>
+    <string>Cancelar</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_2">

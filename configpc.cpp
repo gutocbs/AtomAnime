@@ -9,7 +9,7 @@ configPC::configPC()
 //    diretorioAnimes.append("E:/Animes");
 //    diretorioAnimes.append(QDir::homePath() + "/Downloads/Animes");
     diretorioTaiga = QDir::homePath() + "/AppData/Roaming/Taiga/data";
-    CriaPastasBase();
+//    CriaPastasBase();
 }
 
 void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
@@ -49,6 +49,12 @@ void configPC::CriaPastasBase(){
     }
     if(!QDir("Configurações/Imagens/Grande").exists()){
         QDir().mkdir("Configurações/Imagens/Grande");
+    }
+    if(!QDir("Configurações/Temp/").exists()){
+        QDir().mkdir("Configurações/Temp/");
+    }
+    if(!QDir("Configurações/Temp/Torrents").exists()){
+        QDir().mkdir("Configurações/Temp/Torrents");
     }
 }
 
