@@ -58,8 +58,10 @@ private:
     leitorarquivos *qleitor;
     Organizador *organiza;
 //    QVector<QCheckBox> box;
-    QCheckBox *box;
     QDownloader *baixaXML;
+    QVector<QCheckBox*> box;
+    QVector<QWidget*> pWidget;
+    QVector<QHBoxLayout*> pLayout;
 
     QString url;
     QString diretorioDownloads;

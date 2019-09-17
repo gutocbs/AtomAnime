@@ -18,7 +18,7 @@ torrent::torrent(QWidget *parent) :
     primeiroDownload = new bool [150];
     for(int i = 0; i < 150; i++)
         primeiroDownload[i] = false;
-    box = new QCheckBox[150];
+//    box = new QCheckBox[150];
 }
 
 torrent::~torrent()
@@ -50,9 +50,6 @@ void torrent::getRss(){
     QObject::connect(baixaXML, SIGNAL(terminouDownload()), this, SLOT(leXML()));
 }
 
-void torrent::esperaTerminarSalvar(){
-    QTimer::singleShot(3000, this, SLOT(leXML()));
-}
 
 void torrent::on_pushButton_clicked()
 {
@@ -79,33 +76,41 @@ void torrent::on_XML_clicked()
 }
 
 void torrent::Download(){
-//    for(int i = 1; i < nome.length(); i++){
-        qDebug() << ui->ListaTorrents->itemAt(149,0)->checkState();
-//        if(box[i].isChecked() == true){//If bool tabela x == true
-//            //Mas e se a pessoa desmarcar?
-//            globalDownload = i;
-//            QDownloader *qdown = new QDownloader;
-//            qdown->setTorrent(link[i+1], nomeTorrent[i]);
-//            QObject::connect(qdown, SIGNAL(terminouDownload()), this, SLOT(baixaTorrent()));
-//        }
-//    }
+    for(int i = 1; i < nome.length(); i++){
+        if(box[i]->isChecked() == true){//If bool tabela x == true
+            //Mas e se a pessoa desmarcar?
+            globalDownload = i;
+            QDownloader *qdown = new QDownloader;
+            qdown->setTorrent(link[i+1], nomeTorrent[i]);
+            QObject::connect(qdown, SIGNAL(terminouDownload()), this, SLOT(baixaTorrent()));
+        }
+    }
 }
 
 
 void torrent::baixaTorrent(){//Por um botão pra escolher qual torrent quer usar nas configurações
+    QDesktopServices::openUrl(QUrl("file:///"+QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",QUrl::TolerantMode));
+    //Espera o programa abrir pra colocar o torrent lá
+    QTimer::singleShot(5000, this, SLOT(esperaTerminarSalvar()));
+}
+
+void torrent::esperaTerminarSalvar(){
     QProcess process;
     process.execute(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",
                     QStringList() << "/DIRECTORY" << diretorioDownloads + nome[globalDownload] <<
                     QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
-    process.kill();
-    QProcess process2;
-    process2.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" + diretorioDownloads + nome[globalDownload],
-                     QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
-    process2.kill();
-    box[globalDownload].setCheckState(Qt::Unchecked);
+//    process.kill();
+//        QProcess process2;
+//        process2.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" + diretorioDownloads + nome[globalDownload],
+//                         QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
+//        process2.kill();
+    box[globalDownload]->setCheckState(Qt::Unchecked);
 }
-
 void torrent::preencheTabela(){
+    qDebug() << nome.length();
+    box.clear();
+    pWidget.clear();
+    pLayout.clear();
 //        ui->ListaTorrents->setRowCount(0);
         ui->ListaTorrents->setRowCount(nome.length());
         for(int i = 0; i < nome.length(); i++)
@@ -113,22 +118,25 @@ void torrent::preencheTabela(){
         ui->ListaTorrents->sortByColumn(5, Qt::AscendingOrder);
 
         for(int i = 0; i < nome.length(); i++){
-            //Cria variável
-            if(primeiroDownload[i] == false){
-                ui->ListaTorrents->setCellWidget(i,0, &box[i]);
-                primeiroDownload[i] = true;
-            }
+            box.append(new QCheckBox);
+            pWidget.append(new QWidget());
+            pLayout.append(new QHBoxLayout(pWidget[i]));
+            pLayout[i]->addWidget(box[i]);
+            pLayout[i]->setAlignment(Qt::AlignCenter);
+            pLayout[i]->setContentsMargins(0,0,0,0);
+            pWidget[i]->setLayout(pLayout[i]);
             for(int w = 0; w < 6; w++){
                 QTableWidgetItem *item = new QTableWidgetItem;
                 if(w == 0){
-                    if(i == 0)
-                        box[i].setCheckState(Qt::Checked);
-                    if(tier[i] == "1"){
-                        box[i].setCheckState(Qt::Checked);
+                    if(nome[i] == "Youjo Senki Movie")
+                        box[i]->setCheckState(Qt::Checked);
+                    else if(tier[i] == "1"){
+                        box[i]->setCheckState(Qt::Checked);
                     }
                     else{
-                        box[i].setCheckState(Qt::Unchecked);
+                        box[i]->setCheckState(Qt::Unchecked);
                     }
+                    ui->ListaTorrents->setCellWidget(i,0, pWidget[i]);
                 }
                 if(w == 1){
                     item->setText(nome[i]);
