@@ -9,7 +9,6 @@ Organizador::Organizador(configPC *conf)
 Organizador::~Organizador(){
     delete anitomy;
     delete conf;
-    epiDis.clear();
 }
 
 //Checa se a pasta já existe

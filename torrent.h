@@ -50,14 +50,12 @@ private slots:
 
 private:
     int globalDownload;
-    bool *primeiroDownload;
 
     Ui::torrent *ui;
     anitomy::Anitomy *anitomy;
     JanelaConfiguracao *jconfig;
     leitorarquivos *qleitor;
     Organizador *organiza;
-//    QVector<QCheckBox> box;
     QDownloader *baixaXML;
     QVector<QCheckBox*> box;
     QVector<QWidget*> pWidget;
@@ -66,7 +64,6 @@ private:
     QString url;
     QString diretorioDownloads;
 
-    QVector<bool> marcadoDownload;
     QVector<QString> nomeTorrent;
     QVector<QString> nome;
     QVector<QString> fansub;

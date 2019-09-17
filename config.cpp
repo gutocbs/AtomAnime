@@ -13,7 +13,7 @@ Config::Config(QObject *parent) : QObject(parent)
 }
 
 Config::~Config(){
-    delete [] pastas;
+    delete pastas;
 }
 
 

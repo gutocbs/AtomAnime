@@ -16,6 +16,7 @@ class leitorarquivos
 public:
 
     leitorarquivos();
+    ~leitorarquivos();
 
     void abreEpisodio(int);
     void Script();
@@ -61,7 +62,6 @@ public slots:
     void OrdenaVetorDataInverso();
 
 private:
-//    infoanime *infoani;
 
     QVector<QString> nomeAnime;
     QVector<QString> nomeIngles;

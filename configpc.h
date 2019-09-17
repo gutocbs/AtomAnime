@@ -18,6 +18,7 @@ class configPC : public QObject
     Q_OBJECT
 public:
     configPC();
+    ~configPC();
 
     int RetornaTamanhoVector();
     int BuscaPastasAnimesEspecificos(QString, QString, QString);

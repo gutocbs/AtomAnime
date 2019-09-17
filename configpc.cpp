@@ -13,6 +13,12 @@ configPC::configPC()
 //    CriaPastasBase();
 }
 
+configPC::~configPC(){
+    delete anitomy;
+    delete arquivo;
+    delete jconfig;
+}
+
 void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
     jconfig = JanelaConfg;
     setUser();

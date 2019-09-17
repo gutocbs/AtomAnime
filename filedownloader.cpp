@@ -6,12 +6,15 @@ QDownloader::QDownloader(QObject *parent) :
 {
     configura = new configPC;
     manager = new QNetworkAccessManager;
-    i = 0;
 }
 
 QDownloader::~QDownloader()
 {
-    manager->deleteLater();
+//    manager->deleteLater();
+    delete manager;
+    delete reply;
+    delete file;
+    delete configura;
 }
 
 void QDownloader::IniciaThread(QThread &dThread){
@@ -145,7 +148,7 @@ void QDownloader::onFinished(QNetworkReply * reply)
         }break;
         default:{
             qDebug(reply->errorString().toLatin1());
-        };
+        }
     }
 
     if(file->isOpen())
@@ -174,6 +177,4 @@ void QDownloader::onReplyFinished()
 }
 
 void QDownloader::run(){
-//        setFile(URL, W);
-//        qDebug() << "oi";
 }

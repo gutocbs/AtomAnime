@@ -15,10 +15,6 @@ torrent::torrent(QWidget *parent) :
     ui->ListaTorrents->setColumnWidth(0,2);
 //    ui->ListaTorrents->setColumnWidth(1, 50);
     ui->ListaTorrents->setColumnWidth(1, 400);
-    primeiroDownload = new bool [150];
-    for(int i = 0; i < 150; i++)
-        primeiroDownload[i] = false;
-//    box = new QCheckBox[150];
 }
 
 torrent::~torrent()
@@ -58,7 +54,6 @@ void torrent::on_pushButton_clicked()
 
 void torrent::on_XML_clicked()
 {
-    marcadoDownload.clear();
     nomeTorrent.clear();
     nome.clear();
     fansub.clear();
@@ -99,76 +94,80 @@ void torrent::esperaTerminarSalvar(){
     process.execute(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",
                     QStringList() << "/DIRECTORY" << diretorioDownloads + nome[globalDownload] <<
                     QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
-//    process.kill();
 //        QProcess process2;
 //        process2.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" + diretorioDownloads + nome[globalDownload],
 //                         QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
-//        process2.kill();
     box[globalDownload]->setCheckState(Qt::Unchecked);
 }
 void torrent::preencheTabela(){
-    qDebug() << nome.length();
     box.clear();
     pWidget.clear();
     pLayout.clear();
-//        ui->ListaTorrents->setRowCount(0);
-        ui->ListaTorrents->setRowCount(nome.length());
-        for(int i = 0; i < nome.length(); i++)
-        ui->ListaTorrents->setSortingEnabled(true);
-        ui->ListaTorrents->sortByColumn(5, Qt::AscendingOrder);
 
-        for(int i = 0; i < nome.length(); i++){
-            box.append(new QCheckBox);
-            pWidget.append(new QWidget());
-            pLayout.append(new QHBoxLayout(pWidget[i]));
-            pLayout[i]->addWidget(box[i]);
-            pLayout[i]->setAlignment(Qt::AlignCenter);
-            pLayout[i]->setContentsMargins(0,0,0,0);
-            pWidget[i]->setLayout(pLayout[i]);
-            for(int w = 0; w < 6; w++){
-                QTableWidgetItem *item = new QTableWidgetItem;
-                if(w == 0){
-                    if(nome[i] == "Youjo Senki Movie")
-                        box[i]->setCheckState(Qt::Checked);
-                    else if(tier[i] == "1"){
-                        box[i]->setCheckState(Qt::Checked);
-                    }
-                    else{
-                        box[i]->setCheckState(Qt::Unchecked);
-                    }
-                    ui->ListaTorrents->setCellWidget(i,0, pWidget[i]);
+    ui->ListaTorrents->setRowCount(nome.length());
+    ui->ListaTorrents->setSortingEnabled(true);
+    ui->ListaTorrents->sortByColumn(5, Qt::AscendingOrder);
+
+    for(int i = 0; i < nome.length(); i++){
+        box.append(new QCheckBox);
+        pWidget.append(new QWidget());
+        pLayout.append(new QHBoxLayout(pWidget[i]));
+        pLayout[i]->addWidget(box[i]);
+        pLayout[i]->setAlignment(Qt::AlignCenter);
+        pLayout[i]->setContentsMargins(0,0,0,0);
+        pWidget[i]->setLayout(pLayout[i]);
+        for(int w = 0; w < 6; w++){
+            QTableWidgetItem *item = new QTableWidgetItem;
+            item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+            item->setBackground(QColor("transparent"));
+            item->setForeground(QColor::fromRgb(220,220,220));
+            if(w == 0){
+                if(nome[i] == "Youjo Senki Movie")
+                    box[i]->setCheckState(Qt::Checked);
+                else if(tier[i] == "1"){
+                    box[i]->setCheckState(Qt::Checked);
                 }
-                if(w == 1){
-                    item->setText(nome[i]);
-                    ui->ListaTorrents->setItem(i,w, item);
-    //                ui->ListaTorrents->itemAt(i,w)->setForeground(QColor::fromRgb(220,220,220));
+                else{
+                    box[i]->setCheckState(Qt::Unchecked);
                 }
-                else if(w == 2){
-                    item->setText(episodio[i]);
-                    ui->ListaTorrents->setItem(i,w, item);
-                }
-                else if(w == 3){
-                    if(resolucao[i] == "360p")
-                        resolucao[i] = "0360p";
-                    else if(resolucao[i] == "480p")
-                        resolucao[i] = "0480p";
-                    else if(resolucao[i] == "720p")
-                        resolucao[i] = "0720p";
-                    item->setText(resolucao[i]);
-                    ui->ListaTorrents->setItem(i,w, item);
-                }
-                else if(w == 4){
-                    item->setText(fansub[i]);
-                    ui->ListaTorrents->setItem(i,w, item);
-                }
-                else if(w == 5){
-    //                qDebug() << tier[i] << nome[i];
-                    item->setText(tier[i]);
-                    ui->ListaTorrents->setItem(i,w,item);
-                }
+                ui->ListaTorrents->setCellWidget(i,0, pWidget[i]);
+            }
+            if(w == 1){
+                item->setText(nome[i]);
+                ui->ListaTorrents->setItem(i,w, item);
+//                ui->ListaTorrents->itemAt(i,w)->setForeground(QColor::fromRgb(220,220,220));//isso é prata, da cor da fonte dos labels
+            }
+            else if(w == 2){
+                item->setFlags(Qt::NoItemFlags);
+                item->setForeground(QColor::fromRgb(220,220,220));
+                item->setText(episodio[i]);
+                ui->ListaTorrents->setItem(i,w, item);
+            }
+            else if(w == 3){
+                item->setFlags(Qt::NoItemFlags);
+                item->setForeground(QColor::fromRgb(220,220,220));
+                if(resolucao[i] == "360p")
+                    resolucao[i] = "0360p";
+                else if(resolucao[i] == "480p")
+                    resolucao[i] = "0480p";
+                else if(resolucao[i] == "720p")
+                    resolucao[i] = "0720p";
+                item->setText(resolucao[i]);
+                ui->ListaTorrents->setItem(i,w, item);
+            }
+            else if(w == 4){
+                item->setFlags(Qt::NoItemFlags);
+                item->setForeground(QColor::fromRgb(220,220,220));
+                item->setText(fansub[i]);
+                ui->ListaTorrents->setItem(i,w, item);
+            }
+            else if(w == 5){
+                item->setText(tier[i]);
+                ui->ListaTorrents->setItem(i,w,item);
             }
         }
-        ui->ListaTorrents->update();
+    }
+    ui->ListaTorrents->update();
 }
 
 void torrent::leXML(){
@@ -214,7 +213,6 @@ void torrent::leXML(){
                         tempSub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
                         resolucao.append(QString::fromStdWString(elements.get(anitomy::kElementVideoResolution)));
                         tempQualidade = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
-                        marcadoDownload.append(false);
                         for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
                             if(linha.contains(qleitor->retornaNome(i))){
                                 tempTier = "1";
