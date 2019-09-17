@@ -36,31 +36,33 @@ public:
     bool comparaData(QString);
 
     void botaoRefresh();
+    void quebraloop();
 private:
     configPC *pastas;
 
-        //Reescrevendo função
-        QString qId;
-        QString qProgresso;
-        QString qEpiCount;
-        QString qScore;
-        QString qImagem;
-        QString qGenero;
-        QString qNome;
-        QString qNomeIngles;
-        QString qSinopse;
-        QString qProdutores;
-        QString qScoreGeral;
-        QString qSeason;
-        bool qFinished;
-        bool qWatching;
-        bool qAnimeId;
-        bool qPrimeiraEntrada;
-        bool qStartDateOk;
-        QString arquivoLer1;
-        QString arquivoLer2;
+    QString qId;
+    QString qProgresso;
+    QString qEpiCount;
+    QString qScore;
+    QString qImagem;
+    QString qGenero;
+    QString qNome;
+    QString qNomeIngles;
+    QString qSinopse;
+    QString qProdutores;
+    QString qScoreGeral;
+    QString qSeason;
+    bool qFinished;
+    bool qWatching;
+    bool qAnimeId;
+    bool qPrimeiraEntrada;
+    bool qStartDateOk;
+    QString arquivoLer1;
+    QString arquivoLer2;
 
-        QString user;
+    QString user;
+
+    bool breakLoop;
 
 signals:
     void mensagemConfig(QString);

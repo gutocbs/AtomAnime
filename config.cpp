@@ -10,12 +10,16 @@ Config::Config(QObject *parent) : QObject(parent)
     qFinished = false;
     qStartDateOk = false;
 //    qPrimeiraEntrada = true;
+    breakLoop = false;
 }
 
 Config::~Config(){
     delete pastas;
 }
 
+void Config::quebraloop(){
+    breakLoop = true;
+}
 
 void Config::IniciaThread(QThread &cThread){
     connect(&cThread, SIGNAL(started()), this, SLOT(run()));
@@ -1263,6 +1267,8 @@ void Config::run(){
                 this->thread()->sleep(300);
                 ParseTaiga();
                 emit refresh();
+                if(breakLoop == true)
+                    break;
             }
         }
         else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){
@@ -1275,5 +1281,8 @@ void Config::run(){
                 emit mensagemConfig("EUsr");
             }
         }
+        if(breakLoop == true)
+            break;
     }
+    qDebug() << "olha, quebrou";
 }

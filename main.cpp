@@ -2,7 +2,6 @@
 #include <QApplication>
 #include <QtDebug>
 #include <QScreen>
-#include "config.h"
 
 int main(int argc, char *argv[])
 {

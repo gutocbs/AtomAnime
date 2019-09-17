@@ -35,12 +35,14 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+    //Essa função é pública por causa do future
     void ConfiguraArquivos();
 
 private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
-    torrent jtorrent;
+    ///CRASH
+//    torrent jtorrent;
     mainwindow1366768 main768;
 
     //Download de imagens
@@ -72,46 +74,64 @@ private:
     Config *runArquivo;
 
     QThread cThread; //Thread de baixar os animes
-    QThread confThread;
 ///
     int anime0, anime1, anime2, anime3, anime4;
     int idAnime;
-    QVector<int> vetorAnimes;
     int tamanhoLista;
     int numEpisodios;
     int pagina;
     int downl;
-
     int tamanhoListaWatching;
     int tamanhoListaCompleted;
     int tamanhoListaDropped;
     int tamanhoListaOnHold;
     int tamanhoListaPlanToWatch;
 
-
     QString ordemVetorWatching, ordemVetorCompleted, ordemVetorDropped, ordemVetorPaused, ordemVetorPlantoWatch;
-
-    QVector<int> qEpiDisponivel;
-
     QString lista;
+
+    QVector<int> vetorAnimes;
+    QVector<int> qEpiDisponivel;
 
     bool primeiraLeitura;
 
     QPixmap pix;
 
 public slots:
+    //Construtores de janelas
     void InstauraPrimeiraJanela();
-    void RestauraJanela();
-    void mandaRefresh();
-    void refreshArquivo();
-    void mudaImagem();
-    void voltaPagina();
-    void setSinopse();
-    void carregaInfo();
+    void BotaoWatching();
+    void BotaoCompleted();
+    void BotaoOnHold();
+    void BotaoDropped();
+    void BotaoPlanToWatch();
+    void BotaoBusca();
+
+    //Downloads
     void baixaImagens(QString);
     void imagemBig();
+
+    //Mexem com as janelas
+    void RestauraJanela();
+    void OrdenaVetor();
+
+    //Arquivos
+    void mandaRefresh();
+    void refreshArquivo();
+
+    //Informações dos animes
+    void setSinopse();
+
+    //Listas de animes
+    void proximaPagina();
+    void voltaPagina();
+
+
+    //Botões de configuração
     void abrePasta();
     void abreAnilist();
+    void AbreEpisodio();
+    void Configurar();
 
     ///Carrega botões
     void Botoes();
@@ -120,7 +140,7 @@ public slots:
     void LiberaBotaoDropped();
     void LiberaBotaoPlanToWatch();
 
-    ///Botões
+    ///Botões de carregar animes
     void carregaAnime1();
     void carregaAnime2();
     void carregaAnime3();
@@ -150,27 +170,18 @@ public slots:
     void carregaAnime27();
     void carregaAnime28();
 
-    void BotaoWatching();
-    void BotaoCompleted();
-    void BotaoOnHold();
-    void BotaoDropped();
-    void BotaoPlanToWatch();
-    void BotaoBusca();
-    void OrdenaVetor();
     void setUser();
 
+//    void carregaInfo();
+
 private slots:
-    void Configurar();
-    void ConfigCancelada();
-    void Torrent();
-    void voltaTorrent();
-    void AbreEpisodio();
-    void keyPressEvent(QKeyEvent * event);
-    void on_NotaMais_clicked();
-    void on_NotaMenos_clicked();
-    void on_ProgressoMais_clicked();
-    void on_ProgressoMenos_clicked();
-    void on_Lista_clicked();
+//    void Torrent();
+//    void keyPressEvent(QKeyEvent * event);
+//    void on_NotaMais_clicked();
+//    void on_NotaMenos_clicked();
+//    void on_ProgressoMais_clicked();
+//    void on_ProgressoMenos_clicked();
+//    void on_Lista_clicked();
 };
 
 #endif // MAINWINDOW_H

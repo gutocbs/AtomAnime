@@ -31,8 +31,6 @@ private:
     QNetworkReply *reply;
     QFile *file;
     configPC *configura;
-    int i;
-    leitorarquivos *A;
 
 signals:
     void terminouDownload();

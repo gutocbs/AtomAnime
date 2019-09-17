@@ -6,11 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect  screenGeometry = screen->geometry();
-    int height = screenGeometry.height();
-    int width = screenGeometry.width();
-    qDebug() << height << " - " << width;
+//    QScreen *screen = QGuiApplication::primaryScreen();
+//    QRect  screenGeometry = screen->geometry();
+//    int height = screenGeometry.height();
+//    int width = screenGeometry.width();
+//    qDebug() << height << " - " << width;
 
     tamanhoListaOnHold = 0;
     tamanhoListaDropped = 0;
@@ -23,36 +23,40 @@ MainWindow::MainWindow(QWidget *parent) :
     primeiraLeitura = false;
 
     lista = "watching";
-    leitorWatching = new leitorarquivos;
+    leitorWatching = new leitorarquivos;//Tentar tirar esse bando de coisa
     leitorCompleted = new leitorarquivos;
     leitorOnHold = new leitorarquivos;
     leitorDropped = new leitorarquivos;
     leitorPlanToWatch = new leitorarquivos;
-//    leitorA = leitorWatching;
     leitorA = new leitorarquivos;
     configuracoes = new configPC();
     configuracoes->recebeJConfig(&jConfig);
     configuracoes->CriaPastasBase();
+
     runArquivo = new Config();
     runArquivo->setConfigs(configuracoes);
     runArquivo->IniciaThread(cThread);
     runArquivo->moveToThread(&cThread);
-    cThread.start();
 
-    connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
-    connect(runArquivo, SIGNAL(refresh()),this,SLOT(refreshArquivo()));
-    connect(runArquivo, SIGNAL(terminouSetArquivo()),this,SLOT(InstauraPrimeiraJanela()));
-    connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(LiberaBotaoCompleted()));
-    connect(runArquivo, SIGNAL(terminouOnHold()),this,SLOT(LiberaBotaoOnHold()));
-    connect(runArquivo, SIGNAL(terminouDropped()),this,SLOT(LiberaBotaoDropped()));
-    connect(runArquivo, SIGNAL(terminouPlanToWatch()),this,SLOT(LiberaBotaoPlanToWatch()));
+
+    ///BUG - thread fica em loop e nunca vai conseguir parar
+    ///concertar isso
+//    cThread.start();
+
+//    connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
+//    connect(runArquivo, SIGNAL(refresh()),this,SLOT(refreshArquivo()));
+//    connect(runArquivo, SIGNAL(terminouSetArquivo()),this,SLOT(InstauraPrimeiraJanela()));
+//    connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(LiberaBotaoCompleted()));
+//    connect(runArquivo, SIGNAL(terminouOnHold()),this,SLOT(LiberaBotaoOnHold()));
+//    connect(runArquivo, SIGNAL(terminouDropped()),this,SLOT(LiberaBotaoDropped()));
+//    connect(runArquivo, SIGNAL(terminouPlanToWatch()),this,SLOT(LiberaBotaoPlanToWatch()));
 
     anime0 = -1;
     numEpisodios = 0;
 
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
-    ui->janela->addWidget(&jtorrent);
+//    ui->janela->addWidget(&jtorrent);
 //    ui->janela768->addWidget(&main768);
 //    if(height == 1080){
 //        ui->janela768->hide();
@@ -61,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //        ui->janela768->setCurrentIndex(1);
 //    }
 
-    jtorrent.getLeitorArquivos(leitorA);
+//    jtorrent.getLeitorArquivos(leitorA);
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
@@ -72,53 +76,52 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     cThread.quit();
-
-    configuracoes->EscreveConfig();
-    delete leitorWatching;
-    delete leitorCompleted;
-    delete leitorOnHold;
-    delete leitorDropped;
-    delete leitorPlanToWatch;
-    delete leitorA;
-    delete configuracoes;
-    delete organiza;
     delete ui;
-    delete pasta;
-    delete runArquivo;
+//    configuracoes->EscreveConfig();
+//    delete leitorWatching;
+//    delete leitorCompleted;
+//    delete leitorOnHold;
+//    delete leitorDropped;
+//    delete leitorPlanToWatch;
+//    delete leitorA;
+//    delete configuracoes;
+//    delete organiza;
+//    delete pasta;
 
-    delete qdown;
-    delete qdownload;
-    delete baixaOnHold;
-    delete baixaDropped;
-    delete baixaPlanToWatch;
-    delete baixaBusca;
+//    delete qdown;
+//    delete qdownload;
+//    delete baixaOnHold;
+//    delete baixaDropped;
+//    delete baixaPlanToWatch;
+//    delete baixaBusca;
 
-    delete downImagemGrandeWatching;
-    delete downImagemGrandeCompleted;
-    delete downImagemGrandeOnHold;
-    delete downImagemGrandeDropped;
-    delete downImagemGrandePlanToWatch;
-    delete downImagemGrandeBusca;
+//    delete downImagemGrandeWatching;
+//    delete downImagemGrandeCompleted;
+//    delete downImagemGrandeOnHold;
+//    delete downImagemGrandeDropped;
+//    delete downImagemGrandePlanToWatch;
+//    delete downImagemGrandeBusca;
 
-    vetorAnimes.clear();
+//    delete runArquivo;
 }
 
-void MainWindow::keyPressEvent(QKeyEvent * event){
-    if(event->key() == Qt::Key_U){
-        mudaImagem();
-    }
-    else if(event->key() == Qt::Key_X){
-        AbreEpisodio();
-    }
-}
+//void MainWindow::keyPressEvent(QKeyEvent * event){
+//    if(event->key() == Qt::Key_U){
+//        mudaImagem();
+//    }
+//    else if(event->key() == Qt::Key_X){
+//        AbreEpisodio();
+//    }
+//}
 
 void MainWindow::Botoes(){
-    connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(mudaImagem()));
+    connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(proximaPagina()));
     connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(RestauraJanela()));
     connect(ui->PaginaAnterior, SIGNAL(clicked()),this,SLOT(voltaPagina()));
     connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
     connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));
     connect(ui->AbreEpi, SIGNAL(clicked()),this,SLOT(AbreEpisodio()));
+
     connect(ui->clickAnime1, SIGNAL(clicked()),this,SLOT(carregaAnime1()));
     connect(ui->clickAnime2, SIGNAL(clicked()),this,SLOT(carregaAnime2()));
     connect(ui->clickAnime3, SIGNAL(clicked()),this,SLOT(carregaAnime3()));
@@ -147,6 +150,7 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime26, SIGNAL(clicked()),this,SLOT(carregaAnime26()));
     connect(ui->clickAnime27, SIGNAL(clicked()),this,SLOT(carregaAnime27()));
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
+
     connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
     connect(ui->Busca, SIGNAL(clicked()), this,SLOT(BotaoBusca()));
     connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(mandaRefresh()));
@@ -155,7 +159,7 @@ void MainWindow::Botoes(){
 
     connect(&jConfig, SIGNAL(user()), this, SLOT(setUser()));
     connect(&jConfig, SIGNAL(cancelado()), this, SLOT(ConfigCancelada()));
-    connect(&jtorrent, SIGNAL(volta()), this, SLOT(voltaTorrent()));
+//    connect(&jtorrent, SIGNAL(volta()), this, SLOT(voltaTorrent()));
 }
 
 void MainWindow::setUser(){
@@ -184,11 +188,13 @@ void MainWindow::LiberaBotaoPlanToWatch(){
 }
 
 void MainWindow::InstauraPrimeiraJanela(){
+    anime0 = 0;
+
     ui->label->setText("Carregando!");
-    ui->Watching->setStyleSheet("background: red;");
+
     leitorA->leLinha("watching");
-    leitorA->OrdenaVetor(configuracoes->getOrdem());
     ordemVetorWatching = configuracoes->getOrdem();
+    leitorA->OrdenaVetor(ordemVetorWatching);
 
     qdown = new QDownloader[leitorA->retornaTamanhoLista()];
     downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
@@ -203,13 +209,14 @@ void MainWindow::InstauraPrimeiraJanela(){
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
-    anime0 = 0;
+
+
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
-    carregaInfo();
+
     ui->Watching->setStyleSheet("background: red;");
-    jtorrent.getOrganizador(organiza);
+//    jtorrent.getOrganizador(organiza);
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 }
 
@@ -235,7 +242,7 @@ void MainWindow::BotaoWatching(){
     if(tamanhoListaWatching != tamanhoLista){
         downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
         qdown = new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoLista = tamanhoLista;
+        tamanhoListaWatching = tamanhoLista;
     }
 
 
@@ -441,7 +448,7 @@ void MainWindow::BotaoBusca(){
             for(int w = 0; w < tamanhoLista; w++){
                 vetorAnimes.append(w);
             }
-            carregaInfo();
+//            carregaInfo();
             ui->label->setText("Todos os animes foram encontrados");
             ui->StringBusca->clear();
             achou = true;
@@ -452,6 +459,12 @@ void MainWindow::BotaoBusca(){
     }
     if(achou == false)
         ui->label->setText("Nenhum anime com essa palavra chave foi encontrado");
+}
+
+void MainWindow::RestauraJanela(){
+    imagemBig();
+    baixaImagens(lista);
+    carregaInfo();
 }
 
 void MainWindow::OrdenaVetor(){
@@ -469,7 +482,7 @@ void MainWindow::OrdenaVetor(){
         else if(lista == "plantowatch")
             ordemVetorPlantoWatch = ui->OrdemAnime->currentText();
         leitorA->OrdenaVetor(ui->OrdemAnime->currentText());
-        carregaInfo();
+//        carregaInfo();
     }
 }
 
@@ -508,29 +521,24 @@ void MainWindow::refreshArquivo(){
     }
 }
 
-void MainWindow::RestauraJanela(){
-    imagemBig();
-    baixaImagens(lista);
-    carregaInfo();
-}
-
 void MainWindow::setSinopse(){
     ui->sinopse->setText(leitorA->retornaSinopse(anime0));
 }
 
-void MainWindow::mudaImagem(){
+void MainWindow::proximaPagina(){
      if(idAnime+28 < tamanhoLista){
         idAnime = idAnime+28;
         pagina++;
     }
-    carregaInfo();
+//    carregaInfo();
 }
+
 void MainWindow::voltaPagina(){
     if(idAnime-28 >= 0){
         idAnime = idAnime-28;
         pagina--;
     }
-    carregaInfo();
+//    carregaInfo();
 }
 
 void MainWindow::abrePasta(){
@@ -545,7 +553,6 @@ void MainWindow::abreAnilist(){
 
 void MainWindow::AbreEpisodio()
 {
-
     if(lista == "completed"){
         ui->label->setText("Você já viu todos os episódios, não tem um próximo!");
     }
@@ -677,35 +684,28 @@ void MainWindow::Configurar(){
     ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
     ui->janela->setCurrentIndex(1);
 }
-void MainWindow::Torrent(){
-    ui->Watching->blockSignals(true);
-    ui->Completed->blockSignals(true);
-    ui->Dropped->blockSignals(true);
-    ui->OnHold->blockSignals(true);
-    ui->PlanToWatch->blockSignals(true);
-    ui->Refresh->blockSignals(true);
-    ui->MudarListaBotao->blockSignals(true);
-    ui->MudarLista->blockSignals(true);
-    ui->OrdemAnime->blockSignals(true);
-    ui->Busca->blockSignals(true);
-    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
-    ui->janela->setCurrentIndex(2);
-}
 
-void MainWindow::ConfigCancelada(){
-    ui->janela->setCurrentIndex(0);
-}
-void MainWindow::voltaTorrent(){
-    ui->janela->setCurrentIndex(0);
-}
-
+//void MainWindow::Torrent(){
+//    ui->Watching->blockSignals(true);
+//    ui->Completed->blockSignals(true);
+//    ui->Dropped->blockSignals(true);
+//    ui->OnHold->blockSignals(true);
+//    ui->PlanToWatch->blockSignals(true);
+//    ui->Refresh->blockSignals(true);
+//    ui->MudarListaBotao->blockSignals(true);
+//    ui->MudarLista->blockSignals(true);
+//    ui->OrdemAnime->blockSignals(true);
+//    ui->Busca->blockSignals(true);
+//    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
+//    ui->janela->setCurrentIndex(2);
+//}
 
 void MainWindow::carregaAnime1(){
     if(idAnime <= tamanhoLista){
@@ -1447,72 +1447,72 @@ void MainWindow::carregaInfo(){
     }
 }
 
-void MainWindow::on_NotaMais_clicked()
-{
-    if(ui->Nota->text().toInt() < 100){
-        ui->Nota->setText(QString::number(ui->Nota->text().toInt()+10));
-        ui->Nota_2->setText(ui->Nota->text());
-    }
-}
+//void MainWindow::on_NotaMais_clicked()
+//{
+//    if(ui->Nota->text().toInt() < 100){
+//        ui->Nota->setText(QString::number(ui->Nota->text().toInt()+10));
+//        ui->Nota_2->setText(ui->Nota->text());
+//    }
+//}
 
-void MainWindow::on_NotaMenos_clicked()
-{
-    if(ui->Nota->text().toInt() > 0){
-        ui->Nota->setText(QString::number(ui->Nota->text().toInt()-10));
-        ui->Nota_2->setText(ui->Nota->text());
-    }
-}
+//void MainWindow::on_NotaMenos_clicked()
+//{
+//    if(ui->Nota->text().toInt() > 0){
+//        ui->Nota->setText(QString::number(ui->Nota->text().toInt()-10));
+//        ui->Nota_2->setText(ui->Nota->text());
+//    }
+//}
 
-void MainWindow::on_ProgressoMais_clicked()
-{
-    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
-    if(progressoQuebrado.at(0).toInt() < leitorA->retornaNumEpi(anime0).toInt()){
-        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()+1) + "/" + progressoQuebrado.at(1));
-        ui->Progresso_2->setText(ui->ProxEpi->text());
-    }
+//void MainWindow::on_ProgressoMais_clicked()
+//{
+//    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
+//    if(progressoQuebrado.at(0).toInt() < leitorA->retornaNumEpi(anime0).toInt()){
+//        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()+1) + "/" + progressoQuebrado.at(1));
+//        ui->Progresso_2->setText(ui->ProxEpi->text());
+//    }
 
-}
+//}
 
-void MainWindow::on_ProgressoMenos_clicked()
-{
-    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
-    if(progressoQuebrado.at(0).toInt() > 0){
-        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()-1) + "/" + progressoQuebrado.at(1));
-        ui->Progresso_2->setText(ui->ProxEpi->text());
-    }
-}
+//void MainWindow::on_ProgressoMenos_clicked()
+//{
+//    QStringList progressoQuebrado = ui->ProxEpi->text().split('/');
+//    if(progressoQuebrado.at(0).toInt() > 0){
+//        ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()-1) + "/" + progressoQuebrado.at(1));
+//        ui->Progresso_2->setText(ui->ProxEpi->text());
+//    }
+//}
 
-void MainWindow::on_Lista_clicked()
-{
-    ui->Watching->blockSignals(false);
-    ui->Completed->blockSignals(false);
-    ui->Dropped->blockSignals(false);
-    ui->OnHold->blockSignals(false);
-    ui->PlanToWatch->blockSignals(false);
-    ui->Refresh->blockSignals(false);
-    ui->MudarListaBotao->blockSignals(false);
-    ui->MudarLista->blockSignals(false);
-    ui->OrdemAnime->blockSignals(false);
-    ui->Busca->blockSignals(false);
+//void MainWindow::on_Lista_clicked()
+//{
+//    ui->Watching->blockSignals(false);
+//    ui->Completed->blockSignals(false);
+//    ui->Dropped->blockSignals(false);
+//    ui->OnHold->blockSignals(false);
+//    ui->PlanToWatch->blockSignals(false);
+//    ui->Refresh->blockSignals(false);
+//    ui->MudarListaBotao->blockSignals(false);
+//    ui->MudarLista->blockSignals(false);
+//    ui->OrdemAnime->blockSignals(false);
+//    ui->Busca->blockSignals(false);
 
-    ui->Watching->setStyleSheet("background: white;");
-    ui->Completed->setStyleSheet("background: white;");
-    ui->Dropped->setStyleSheet("background: white;");
-    ui->OnHold->setStyleSheet("background: white;");
-    ui->PlanToWatch->setStyleSheet("background: white;");
-    ui->Refresh->setStyleSheet("background: white;");
-    ui->MudarListaBotao->setStyleSheet("background: white;");
-    ui->Busca->setStyleSheet("background: white;");
+//    ui->Watching->setStyleSheet("background: white;");
+//    ui->Completed->setStyleSheet("background: white;");
+//    ui->Dropped->setStyleSheet("background: white;");
+//    ui->OnHold->setStyleSheet("background: white;");
+//    ui->PlanToWatch->setStyleSheet("background: white;");
+//    ui->Refresh->setStyleSheet("background: white;");
+//    ui->MudarListaBotao->setStyleSheet("background: white;");
+//    ui->Busca->setStyleSheet("background: white;");
 
-    if(lista == "watching")
-        ui->Watching->setStyleSheet("background: red;");
-    else if(lista == "completed")
-        ui->Completed->setStyleSheet("background: red;");
-    else if(lista == "onhold")
-        ui->OnHold->setStyleSheet("background: red;");
-    else if(lista == "dropped")
-        ui->Dropped->setStyleSheet("background: red;");
-    else if(lista == "plantowatch")
-        ui->PlanToWatch->setStyleSheet("background: red;");
-    ui->janela->setCurrentIndex(0);
-}
+//    if(lista == "watching")
+//        ui->Watching->setStyleSheet("background: red;");
+//    else if(lista == "completed")
+//        ui->Completed->setStyleSheet("background: red;");
+//    else if(lista == "onhold")
+//        ui->OnHold->setStyleSheet("background: red;");
+//    else if(lista == "dropped")
+//        ui->Dropped->setStyleSheet("background: red;");
+//    else if(lista == "plantowatch")
+//        ui->PlanToWatch->setStyleSheet("background: red;");
+//    ui->janela->setCurrentIndex(0);
+//}
