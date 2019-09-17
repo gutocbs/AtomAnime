@@ -106,9 +106,11 @@ public slots:
     void BotaoDropped();
     void BotaoPlanToWatch();
     void BotaoBusca();
+    void on_Lista_clicked();
+    void Configurar();
 
     //Downloads
-    void baixaImagens(QString);
+    void baixaImagens();
     void imagemBig();
 
     //Mexem com as janelas
@@ -121,6 +123,7 @@ public slots:
 
     //Informações dos animes
     void setSinopse();
+    void carregaInfo();
 
     //Listas de animes
     void proximaPagina();
@@ -131,7 +134,10 @@ public slots:
     void abrePasta();
     void abreAnilist();
     void AbreEpisodio();
-    void Configurar();
+    void on_NotaMais_clicked();
+    void on_NotaMenos_clicked();
+    void on_ProgressoMais_clicked();
+    void on_ProgressoMenos_clicked();
 
     ///Carrega botões
     void Botoes();
@@ -172,16 +178,10 @@ public slots:
 
     void setUser();
 
-//    void carregaInfo();
 
 private slots:
 //    void Torrent();
-//    void keyPressEvent(QKeyEvent * event);
-//    void on_NotaMais_clicked();
-//    void on_NotaMenos_clicked();
-//    void on_ProgressoMais_clicked();
-//    void on_ProgressoMenos_clicked();
-//    void on_Lista_clicked();
+    void keyPressEvent(QKeyEvent * event);
 };
 
 #endif // MAINWINDOW_H

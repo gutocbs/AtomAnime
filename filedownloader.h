@@ -12,32 +12,41 @@
 #include <QThread>
 
 #include "configpc.h"
+#include "leitorarquivos.h"
 
 class QDownloader : public QObject
 {
     Q_OBJECT
 public:
-    explicit QDownloader(QObject *parent = 0);
+    explicit QDownloader(QObject *parent = nullptr);
     virtual ~QDownloader();
     void setFile(QString fileURL, QString);
     void setURL(QString);
     void setTorrent(QString, QString);
     void setFileBig(QString fileURL, QString);
 //    void setFile(leitorarquivos *, int);
-    void IniciaThread(QThread &dThread);
-
+    void setListaAnimes(leitorarquivos *leiArq);
+    void downloadImagensLista(QString, QString);
 private:
     QNetworkAccessManager *manager;
     QNetworkReply *reply;
     QFile *file;
     configPC *configura;
+    leitorarquivos *leiArq;
+
+    int indexLista;
+    bool fileIsOpen;
+    bool terminouLista;
+    QString lista;
+    QString listaAtual;
+    int tamanhoLista;
 
 signals:
     void terminouDownload();
     void filexists();
-public slots:
-    void run();
 
+public slots:
+    void setNext();
 private slots:
     void onDownloadProgress(qint64,qint64);
     void onFinished(QNetworkReply*);

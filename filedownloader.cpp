@@ -6,6 +6,9 @@ QDownloader::QDownloader(QObject *parent) :
 {
     configura = new configPC;
     manager = new QNetworkAccessManager;
+    lista = "0";
+    fileIsOpen = false;
+    terminouLista = false;
 }
 
 QDownloader::~QDownloader()
@@ -15,12 +18,70 @@ QDownloader::~QDownloader()
     delete reply;
     delete file;
     delete configura;
+    delete leiArq;
 }
 
-void QDownloader::IniciaThread(QThread &dThread){
-    connect(&dThread, SIGNAL(started()), this, SLOT(run()));
+void QDownloader::setListaAnimes(leitorarquivos *leiArq){
+//    this->leiArq = leiArq;
+    indexLista = -1;
 }
 
+void QDownloader::downloadImagensLista(QString fileURL, QString w){
+    QString filePath = fileURL;
+    QString saveFilePath;
+    QStringList filePathList = filePath.split('/');
+//    fileURL.replace("medium", "small");
+    QString arquivo = configura->diretorioImagensMedio;
+    arquivo.append(w);
+    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+
+    saveFilePath = arquivo;
+
+    if(QFile(saveFilePath).size() == 0)
+        QFile(saveFilePath).remove();
+
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(fileURL));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(setNext()));
+        fileIsOpen = true;
+    }
+    else{
+        fileIsOpen = false;
+        setNext();
+    }
+}
+
+void QDownloader::setURL(QString url){
+    QString saveFilePath = "Configurações/rss.xml";
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+    QFile::remove(saveFilePath);
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(url));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+
+//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
+    }
+}
 
 void QDownloader::setFile(QString fileURL, QString w)
 {
@@ -56,27 +117,6 @@ void QDownloader::setFile(QString fileURL, QString w)
     }
     else{
         emit filexists();
-    }
-}
-
-void QDownloader::setURL(QString url){
-    QString saveFilePath = "Configurações/rss.xml";
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-    QFile::remove(saveFilePath);
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(url));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-
-//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
     }
 }
 
@@ -176,5 +216,82 @@ void QDownloader::onReplyFinished()
 //    setFile(A, i+1);
 }
 
-void QDownloader::run(){
+void QDownloader::setNext()
+{
+    if(fileIsOpen == true){
+        if(file->isOpen())
+        {
+            file->close();
+            file->deleteLater();
+        }
+    }
+    if(lista == "0"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("watching");
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        listaAtual = "watching";
+        indexLista = -1;
+    }
+    else if(lista == "1"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("completed");
+        listaAtual = "completed";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "2"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("onhold");
+        listaAtual = "onhold";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "3"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("dropped");
+        listaAtual = "dropped";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "4"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("plantowatch");
+        listaAtual = "plantowatch";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+//        tamanhoLista = 709;
+        indexLista = -1;
+    }
+    lista = "9";
+    indexLista++;
+    if(terminouLista == false){
+        if(indexLista < tamanhoLista){
+            qDebug() << leiArq->retornaNome(indexLista);
+            downloadImagensLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
+        }
+        else{
+            if(listaAtual == "watching"){
+                lista = "1";
+                qDebug() << endl << "Completed: ";
+            }
+            else if(listaAtual == "completed"){
+                lista = "2";
+                qDebug() << endl << "On Hold: ";
+            }
+            else if(listaAtual == "onhold"){
+                lista = "3";
+                qDebug() << endl << "Dropped: ";
+            }
+            else if(listaAtual == "dropped"){
+                lista = "4";
+                qDebug() << endl << "Plan to Watch: ";
+            }
+            else if(listaAtual == "plantowatch")
+                terminouLista = true;
+            setNext();
+        }
+    }
+    else{
+        emit terminouDownload();
+    }
 }
+
