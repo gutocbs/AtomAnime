@@ -35,6 +35,7 @@ public:
 
     bool comparaData(QString);
 
+    void botaoRefresh();
 private:
     configPC *pastas;
 
@@ -69,6 +70,7 @@ signals:
     void terminouDropped();
     void terminouPlanToWatch();
     void terminouWatching();
+    void refresh();
 public slots:
     void run();
 };

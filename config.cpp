@@ -1232,6 +1232,17 @@ bool Config::comparaData(QString season){
     return false;
 }
 
+void Config::botaoRefresh(){
+    ParseTaiga();
+    ParseCompleted();
+    ParseOnHold();
+    ParseDropped();
+    qWatching = false;
+    qAnimeId = false;
+    ParsePlanToWatch();
+    emit refresh();
+}
+
 void Config::run(){
     QDir diretorio;
     while(true){
@@ -1251,6 +1262,7 @@ void Config::run(){
                 emit terminouPlanToWatch();
                 this->thread()->sleep(300);
                 ParseTaiga();
+                emit refresh();
             }
         }
         else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){

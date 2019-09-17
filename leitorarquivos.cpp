@@ -41,9 +41,6 @@ void leitorarquivos::leLinha(QString lista)
             genero.append(in.readLine().split(','));
             sinopse.append(in.readLine());
             arrumaSinopse(NomeLista);
-//          qDebug() << nomeAnime[NomeLista];// << "esperando";
-//          qDebug() << link[NomeLista];// << "esperando";
-          //qDebug() << sinopse[NomeLista].toLatin1();// << "esperando";
             id.append(in.readLine());
             NomeLista++;
        }

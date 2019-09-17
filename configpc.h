@@ -39,10 +39,21 @@ public:
     QString diretorioImagensMedio;
     QString diretorioImagensGrandes;
 
+
+
 public slots:
     void setUser();
     void addDir(QString);
     void rmvDir(QString);
+    void setFeedBusca(QString);
+    void setDetection(int);
+    void setDownloadListas(int);
+    void setTempoDownload(int);
+    void setDownloadAutomatico(int);
+    void setDownloadFolder(QString);
+    void setFansub(QString);
+    void setQualidade(QString);
+    void setTorrentPadrao(QString);
 
 private:
     anitomy::Anitomy *anitomy;
@@ -53,6 +64,16 @@ private:
     QVector<QString> idAnime;
     QString usernameAnilist;
     QString ordemLista;
+    QString feedTorrentGeral;
+    QString feedTorrentEspecifico;
+    QString downloadFolder;
+    QString preFfansub;
+    QString prefQualidade;
+    QString prefTorrent;
+    int detection;
+    int downloadListas;
+    int tempoDownload;
+    int downloadAutomatico;
 };
 
 #endif // CONFIGPC_H

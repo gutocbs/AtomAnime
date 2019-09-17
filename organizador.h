@@ -17,6 +17,7 @@ class Organizador
 {
 public:
     Organizador(configPC*);
+    ~Organizador();
     void criaPastas(QString);
     void mudaArquivo(QString, QString);
     void abreAnilist(QString);

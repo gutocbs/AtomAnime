@@ -10,6 +10,8 @@
 #include <QListWidgetItem>
 #include <QCheckBox>
 #include <QDir>
+#include <QTimer>
+#include <QBoxLayout>
 
 #include "anitomy/anitomy.h"
 #include "filedownloader.h"
@@ -44,9 +46,11 @@ private slots:
 
     void on_XML_clicked();
     void on_Download_clicked();
+    void esperaTerminarSalvar();
 
 private:
     int globalDownload;
+    bool *primeiroDownload;
 
     Ui::torrent *ui;
     anitomy::Anitomy *anitomy;
@@ -55,6 +59,7 @@ private:
     Organizador *organiza;
 //    QVector<QCheckBox> box;
     QCheckBox *box;
+    QDownloader *baixaXML;
 
     QString url;
     QString diretorioDownloads;

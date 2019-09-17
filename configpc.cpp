@@ -4,6 +4,7 @@ configPC::configPC()
 {
 //    arquivo = new leitorarquivos;
     anitomy = new anitomy::Anitomy;
+//        diretorioImagensMedio = "Configurações/Imagens/Pequeno/";
     diretorioImagensMedio = "Configurações/Imagens/Medio/";
     diretorioImagensGrandes = "Configurações/Imagens/Grande/";
 //    diretorioAnimes.append("E:/Animes");
@@ -14,12 +15,21 @@ configPC::configPC()
 
 void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
     jconfig = JanelaConfg;
-    this->diretorioAnimes = jconfig->retornaDiretorioAnime();
     setUser();
     this->ordemLista = jconfig->returnOrdemLista();
+
     connect(jconfig, SIGNAL(user()), this, SLOT(setUser()));
     connect(jconfig, SIGNAL(dirAdd(QString)), this, SLOT(addDir(QString)));
     connect(jconfig, SIGNAL(dirRem(QString)), this, SLOT(rmvDir(QString)));
+    connect(jconfig, SIGNAL(detec(int)), this, SLOT(setDetection(int)));
+    connect(jconfig, SIGNAL(dListas(int)), this, SLOT(setDownloadListas(int)));
+    connect(jconfig, SIGNAL(tDownload(int)), this, SLOT(setTempoDownload(int)));
+    connect(jconfig, SIGNAL(dAutomatico(int)), this, SLOT(setDownloadAutomatico(int)));
+    connect(jconfig, SIGNAL(dFolder(QString)), this, SLOT(setDownloadFolder(QString)));
+    connect(jconfig, SIGNAL(fBusca(QString)), this, SLOT(setFeedBusca(QString)));
+    connect(jconfig, SIGNAL(fSub(QString)), this, SLOT(setFansub(QString)));
+    connect(jconfig, SIGNAL(quality(QString)), this, SLOT(setQualidade(QString)));
+    connect(jconfig, SIGNAL(tPadrao(QString)), this, SLOT(setTorrentPadrao(QString)));
 }
 
 void configPC::addDir(QString dir){
@@ -44,6 +54,9 @@ void configPC::CriaPastasBase(){
     if(!QDir("Configurações/Imagens").exists()){
         QDir().mkdir("Configurações/Imagens");
     }
+    if(!QDir("Configurações/Imagens/Pequeno").exists()){
+        QDir().mkdir("Configurações/Imagens/Pequeno");
+    }
     if(!QDir("Configurações/Imagens/Medio").exists()){
         QDir().mkdir("Configurações/Imagens/Medio");
     }
@@ -60,10 +73,60 @@ void configPC::CriaPastasBase(){
 
 void configPC::setUser(){
     usernameAnilist = jconfig->returnUserAnilist();
+    diretorioAnimes = jconfig->retornaDiretorioAnime();
+    detection = jconfig->returnDetection();
+    downloadListas = jconfig->returnDownloadListas();
+    tempoDownload = jconfig->returnTempoDownload();
+    downloadAutomatico = jconfig->returnDownloadAutomatico();
+    downloadFolder = jconfig->returnDownloadFolder();
+    QStringList temp = jconfig->returnFeedBusca().split("-");
+    feedTorrentGeral = temp.at(0);
+    feedTorrentEspecifico = temp.at(1);
+    preFfansub = jconfig->returnFansub();
+    prefQualidade = jconfig->returnQualidade();
+    prefTorrent = jconfig->returnTorrentPadrao();
+}
+
+void configPC::setFeedBusca(QString jfb){
+    QStringList temp = jfb.split("-");
+    feedTorrentGeral = temp.at(0);
+    feedTorrentEspecifico = temp.at(1);
 }
 
 void configPC::setOrdem(QString ordem){
     ordemLista = ordem;
+}
+
+void configPC::setDetection(int jdet){
+    detection = jdet;
+}
+
+void configPC::setDownloadListas(int jdl){
+    downloadListas = jdl;
+}
+
+void configPC::setTempoDownload(int jtd){
+    tempoDownload = jtd;
+}
+
+void configPC::setDownloadAutomatico(int jda){
+    downloadAutomatico = jda;
+}
+
+void configPC::setDownloadFolder(QString jdf){
+    downloadFolder = jdf;
+}
+
+void configPC::setFansub(QString jfs){
+    preFfansub = jfs;
+}
+
+void configPC::setQualidade(QString jql){
+    prefQualidade = jql;
+}
+
+void configPC::setTorrentPadrao(QString jtp){
+    prefTorrent = jtp;
 }
 
 QString configPC::getOrdem(){
@@ -96,7 +159,17 @@ void configPC::EscreveConfig(){
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         stream << "user>" << usernameAnilist << endl;
-        stream << "ordem>" << ordemLista;
+        stream << "ordem>" << ordemLista << endl;
+        stream << "feedgeral>" << feedTorrentGeral << endl;
+        stream << "feedespecifico>" << feedTorrentEspecifico << endl;
+        stream << "detection>" << detection << endl;
+        stream << "downloadlistas>" << downloadListas << endl;
+        stream << "tempodownload>" << tempoDownload << endl;
+        stream << "downloadautomatico>" << downloadAutomatico << endl;
+        stream << "downloadfolder>" << downloadFolder << endl;
+        stream << "fansub>" << preFfansub << endl;
+        stream << "qualidade>" << prefQualidade << endl;
+        stream << "torrent>" << prefTorrent << endl;
     }
 }
 

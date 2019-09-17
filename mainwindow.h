@@ -82,6 +82,15 @@ private:
     int pagina;
     int downl;
 
+    int tamanhoListaWatching;
+    int tamanhoListaCompleted;
+    int tamanhoListaDropped;
+    int tamanhoListaOnHold;
+    int tamanhoListaPlanToWatch;
+
+
+    QString ordemVetorWatching, ordemVetorCompleted, ordemVetorDropped, ordemVetorPaused, ordemVetorPlantoWatch;
+
     QVector<int> qEpiDisponivel;
 
     QString lista;
@@ -93,6 +102,8 @@ private:
 public slots:
     void InstauraPrimeiraJanela();
     void RestauraJanela();
+    void mandaRefresh();
+    void refreshArquivo();
     void mudaImagem();
     void voltaPagina();
     void setSinopse();
@@ -146,6 +157,7 @@ public slots:
     void BotaoPlanToWatch();
     void BotaoBusca();
     void OrdenaVetor();
+    void setUser();
 
 private slots:
     void Configurar();
@@ -158,6 +170,7 @@ private slots:
     void on_NotaMenos_clicked();
     void on_ProgressoMais_clicked();
     void on_ProgressoMenos_clicked();
+    void on_Lista_clicked();
 };
 
 #endif // MAINWINDOW_H

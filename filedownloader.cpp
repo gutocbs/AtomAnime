@@ -25,7 +25,7 @@ void QDownloader::setFile(QString fileURL, QString w)
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
         //QString fileName = filePathList.at(filePathList.count() - 1);
-    //fileURL.replace("medium", "large");
+//    fileURL.replace("medium", "small");
     QString arquivo = configura->diretorioImagensMedio;
     arquivo.append(w);
     arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));//lastIndexOf(QChar('/'))+1)
@@ -50,6 +50,9 @@ void QDownloader::setFile(QString fileURL, QString w)
         connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
         connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
         connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
+    }
+    else{
+        emit filexists();
     }
 }
 
@@ -165,6 +168,7 @@ void QDownloader::onReplyFinished()
         file->close();
         file->deleteLater();
     }
+//    qDebug() << "oi";
     emit terminouDownload();
 //    setFile(A, i+1);
 }

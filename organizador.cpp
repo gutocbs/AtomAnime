@@ -6,6 +6,12 @@ Organizador::Organizador(configPC *conf)
     anitomy = new anitomy::Anitomy;
 }
 
+Organizador::~Organizador(){
+    delete anitomy;
+    delete conf;
+    epiDis.clear();
+}
+
 //Checa se a pasta já existe
 void Organizador::criaPastas(QString caminho){
     //Caso exista, não faz nada

@@ -149,7 +149,7 @@
    <widget class="QPushButton" name="Refresh">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>340</x>
       <y>40</y>
       <width>88</width>
       <height>34</height>
@@ -652,8 +652,8 @@ color: rgb(220, 220, 220);</string>
      <widget class="QLabel" name="NomeIngles">
       <property name="geometry">
        <rect>
-        <x>855</x>
-        <y>43</y>
+        <x>871</x>
+        <y>60</y>
         <width>581</width>
         <height>41</height>
        </rect>
@@ -1447,8 +1447,8 @@ color: rgb(220, 220, 220);</string>
      <widget class="QLabel" name="Nome">
       <property name="geometry">
        <rect>
-        <x>855</x>
-        <y>2</y>
+        <x>871</x>
+        <y>20</y>
         <width>581</width>
         <height>41</height>
        </rect>
@@ -2581,6 +2581,41 @@ color: rgb(220, 220, 220);</string>
      </property>
     </item>
    </widget>
+   <widget class="QPushButton" name="Lista">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>40</y>
+      <width>88</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: white;</string>
+    </property>
+    <property name="text">
+     <string>Lista</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="nomeUsuario">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>40</y>
+      <width>221</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: transparent;
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+    </property>
+    <property name="text">
+     <string>Nome e imagem de usuário</string>
+    </property>
+   </widget>
    <zorder>BotaoConfig</zorder>
    <zorder>Watching</zorder>
    <zorder>Completed</zorder>
@@ -2596,6 +2631,8 @@ color: rgb(220, 220, 220);</string>
    <zorder>OrdemAnime</zorder>
    <zorder>MudarListaBotao</zorder>
    <zorder>MudarLista</zorder>
+   <zorder>Lista</zorder>
+   <zorder>nomeUsuario</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

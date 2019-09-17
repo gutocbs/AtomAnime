@@ -12,7 +12,10 @@ MainWindow::MainWindow(QWidget *parent) :
     int width = screenGeometry.width();
     qDebug() << height << " - " << width;
 
-
+    tamanhoListaOnHold = 0;
+    tamanhoListaDropped = 0;
+    tamanhoListaCompleted = 0;
+    tamanhoListaPlanToWatch = 0;
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -25,7 +28,8 @@ MainWindow::MainWindow(QWidget *parent) :
     leitorOnHold = new leitorarquivos;
     leitorDropped = new leitorarquivos;
     leitorPlanToWatch = new leitorarquivos;
-    leitorA = leitorWatching;
+//    leitorA = leitorWatching;
+    leitorA = new leitorarquivos;
     configuracoes = new configPC();
     configuracoes->recebeJConfig(&jConfig);
     configuracoes->CriaPastasBase();
@@ -36,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     cThread.start();
 
     connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
+    connect(runArquivo, SIGNAL(refresh()),this,SLOT(refreshArquivo()));
     connect(runArquivo, SIGNAL(terminouSetArquivo()),this,SLOT(InstauraPrimeiraJanela()));
     connect(runArquivo, SIGNAL(terminouCompleted()),this,SLOT(LiberaBotaoCompleted()));
     connect(runArquivo, SIGNAL(terminouOnHold()),this,SLOT(LiberaBotaoOnHold()));
@@ -60,22 +65,42 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
-
+    ui->nomeUsuario->setText(configuracoes->retornaUser());
     Botoes();
 }
 
 MainWindow::~MainWindow()
 {
+    cThread.quit();
+
     configuracoes->EscreveConfig();
+    delete leitorWatching;
+    delete leitorCompleted;
+    delete leitorOnHold;
+    delete leitorDropped;
+    delete leitorPlanToWatch;
     delete leitorA;
-    delete qdown;
     delete configuracoes;
     delete organiza;
     delete ui;
     delete pasta;
     delete runArquivo;
-//    delete vetorAnimes;
-    cThread.quit();
+
+    delete qdown;
+    delete qdownload;
+    delete baixaOnHold;
+    delete baixaDropped;
+    delete baixaPlanToWatch;
+    delete baixaBusca;
+
+    delete downImagemGrandeWatching;
+    delete downImagemGrandeCompleted;
+    delete downImagemGrandeOnHold;
+    delete downImagemGrandeDropped;
+    delete downImagemGrandePlanToWatch;
+    delete downImagemGrandeBusca;
+
+    vetorAnimes.clear();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent * event){
@@ -124,14 +149,18 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
     connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
     connect(ui->Busca, SIGNAL(clicked()), this,SLOT(BotaoBusca()));
-    connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(RestauraJanela()));
+    connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(mandaRefresh()));
     connect(ui->BotaoPasta, SIGNAL(clicked()), this,SLOT(abrePasta()));
     connect(ui->BotaoAnilist, SIGNAL(clicked()), this,SLOT(abreAnilist()));
 
+    connect(&jConfig, SIGNAL(user()), this, SLOT(setUser()));
     connect(&jConfig, SIGNAL(cancelado()), this, SLOT(ConfigCancelada()));
     connect(&jtorrent, SIGNAL(volta()), this, SLOT(voltaTorrent()));
 }
 
+void MainWindow::setUser(){
+    ui->nomeUsuario->setText(configuracoes->retornaUser());
+}
 
 void MainWindow::LiberaBotaoCompleted(){
     ui->Completed->setStyleSheet("background: white;");
@@ -159,19 +188,18 @@ void MainWindow::InstauraPrimeiraJanela(){
     ui->Watching->setStyleSheet("background: red;");
     leitorA->leLinha("watching");
     leitorA->OrdenaVetor(configuracoes->getOrdem());
-//    qDebug() << "oi";
+    ordemVetorWatching = configuracoes->getOrdem();
+
     qdown = new QDownloader[leitorA->retornaTamanhoLista()];
     downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
+
     organiza = new Organizador(configuracoes);
-//    QString fileURL = "https://nyaa.si/download/1173229.torrent";
-//    qdown[0].setFile("https://nyaa.si/download/1173229.torrent","1");
-//    organiza->abre("E:/Programas/Programação/QT/AtomAniem/build-AtomAnime-Desktop_Qt_5_13_0_MinGW_64_bit-Debug/Configurações/Imagens/Medio/1.torrent");
     baixaImagens("watching");
     imagemBig();
 
-//    extern void ConfiguraArquivos();
     QFuture<void> future = QtConcurrent::run(this, &MainWindow::ConfiguraArquivos);
     tamanhoLista = leitorA->retornaTamanhoLista();
+    tamanhoListaWatching = tamanhoLista;
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
@@ -181,34 +209,40 @@ void MainWindow::InstauraPrimeiraJanela(){
     }
     carregaInfo();
     ui->Watching->setStyleSheet("background: red;");
-//    qDebug() << organiza->retornaEpisodiosDisponiveis();
     jtorrent.getOrganizador(organiza);
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
-//    RestauraJanela();
 }
 
 void MainWindow::BotaoWatching(){
+    delete leitorA;
+
     ui->OrdemAnime->setCurrentIndex(0);
-//    leitorA->OrdenaVetor();
+
     ui->label->setText("Carregando!");
     lista = "watching";
+
     ui->Watching->setStyleSheet("background: red;");
     ui->Dropped->setStyleSheet("background: white;");
     ui->Completed->setStyleSheet("background: white;");
     ui->PlanToWatch->setStyleSheet("background: white;");
     ui->OnHold->setStyleSheet("background: white;");
-    leitorA = leitorWatching;
-    leitorA->leLinha(lista);
-//    qDebug() << leitorA->retornaTamanhoLista();
-    qdownload = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
-//    qDebug() << qdownload->
+
+    leitorA = new leitorarquivos;
+    leitorA->leLinha("watching");
+    leitorA->OrdenaVetor(ordemVetorWatching);
     tamanhoLista = leitorA->retornaTamanhoLista();
-//    qDebug() << anime0;
-//    qDebug() << leitorA->retornaNome(anime0);
-    if(idAnime >= tamanhoLista){
-        idAnime = tamanhoLista - 16;
+
+    if(tamanhoListaWatching != tamanhoLista){
+        downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
+        qdown = new QDownloader[leitorA->retornaTamanhoLista()];
+        tamanhoLista = tamanhoLista;
     }
+
+
+    if(idAnime >= tamanhoLista){
+        idAnime = tamanhoLista - 28;
+    }
+
     anime0 = 0;
     idAnime = 0;
     pagina = 1;
@@ -216,26 +250,36 @@ void MainWindow::BotaoWatching(){
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
+
     RestauraJanela();
 }
 
 void MainWindow::BotaoCompleted(){
+    delete leitorA;
+
     ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "completed";
+
     ui->Completed->setStyleSheet("background: red;");
     ui->Dropped->setStyleSheet("background: white;");
     ui->PlanToWatch->setStyleSheet("background: white;");
     ui->OnHold->setStyleSheet("background: white;");
     ui->Watching->setStyleSheet("background: white;");
-    leitorA = leitorCompleted;
+
+    leitorA = new leitorarquivos;
     leitorA->leLinha(lista);
-    qdownload = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandeCompleted = new QDownloader[leitorA->retornaTamanhoLista()];
     tamanhoLista = leitorA->retornaTamanhoLista();
-    imagemBig();
+
+    if(tamanhoListaCompleted != tamanhoLista){
+        qdownload = new QDownloader[leitorA->retornaTamanhoLista()];
+        downImagemGrandeCompleted = new QDownloader[leitorA->retornaTamanhoLista()];
+        tamanhoListaCompleted = tamanhoLista;
+    }
+
+
     if(idAnime >= tamanhoLista){
-        idAnime = tamanhoLista - 16;
+        idAnime = tamanhoLista - 28;
     }
     anime0 = 0;
     idAnime = 0;
@@ -247,24 +291,32 @@ void MainWindow::BotaoCompleted(){
     RestauraJanela();
 }
 
-
 void MainWindow::BotaoOnHold(){
+    delete leitorA;
+
     ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
+
     lista = "onhold";
+
     ui->OnHold->setStyleSheet("background: red;");
     ui->Dropped->setStyleSheet("background: white;");
     ui->Completed->setStyleSheet("background: white;");
     ui->PlanToWatch->setStyleSheet("background: white;");
     ui->Watching->setStyleSheet("background: white;");
-    leitorA = leitorOnHold;
+
+    leitorA = new leitorarquivos;
     leitorA->leLinha(lista);
-    baixaOnHold = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandeOnHold= new QDownloader[leitorA->retornaTamanhoLista()];
-    imagemBig();
     tamanhoLista = leitorA->retornaTamanhoLista();
+
+    if(tamanhoListaOnHold != tamanhoLista){
+        baixaOnHold = new QDownloader[leitorA->retornaTamanhoLista()];
+        downImagemGrandeOnHold= new QDownloader[leitorA->retornaTamanhoLista()];
+        tamanhoListaOnHold = tamanhoLista;
+    }
+
     if(idAnime >= tamanhoLista){
-        idAnime = tamanhoLista - 16;
+        idAnime = tamanhoLista - 28;
     }
     anime0 = 0;
     idAnime = 0;
@@ -276,79 +328,109 @@ void MainWindow::BotaoOnHold(){
     RestauraJanela();
 }
 void MainWindow::BotaoDropped(){
+    delete leitorA;
+
     ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
     lista = "dropped";
+
     ui->Dropped->setStyleSheet("background: red;");
     ui->Completed->setStyleSheet("background: white;");
     ui->PlanToWatch->setStyleSheet("background: white;");
     ui->OnHold->setStyleSheet("background: white;");
     ui->Watching->setStyleSheet("background: white;");
-    leitorA = leitorDropped;
+
+    leitorA = new leitorarquivos;
     leitorA->leLinha(lista);
-    baixaDropped = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandeDropped= new QDownloader[leitorA->retornaTamanhoLista()];
-    imagemBig();
     tamanhoLista = leitorA->retornaTamanhoLista();
+
+    if(tamanhoListaDropped != tamanhoLista){
+        baixaDropped = new QDownloader[leitorA->retornaTamanhoLista()];
+        downImagemGrandeDropped= new QDownloader[leitorA->retornaTamanhoLista()];
+        tamanhoListaDropped = tamanhoLista;
+    }
+
+
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 16;
     }
+
     anime0 = 0;
     idAnime = 0;
     pagina = 1;
+
     vetorAnimes.clear();
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
+
     RestauraJanela();
 }
 void MainWindow::BotaoPlanToWatch(){
+    delete leitorA;
+
     ui->OrdemAnime->setCurrentIndex(0);
     ui->label->setText("Carregando!");
+
     lista = "plantowatch";
+
     ui->PlanToWatch->setStyleSheet("background: red;");
     ui->Dropped->setStyleSheet("background: white;");
     ui->Completed->setStyleSheet("background: white;");
     ui->OnHold->setStyleSheet("background: white;");
     ui->Watching->setStyleSheet("background: white;");
-    leitorA = leitorPlanToWatch;
+
+    leitorA = new leitorarquivos;
     leitorA->leLinha(lista);
-    baixaPlanToWatch = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandePlanToWatch= new QDownloader[leitorA->retornaTamanhoLista()];
-    imagemBig();
     tamanhoLista = leitorA->retornaTamanhoLista();
+
+    if(tamanhoListaPlanToWatch != tamanhoLista){
+        baixaPlanToWatch = new QDownloader[leitorA->retornaTamanhoLista()];
+        downImagemGrandePlanToWatch= new QDownloader[leitorA->retornaTamanhoLista()];
+        tamanhoListaPlanToWatch = tamanhoLista;
+    }
+
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 16;
     }
+
     anime0 = 0;
     idAnime = 0;
     pagina = 1;
     vetorAnimes.clear();
+
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
+
     RestauraJanela();
 }
 
 void MainWindow::BotaoBusca(){
+    delete leitorA;
+
     bool achou = false;
     int numEncontros;
     if(ui->StringBusca->toPlainText() != ""){
         ui->OrdemAnime->setCurrentIndex(0);
         ui->label->setText("Buscando " + ui->StringBusca->toPlainText());
         lista = "busca";
+
         ui->PlanToWatch->setStyleSheet("background: white;");
         ui->Dropped->setStyleSheet("background: white;");
         ui->Completed->setStyleSheet("background: white;");
         ui->OnHold->setStyleSheet("background: white;");
         ui->Watching->setStyleSheet("background: white;");
+
         leitorA = new leitorarquivos;
         numEncontros = leitorA->busca(ui->StringBusca->toPlainText());
+
         if(numEncontros != 0){
+            tamanhoLista = leitorA->retornaTamanhoLista();
+
             baixaBusca = new QDownloader[leitorA->retornaTamanhoLista()];
             downImagemGrandeBusca = new QDownloader[leitorA->retornaTamanhoLista()];
             imagemBig();
-            tamanhoLista = leitorA->retornaTamanhoLista();
             if(idAnime >= tamanhoLista){
                 idAnime = tamanhoLista - 28;
             }
@@ -374,14 +456,60 @@ void MainWindow::BotaoBusca(){
 
 void MainWindow::OrdenaVetor(){
     if(ui->OrdemAnime->currentIndex() != 0){
-        if(lista == "watching")
+        if(lista == "watching"){
             configuracoes->setOrdem(ui->OrdemAnime->currentText());
+            ordemVetorWatching = ui->OrdemAnime->currentText();
+        }
+        else if(lista == "completed")
+            ordemVetorCompleted = ui->OrdemAnime->currentText();
+        else if(lista == "dropped")
+            ordemVetorDropped = ui->OrdemAnime->currentText();
+        else if(lista == "onhold")
+            ordemVetorPaused = ui->OrdemAnime->currentText();
+        else if(lista == "plantowatch")
+            ordemVetorPlantoWatch = ui->OrdemAnime->currentText();
         leitorA->OrdenaVetor(ui->OrdemAnime->currentText());
         carregaInfo();
     }
 }
 
+void MainWindow::mandaRefresh(){
+    runArquivo->botaoRefresh();
+}
+
+void MainWindow::refreshArquivo(){
+    //O download de imagens só acontece caso a lista tenha novos animes
+    //e isso vai garantir que a função vai rodar toda vez que der refresh
+    tamanhoListaWatching = 0;
+    tamanhoListaOnHold = 0;
+    tamanhoListaDropped = 0;
+    tamanhoListaCompleted = 0;
+    tamanhoListaPlanToWatch = 0;
+    QString currentList = lista;
+    BotaoWatching();
+    BotaoCompleted();
+    BotaoOnHold();
+    BotaoDropped();
+    BotaoPlanToWatch();
+    if(currentList == "watching"){
+        BotaoWatching();
+    }
+    else if(currentList == "completed"){
+        BotaoCompleted();
+    }
+    else if(currentList == "onhold"){
+        BotaoOnHold();
+    }
+    else if(currentList == "dropped"){
+        BotaoDropped();
+    }
+    else if(currentList == "plantowatch"){
+        BotaoPlanToWatch();
+    }
+}
+
 void MainWindow::RestauraJanela(){
+    imagemBig();
     baixaImagens(lista);
     carregaInfo();
 }
@@ -493,6 +621,7 @@ void MainWindow::imagemBig(){
         }
     }
 }
+
 void MainWindow::ConfiguraArquivos(){
     ui->label->setText("Buscando animes");
     leitorconf = leitorWatching;
@@ -524,12 +653,49 @@ void MainWindow::ConfiguraArquivos(){
     leitorconf = leitorWatching;
     leitorconf->leLinha("watching");
     ui->label->setText("Animes baixados encontrados!");
+    delete leitorconf;
 }
 
 void MainWindow::Configurar(){
+    ui->Watching->blockSignals(true);
+    ui->Completed->blockSignals(true);
+    ui->Dropped->blockSignals(true);
+    ui->OnHold->blockSignals(true);
+    ui->PlanToWatch->blockSignals(true);
+    ui->Refresh->blockSignals(true);
+    ui->MudarListaBotao->blockSignals(true);
+    ui->MudarLista->blockSignals(true);
+    ui->OrdemAnime->blockSignals(true);
+    ui->Busca->blockSignals(true);
+    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
     ui->janela->setCurrentIndex(1);
 }
 void MainWindow::Torrent(){
+    ui->Watching->blockSignals(true);
+    ui->Completed->blockSignals(true);
+    ui->Dropped->blockSignals(true);
+    ui->OnHold->blockSignals(true);
+    ui->PlanToWatch->blockSignals(true);
+    ui->Refresh->blockSignals(true);
+    ui->MudarListaBotao->blockSignals(true);
+    ui->MudarLista->blockSignals(true);
+    ui->OrdemAnime->blockSignals(true);
+    ui->Busca->blockSignals(true);
+    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
     ui->janela->setCurrentIndex(2);
 }
 
@@ -1314,4 +1480,39 @@ void MainWindow::on_ProgressoMenos_clicked()
         ui->ProxEpi->setText(QString::number(progressoQuebrado.at(0).toInt()-1) + "/" + progressoQuebrado.at(1));
         ui->Progresso_2->setText(ui->ProxEpi->text());
     }
+}
+
+void MainWindow::on_Lista_clicked()
+{
+    ui->Watching->blockSignals(false);
+    ui->Completed->blockSignals(false);
+    ui->Dropped->blockSignals(false);
+    ui->OnHold->blockSignals(false);
+    ui->PlanToWatch->blockSignals(false);
+    ui->Refresh->blockSignals(false);
+    ui->MudarListaBotao->blockSignals(false);
+    ui->MudarLista->blockSignals(false);
+    ui->OrdemAnime->blockSignals(false);
+    ui->Busca->blockSignals(false);
+
+    ui->Watching->setStyleSheet("background: white;");
+    ui->Completed->setStyleSheet("background: white;");
+    ui->Dropped->setStyleSheet("background: white;");
+    ui->OnHold->setStyleSheet("background: white;");
+    ui->PlanToWatch->setStyleSheet("background: white;");
+    ui->Refresh->setStyleSheet("background: white;");
+    ui->MudarListaBotao->setStyleSheet("background: white;");
+    ui->Busca->setStyleSheet("background: white;");
+
+    if(lista == "watching")
+        ui->Watching->setStyleSheet("background: red;");
+    else if(lista == "completed")
+        ui->Completed->setStyleSheet("background: red;");
+    else if(lista == "onhold")
+        ui->OnHold->setStyleSheet("background: red;");
+    else if(lista == "dropped")
+        ui->Dropped->setStyleSheet("background: red;");
+    else if(lista == "plantowatch")
+        ui->PlanToWatch->setStyleSheet("background: red;");
+    ui->janela->setCurrentIndex(0);
 }

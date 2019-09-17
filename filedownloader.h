@@ -36,6 +36,7 @@ private:
 
 signals:
     void terminouDownload();
+    void filexists();
 public slots:
     void run();
 
