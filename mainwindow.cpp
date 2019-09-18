@@ -12,10 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
 //    int width = screenGeometry.width();
 //    qDebug() << height << " - " << width;
 
-    tamanhoListaOnHold = 0;
-    tamanhoListaDropped = 0;
-    tamanhoListaCompleted = 0;
-    tamanhoListaPlanToWatch = 0;
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -23,11 +19,6 @@ MainWindow::MainWindow(QWidget *parent) :
     primeiraLeitura = false;
 
     lista = "watching";
-    leitorWatching = new leitorarquivos;//Tentar tirar esse bando de coisa
-    leitorCompleted = new leitorarquivos;
-    leitorOnHold = new leitorarquivos;
-    leitorDropped = new leitorarquivos;
-    leitorPlanToWatch = new leitorarquivos;
     leitorA = new leitorarquivos;
     configuracoes = new configPC();
     configuracoes->recebeJConfig(&jConfig);
@@ -56,11 +47,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
-//    InstauraPrimeiraJanela();
-//    LiberaBotaoOnHold();
-//    LiberaBotaoDropped();
-//    LiberaBotaoCompleted();
-//    LiberaBotaoPlanToWatch();
 //    ui->janela->addWidget(&jtorrent);
 //    ui->janela768->addWidget(&main768);
 //    if(height == 1080){
@@ -80,7 +66,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    cThread.quit();
     delete ui;
 //    configuracoes->EscreveConfig();
 //    delete leitorWatching;
@@ -199,22 +184,21 @@ void MainWindow::InstauraPrimeiraJanela(){
     ordemVetorWatching = configuracoes->getOrdem();
     leitorA->OrdenaVetor(ordemVetorWatching);
 
-    qdown = new QDownloader[leitorA->retornaTamanhoLista()];
-    downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
-
     organiza = new Organizador(configuracoes);
-//    lista = "watching";
-//    QFuture<void> future = QtConcurrent::run(this, &MainWindow::baixaImagens, lista);
-    baixaImagens();
-    imagemBig();
 
     QFuture<void> future = QtConcurrent::run(this, &MainWindow::ConfiguraArquivos);
     tamanhoLista = leitorA->retornaTamanhoLista();
-    tamanhoListaWatching = tamanhoLista;
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
 
+
+    ///IMPLEMENTAR ISSO
+//    if(jConfig.returnImagensPequenas == true)
+//        baixaImagensPequenas();
+//    else
+        baixaImagens();
+    baixaImagensGrandes();
 
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
@@ -231,7 +215,6 @@ void MainWindow::BotaoWatching(){
 
     ui->OrdemAnime->setCurrentIndex(0);
 
-    ui->label->setText("Carregando!");
     lista = "watching";
 
     ui->Watching->setStyleSheet("background: red;");
@@ -245,13 +228,6 @@ void MainWindow::BotaoWatching(){
     leitorA->OrdenaVetor(ordemVetorWatching);
     tamanhoLista = leitorA->retornaTamanhoLista();
 
-    if(tamanhoListaWatching != tamanhoLista){
-        downImagemGrandeWatching = new QDownloader[leitorA->retornaTamanhoLista()];
-        qdown = new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoListaWatching = tamanhoLista;
-    }
-
-
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
@@ -264,14 +240,13 @@ void MainWindow::BotaoWatching(){
         vetorAnimes.append(w);
     }
 
-    RestauraJanela();
+    carregaInfo();
 }
 
 void MainWindow::BotaoCompleted(){
     delete leitorA;
 
     ui->OrdemAnime->setCurrentIndex(0);
-    ui->label->setText("Carregando!");
     lista = "completed";
 
     ui->Completed->setStyleSheet("background: red;");
@@ -284,13 +259,6 @@ void MainWindow::BotaoCompleted(){
     leitorA->leLinha(lista);
     tamanhoLista = leitorA->retornaTamanhoLista();
 
-    if(tamanhoListaCompleted != tamanhoLista){
-        qdownload = new QDownloader[leitorA->retornaTamanhoLista()];
-        downImagemGrandeCompleted = new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoListaCompleted = tamanhoLista;
-    }
-
-
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
@@ -301,14 +269,13 @@ void MainWindow::BotaoCompleted(){
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
-    RestauraJanela();
+    carregaInfo();
 }
 
 void MainWindow::BotaoOnHold(){
     delete leitorA;
 
     ui->OrdemAnime->setCurrentIndex(0);
-    ui->label->setText("Carregando!");
 
     lista = "onhold";
 
@@ -322,12 +289,6 @@ void MainWindow::BotaoOnHold(){
     leitorA->leLinha(lista);
     tamanhoLista = leitorA->retornaTamanhoLista();
 
-    if(tamanhoListaOnHold != tamanhoLista){
-        baixaOnHold = new QDownloader[leitorA->retornaTamanhoLista()];
-        downImagemGrandeOnHold= new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoListaOnHold = tamanhoLista;
-    }
-
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 28;
     }
@@ -338,13 +299,12 @@ void MainWindow::BotaoOnHold(){
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
-    RestauraJanela();
+    carregaInfo();
 }
 void MainWindow::BotaoDropped(){
     delete leitorA;
 
     ui->OrdemAnime->setCurrentIndex(0);
-    ui->label->setText("Carregando!");
     lista = "dropped";
 
     ui->Dropped->setStyleSheet("background: red;");
@@ -356,13 +316,6 @@ void MainWindow::BotaoDropped(){
     leitorA = new leitorarquivos;
     leitorA->leLinha(lista);
     tamanhoLista = leitorA->retornaTamanhoLista();
-
-    if(tamanhoListaDropped != tamanhoLista){
-        baixaDropped = new QDownloader[leitorA->retornaTamanhoLista()];
-        downImagemGrandeDropped= new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoListaDropped = tamanhoLista;
-    }
-
 
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 16;
@@ -377,13 +330,12 @@ void MainWindow::BotaoDropped(){
         vetorAnimes.append(w);
     }
 
-    RestauraJanela();
+    carregaInfo();
 }
 void MainWindow::BotaoPlanToWatch(){
     delete leitorA;
 
     ui->OrdemAnime->setCurrentIndex(0);
-    ui->label->setText("Carregando!");
 
     lista = "plantowatch";
 
@@ -397,12 +349,6 @@ void MainWindow::BotaoPlanToWatch(){
     leitorA->leLinha(lista);
     tamanhoLista = leitorA->retornaTamanhoLista();
 
-    if(tamanhoListaPlanToWatch != tamanhoLista){
-        baixaPlanToWatch = new QDownloader[leitorA->retornaTamanhoLista()];
-        downImagemGrandePlanToWatch= new QDownloader[leitorA->retornaTamanhoLista()];
-        tamanhoListaPlanToWatch = tamanhoLista;
-    }
-
     if(idAnime >= tamanhoLista){
         idAnime = tamanhoLista - 16;
     }
@@ -416,7 +362,7 @@ void MainWindow::BotaoPlanToWatch(){
         vetorAnimes.append(w);
     }
 
-    RestauraJanela();
+    carregaInfo();
 }
 
 void MainWindow::BotaoBusca(){
@@ -443,7 +389,6 @@ void MainWindow::BotaoBusca(){
 
             baixaBusca = new QDownloader[leitorA->retornaTamanhoLista()];
             downImagemGrandeBusca = new QDownloader[leitorA->retornaTamanhoLista()];
-            imagemBig();
             if(idAnime >= tamanhoLista){
                 idAnime = tamanhoLista - 28;
             }
@@ -465,12 +410,6 @@ void MainWindow::BotaoBusca(){
     }
     if(achou == false)
         ui->label->setText("Nenhum anime com essa palavra chave foi encontrado");
-}
-
-void MainWindow::RestauraJanela(){
-    imagemBig();
-//    baixaImagens();
-    carregaInfo();
 }
 
 void MainWindow::OrdenaVetor(){
@@ -499,17 +438,9 @@ void MainWindow::mandaRefresh(){
 void MainWindow::refreshArquivo(){
     //O download de imagens só acontece caso a lista tenha novos animes
     //e isso vai garantir que a função vai rodar toda vez que der refresh
-    tamanhoListaWatching = 0;
-    tamanhoListaOnHold = 0;
-    tamanhoListaDropped = 0;
-    tamanhoListaCompleted = 0;
-    tamanhoListaPlanToWatch = 0;
     QString currentList = lista;
-    BotaoWatching();
-    BotaoCompleted();
-    BotaoOnHold();
-    BotaoDropped();
-    BotaoPlanToWatch();
+    baixaImagens();
+    baixaImagensGrandes();
     if(currentList == "watching"){
         BotaoWatching();
     }
@@ -525,10 +456,6 @@ void MainWindow::refreshArquivo(){
     else if(currentList == "plantowatch"){
         BotaoPlanToWatch();
     }
-}
-
-void MainWindow::setSinopse(){
-    ui->sinopse->setText(leitorA->retornaSinopse(anime0));
 }
 
 void MainWindow::proximaPagina(){
@@ -577,95 +504,52 @@ void MainWindow::baixaImagens()
 {
     QDownloader *DownImagemListas = new QDownloader();
     DownImagemListas->setNext();
-//    DownImagemListas->IniciaThread(cThread);
-//    DownImagemListas->moveToThread(&cThread);
-//    cThread.start();
-//    if(lista == "watching"){
-//        DownImagemListas->setListaAnimes(leitorA);
-//        DownImagemListas->setNext();
-//    }
-//    else if(lista == "completed"){
-//        DownImagemListas->setListaAnimes(leitorA);
-//        DownImagemListas->setNext();
-//    }
-//    else if(lista == "onhold"){
-//        DownImagemListas->setListaAnimes(leitorA);
-//        DownImagemListas->setNext();
-//    }
-//    else if(lista == "dropped"){
-//        DownImagemListas->setListaAnimes(leitorA);
-//        DownImagemListas->setNext();
-//    }
-//    else if(lista == "plantowatch"){
-//        DownImagemListas->setListaAnimes(leitorA);
-//        DownImagemListas->setNext();
-//    }
+    connect(DownImagemListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
-void MainWindow::imagemBig(){
-    if(lista == "watching"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandeWatching[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
-    else if(lista == "completed"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandeCompleted[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
-    else if(lista == "onhold"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandeOnHold[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
-    else if(lista == "dropped"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandeDropped[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
-    else if(lista == "plantowatch"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandePlanToWatch[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
-    else if(lista == "busca"){
-        for(int i = 0; i < leitorA->retornaTamanhoLista();i++){
-            downImagemGrandeBusca[i].setFileBig(leitorA->retornaLink(i), leitorA->retornaId(i));
-        }
-    }
+void MainWindow::baixaImagensGrandes(){
+    QDownloader *DownImagemGrandeListas = new QDownloader();
+    DownImagemGrandeListas->setNextBig();
+}
+
+void MainWindow::baixaImagensPequenas(){
+    QDownloader *DownImagemPequenaListas = new QDownloader();
+    DownImagemPequenaListas->setNextSmall();
+}
+
+void MainWindow::mensagemFimDownload(QString mensagem){
+    if(mensagem == "all")
+        ui->label->setText("Todas as imagens foram carregadas");
+    else
+        ui->label->setText("As imagens da lista " + mensagem + " foram carregadas.");
 }
 
 void MainWindow::ConfiguraArquivos(){
     ui->label->setText("Buscando animes");
-    leitorconf = leitorWatching;
+    leitorarquivos *leitorconf = new leitorarquivos;
     leitorconf->leLinha("watching");
     for(int i = 0; i < leitorconf->retornaTamanhoLista(); i++){
         configuracoes->BuscaPastasAnimesEspecificos(leitorconf->retornaNome(i), leitorconf->retornaNomeIngles(i), leitorconf->retornaId(i));
     }
-    leitorconf = leitorOnHold;
     leitorconf->leLinha("onhold");
     for(int i = 0; i < leitorconf->retornaTamanhoLista(); i++){
         configuracoes->BuscaPastasAnimesEspecificos(leitorconf->retornaNome(i), leitorconf->retornaNomeIngles(i), leitorconf->retornaId(i));
     }
-    leitorconf = leitorDropped;
     leitorconf->leLinha("dropped");
     for(int i = 0; i < leitorconf->retornaTamanhoLista(); i++){
         configuracoes->BuscaPastasAnimesEspecificos(leitorconf->retornaNome(i), leitorconf->retornaNomeIngles(i), leitorconf->retornaId(i));
     }
-    leitorconf = leitorCompleted;
     leitorconf->leLinha("completed");
     for(int i = 0; i < leitorconf->retornaTamanhoLista(); i++){
         configuracoes->BuscaPastasAnimesEspecificos(leitorconf->retornaNome(i), leitorconf->retornaNomeIngles(i), leitorconf->retornaId(i));
     }
-    leitorconf = leitorPlanToWatch;
     leitorconf->leLinha("plantowatch");
     for(int i = 0; i < leitorconf->retornaTamanhoLista(); i++){
         configuracoes->BuscaPastasAnimesEspecificos(leitorconf->retornaNome(i), leitorconf->retornaNomeIngles(i), leitorconf->retornaId(i));
     }
     configuracoes->EscreveArquivo();
-    leitorconf = leitorWatching;
     leitorconf->leLinha("watching");
-    ui->label->setText("Animes baixados encontrados!");
+    ui->label->setText("Animes baixados encontrados! Checando imagens");
     delete leitorconf;
 }
 
@@ -716,173 +600,175 @@ void MainWindow::Configurar(){
 void MainWindow::carregaAnime1(){
     if(idAnime <= tamanhoLista){
         anime0 = idAnime;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime2(){
     if(idAnime+1 < tamanhoLista){
         anime0 = idAnime+1;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime3(){
     if(idAnime+2 < tamanhoLista){
         anime0 = idAnime+2;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime4(){
     if(idAnime+3 < tamanhoLista){
         anime0 = idAnime+3;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime5(){
     if(idAnime+4 < tamanhoLista){
         anime0 = idAnime+4;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime6(){
     if(idAnime+5 < tamanhoLista){
         anime0 = idAnime+5;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime7(){
     if(idAnime+6 < tamanhoLista){
         anime0 = idAnime+6;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime8(){
     if(idAnime+7 < tamanhoLista){
         anime0 = idAnime+7;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime9(){
     if(idAnime+8 < tamanhoLista){
         anime0 = idAnime+8;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime10(){
     if(idAnime+9 < tamanhoLista){
         anime0 = idAnime+9;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime11(){
     if(idAnime+10 < tamanhoLista){
         anime0 = idAnime+10;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime12(){
     if(idAnime+11 < tamanhoLista){
         anime0 = idAnime+11;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime13(){
     if(idAnime+12 < tamanhoLista){
         anime0 = idAnime+12;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime14(){
     if(idAnime+13 < tamanhoLista){
         anime0 = idAnime+13;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime15(){
     if(idAnime+14 < tamanhoLista){
         anime0 = idAnime+14;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime16(){
     if(idAnime+15 < tamanhoLista){
         anime0 = idAnime+15;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime17(){
     if(idAnime+16 < tamanhoLista){
         anime0 = idAnime+16;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime18(){
     if(idAnime+17 < tamanhoLista){
         anime0 = idAnime+17;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime19(){
     if(idAnime+18 < tamanhoLista){
         anime0 = idAnime+18;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime20(){
     if(idAnime+19 < tamanhoLista){
         anime0 = idAnime+19;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime21(){
     if(idAnime+20 < tamanhoLista){
         anime0 = idAnime+20;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime22(){
     if(idAnime+21 < tamanhoLista){
         anime0 = idAnime+21;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime23(){
     if(idAnime+22 < tamanhoLista){
         anime0 = idAnime+22;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime24(){
     if(idAnime+23 < tamanhoLista){
         anime0 = idAnime+23;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime25(){
     if(idAnime+24 < tamanhoLista){
         anime0 = idAnime+24;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime26(){
     if(idAnime+25 < tamanhoLista){
         anime0 = idAnime+25;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime27(){
     if(idAnime+26 < tamanhoLista){
         anime0 = idAnime+26;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 void MainWindow::carregaAnime28(){
     if(idAnime+27 < tamanhoLista){
         anime0 = idAnime+27;
-        RestauraJanela();
+        carregaInfo();
     }
 }
 
 void MainWindow::carregaInfo(){
+    cThread.requestInterruption();
+
     leitorA->retornaNumEpisodiosLancados(anime0);
     ui->NumPagina->setText("Página "+ QString::number(pagina) + "/" + QString::number(((tamanhoLista-1)/28)+1));
     ui->Nome->setWordWrap(true);
@@ -985,14 +871,6 @@ void MainWindow::carregaInfo(){
         ui->anime1_2->clear();
     }
     if(i+1 < tamanhoLista){
-//        if(configuracoes->RetornaDiretorioAnimeEspecifico(i+1) != "0"){
-//            pix.load(":/Imagens/C:/Users/Guto/Desktop/ballG.png");
-//            ui->DisponibilidadeAnime2->setPixmap(pix);
-//        }
-//        else {
-//            pix.load(":/Imagens/C:/Users/Guto/Desktop/ballR.png");
-//            ui->DisponibilidadeAnime2->setPixmap(pix);
-//        }
         ui->anime2->setScaledContents(true);
         ui->anime2_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime2_2->setText(leitorA->retornaNome(i));

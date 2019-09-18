@@ -9,12 +9,12 @@ Config::Config(QObject *parent) : QObject(parent)
     qAnimeId = false;
     qFinished = false;
     qStartDateOk = false;
-//    qPrimeiraEntrada = true;
-    breakLoop = false;
+    qPrimeiraEntrada = false;
 }
 
 Config::~Config(){
     delete pastas;
+    this->thread()->exit(0);
 }
 
 void Config::quebraloop(){
@@ -1249,40 +1249,42 @@ void Config::botaoRefresh(){
 
 void Config::run(){
     QDir diretorio;
-    while(true){
-        if(pastas->retornaUser().compare(user) == 0 && pastas->retornaUser() != ""){
-            ParseTaiga();
+    if(pastas->retornaUser().compare(user) == 0 && pastas->retornaUser() != ""){
+        ParseTaiga();
+        if(qPrimeiraEntrada == false){
             emit terminouSetArquivo();
-            while(true){
-                ParseCompleted();
-                emit terminouCompleted();
-                ParseOnHold();
-                emit terminouOnHold();
-                ParseDropped();
-                qWatching = false;
-                qAnimeId = false;
-                emit terminouDropped();
-                ParsePlanToWatch();
-                emit terminouPlanToWatch();
-                this->thread()->sleep(300);
-                ParseTaiga();
-                emit refresh();
-                if(breakLoop == true)
-                    break;
-            }
+            ParseCompleted();
+            emit terminouCompleted();
+            ParseOnHold();
+            emit terminouOnHold();
+            ParseDropped();
+            qWatching = false;
+            qAnimeId = false;
+            emit terminouDropped();
+            ParsePlanToWatch();
+            emit terminouPlanToWatch();
+            ParseTaiga();
+            qPrimeiraEntrada = true;
         }
-        else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){
-            diretorio.setPath(QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist");
-            if(diretorio.exists()){
-                user = pastas->retornaUser();
-                emit mensagemConfig("AUsr");
-            }
-            else{
-                emit mensagemConfig("EUsr");
-            }
-        }
-        if(breakLoop == true)
-            break;
+        ParseCompleted();
+        ParseOnHold();
+        ParseDropped();
+        qWatching = false;
+        qAnimeId = false;
+        ParsePlanToWatch();
+        ParseTaiga();
+        emit refresh();
     }
-    qDebug() << "olha, quebrou";
+    else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){
+        diretorio.setPath(QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist");
+        if(diretorio.exists()){
+            user = pastas->retornaUser();
+            emit mensagemConfig("AUsr");
+        }
+        else{
+            emit mensagemConfig("EUsr");
+        }
+    }
+    if(this->thread()->isInterruptionRequested())
+        this->thread()->exit(0);
 }

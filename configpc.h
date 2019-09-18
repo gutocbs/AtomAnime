@@ -39,6 +39,7 @@ public:
 
     QString diretorioImagensMedio;
     QString diretorioImagensGrandes;
+    QString diretorioImagensPequenas;
 
 
 

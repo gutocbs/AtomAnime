@@ -61,7 +61,6 @@ private:
     QString arquivoLer2;
 
     QString user;
-
     bool breakLoop;
 
 signals:

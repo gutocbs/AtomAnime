@@ -46,27 +46,11 @@ private:
     mainwindow1366768 main768;
 
     //Download de imagens
-    QDownloader *qdown;
-    QDownloader *qdownload;
-    QDownloader *baixaOnHold;
-    QDownloader *baixaDropped;
-    QDownloader *baixaPlanToWatch;
     QDownloader *baixaBusca;
-    QDownloader *downImagemGrandeWatching;
-    QDownloader *downImagemGrandeCompleted;
-    QDownloader *downImagemGrandeOnHold;
-    QDownloader *downImagemGrandeDropped;
-    QDownloader *downImagemGrandePlanToWatch;
     QDownloader *downImagemGrandeBusca;
 
     //Leitores
     leitorarquivos *leitorA;
-    leitorarquivos *leitorconf;
-    leitorarquivos *leitorCompleted;
-    leitorarquivos *leitorWatching;
-    leitorarquivos *leitorOnHold;
-    leitorarquivos *leitorDropped;
-    leitorarquivos *leitorPlanToWatch;
 
     infoanime *pasta;
     Organizador *organiza;
@@ -81,11 +65,6 @@ private:
     int numEpisodios;
     int pagina;
     int downl;
-    int tamanhoListaWatching;
-    int tamanhoListaCompleted;
-    int tamanhoListaDropped;
-    int tamanhoListaOnHold;
-    int tamanhoListaPlanToWatch;
 
     QString ordemVetorWatching, ordemVetorCompleted, ordemVetorDropped, ordemVetorPaused, ordemVetorPlantoWatch;
     QString lista;
@@ -111,10 +90,10 @@ public slots:
 
     //Downloads
     void baixaImagens();
-    void imagemBig();
+    void baixaImagensGrandes();
+    void baixaImagensPequenas();
 
     //Mexem com as janelas
-    void RestauraJanela();
     void OrdenaVetor();
 
     //Arquivos
@@ -122,7 +101,6 @@ public slots:
     void refreshArquivo();
 
     //Informações dos animes
-    void setSinopse();
     void carregaInfo();
 
     //Listas de animes
@@ -179,6 +157,8 @@ public slots:
     void setUser();
 
 
+    //Mensagens
+    void mensagemFimDownload(QString);
 private slots:
 //    void Torrent();
     void keyPressEvent(QKeyEvent * event);

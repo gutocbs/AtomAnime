@@ -4,7 +4,7 @@ configPC::configPC()
 {
 //    arquivo = new leitorarquivos;
     anitomy = new anitomy::Anitomy;
-//        diretorioImagensMedio = "Configurações/Imagens/Pequeno/";
+    diretorioImagensPequenas = "Configurações/Imagens/Pequeno/";
     diretorioImagensMedio = "Configurações/Imagens/Medio/";
     diretorioImagensGrandes = "Configurações/Imagens/Grande/";
 //    diretorioAnimes.append("E:/Animes");

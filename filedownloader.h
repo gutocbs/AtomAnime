@@ -20,13 +20,11 @@ class QDownloader : public QObject
 public:
     explicit QDownloader(QObject *parent = nullptr);
     virtual ~QDownloader();
-    void setFile(QString fileURL, QString);
     void setURL(QString);
     void setTorrent(QString, QString);
-    void setFileBig(QString fileURL, QString);
-//    void setFile(leitorarquivos *, int);
-    void setListaAnimes(leitorarquivos *leiArq);
     void downloadImagensLista(QString, QString);
+    void downloadImagensGrandesLista(QString, QString);
+    void downloadImagensPequenasLista(QString, QString);
 private:
     QNetworkAccessManager *manager;
     QNetworkReply *reply;
@@ -37,16 +35,19 @@ private:
     int indexLista;
     bool fileIsOpen;
     bool terminouLista;
+    int tamanhoLista;
     QString lista;
     QString listaAtual;
-    int tamanhoLista;
+    QString tamanho;
 
 signals:
     void terminouDownload();
     void filexists();
-
+    void listaMensagem(QString);
 public slots:
     void setNext();
+    void setNextBig();
+    void setNextSmall();
 private slots:
     void onDownloadProgress(qint64,qint64);
     void onFinished(QNetworkReply*);

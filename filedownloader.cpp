@@ -21,18 +21,13 @@ QDownloader::~QDownloader()
     delete leiArq;
 }
 
-void QDownloader::setListaAnimes(leitorarquivos *leiArq){
-//    this->leiArq = leiArq;
-    indexLista = -1;
-}
-
-void QDownloader::downloadImagensLista(QString fileURL, QString w){
+void QDownloader::downloadImagensLista(QString fileURL, QString id){
     QString filePath = fileURL;
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
 //    fileURL.replace("medium", "small");
     QString arquivo = configura->diretorioImagensMedio;
-    arquivo.append(w);
+    arquivo.append(id);
     arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
     saveFilePath = arquivo;
@@ -61,7 +56,77 @@ void QDownloader::downloadImagensLista(QString fileURL, QString w){
         setNext();
     }
 }
+void QDownloader::downloadImagensGrandesLista(QString fileURL, QString id){
+    QString filePath = fileURL;
+    QString saveFilePath;
+    QStringList filePathList = filePath.split('/');
+    fileURL.replace("medium", "large");
+    QString arquivo = configura->diretorioImagensGrandes;
+    arquivo.append(id);
+    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
+    saveFilePath = arquivo;
+
+    if(QFile(saveFilePath).size() == 0)
+        QFile(saveFilePath).remove();
+
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(fileURL));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(setNextBig()));
+        fileIsOpen = true;
+    }
+    else{
+        fileIsOpen = false;
+        setNextBig();
+    }
+}
+
+void QDownloader::downloadImagensPequenasLista(QString fileURL, QString id){
+    QString filePath = fileURL;
+    QString saveFilePath;
+    QStringList filePathList = filePath.split('/');
+    fileURL.replace("medium", "small");
+    QString arquivo = configura->diretorioImagensPequenas;
+    arquivo.append(id);
+    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+
+    saveFilePath = arquivo;
+
+    if(QFile(saveFilePath).size() == 0)
+        QFile(saveFilePath).remove();
+
+    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+
+    if(!fileExists){
+        QNetworkRequest request;
+        request.setUrl(QUrl(fileURL));
+        reply = manager->get(request);
+
+        file = new QFile;
+        file->setFileName(saveFilePath);
+        file->open(QIODevice::WriteOnly);
+
+        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(reply,SIGNAL(finished()),this,SLOT(setNextSmall()));
+        fileIsOpen = true;
+    }
+    else{
+        fileIsOpen = false;
+        setNextSmall();
+    }
+}
 void QDownloader::setURL(QString url){
     QString saveFilePath = "Configurações/rss.xml";
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
@@ -83,43 +148,6 @@ void QDownloader::setURL(QString url){
     }
 }
 
-void QDownloader::setFile(QString fileURL, QString w)
-{
-    QString filePath = fileURL;
-    QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
-        //QString fileName = filePathList.at(filePathList.count() - 1);
-//    fileURL.replace("medium", "small");
-    QString arquivo = configura->diretorioImagensMedio;
-    arquivo.append(w);
-    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));//lastIndexOf(QChar('/'))+1)
-//    right(fileURL.lastIndexOf(QChar('.')))
-
-    saveFilePath = arquivo;
-    if(QFile(saveFilePath).size() == 0)
-        QFile(saveFilePath).remove();
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(fileURL));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-
-//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
-    }
-    else{
-        emit filexists();
-    }
-}
-
 void QDownloader::setTorrent(QString url, QString nome){
     QString saveFilePath = "Configurações/Temp/Torrents/" + nome + ".torrent";
     QFile::remove(saveFilePath);
@@ -127,38 +155,6 @@ void QDownloader::setTorrent(QString url, QString nome){
     if(!fileExists){
         QNetworkRequest request;
         request.setUrl(QUrl(url));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-
-//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
-    }
-}
-
-void QDownloader::setFileBig(QString fileURL, QString w)
-{
-    QString filePath = fileURL;
-    QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
-        //QString fileName = filePathList.at(filePathList.count() - 1);
-    fileURL.replace("medium", "large");
-    QString arquivo = configura->diretorioImagensGrandes;
-    arquivo.append(w);
-    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));//lastIndexOf(QChar('/'))+1)
-//    right(fileURL.lastIndexOf(QChar('.')))
-
-    saveFilePath = arquivo;
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(fileURL));
         reply = manager->get(request);
 
         file = new QFile;
@@ -265,33 +261,208 @@ void QDownloader::setNext()
     indexLista++;
     if(terminouLista == false){
         if(indexLista < tamanhoLista){
-            qDebug() << leiArq->retornaNome(indexLista);
             downloadImagensLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
         }
         else{
             if(listaAtual == "watching"){
+                delete leiArq;
                 lista = "1";
-                qDebug() << endl << "Completed: ";
+                emit listaMensagem("Watching");
             }
             else if(listaAtual == "completed"){
+                delete leiArq;
                 lista = "2";
-                qDebug() << endl << "On Hold: ";
+                emit listaMensagem("Completed");
             }
             else if(listaAtual == "onhold"){
+                delete leiArq;
                 lista = "3";
-                qDebug() << endl << "Dropped: ";
+                emit listaMensagem("On Hold");
             }
             else if(listaAtual == "dropped"){
+                delete leiArq;
                 lista = "4";
-                qDebug() << endl << "Plan to Watch: ";
+                emit listaMensagem("Dropped");
             }
-            else if(listaAtual == "plantowatch")
+            else if(listaAtual == "plantowatch"){
+                delete leiArq;
                 terminouLista = true;
+                emit listaMensagem("Plan to Watch");
+            }
             setNext();
         }
     }
     else{
-        emit terminouDownload();
+        emit listaMensagem("all");
     }
 }
 
+void QDownloader::setNextBig()
+{
+    if(fileIsOpen == true){
+        if(file->isOpen())
+        {
+            file->close();
+            file->deleteLater();
+        }
+    }
+    if(lista == "0"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("watching");
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        listaAtual = "watching";
+        indexLista = -1;
+    }
+    else if(lista == "1"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("completed");
+        listaAtual = "completed";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "2"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("onhold");
+        listaAtual = "onhold";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "3"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("dropped");
+        listaAtual = "dropped";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "4"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("plantowatch");
+        listaAtual = "plantowatch";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+//        tamanhoLista = 709;
+        indexLista = -1;
+    }
+    lista = "9";
+    indexLista++;
+    if(terminouLista == false){
+        if(indexLista < tamanhoLista){
+            downloadImagensGrandesLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
+        }
+        else{
+            if(listaAtual == "watching"){
+                delete leiArq;
+                lista = "1";
+                emit listaMensagem("Watching");
+            }
+            else if(listaAtual == "completed"){
+                delete leiArq;
+                lista = "2";
+                emit listaMensagem("Completed");
+            }
+            else if(listaAtual == "onhold"){
+                delete leiArq;
+                lista = "3";
+                emit listaMensagem("On Hold");
+            }
+            else if(listaAtual == "dropped"){
+                delete leiArq;
+                lista = "4";
+                emit listaMensagem("Dropped");
+            }
+            else if(listaAtual == "plantowatch"){
+                delete leiArq;
+                terminouLista = true;
+                emit listaMensagem("Plan to Watch");
+            }
+            setNextBig();
+        }
+    }
+    else{
+        emit listaMensagem("big");
+    }
+}
+
+void QDownloader::setNextSmall()
+{
+    if(fileIsOpen == true){
+        if(file->isOpen())
+        {
+            file->close();
+            file->deleteLater();
+        }
+    }
+    if(lista == "0"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("watching");
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        listaAtual = "watching";
+        indexLista = -1;
+    }
+    else if(lista == "1"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("completed");
+        listaAtual = "completed";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "2"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("onhold");
+        listaAtual = "onhold";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "3"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("dropped");
+        listaAtual = "dropped";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+        indexLista = -1;
+    }
+    else if(lista == "4"){
+        leiArq = new leitorarquivos;
+        leiArq->leLinha("plantowatch");
+        listaAtual = "plantowatch";
+        tamanhoLista = leiArq->retornaTamanhoLista();
+//        tamanhoLista = 709;
+        indexLista = -1;
+    }
+    lista = "9";
+    indexLista++;
+    if(terminouLista == false){
+        if(indexLista < tamanhoLista){
+            downloadImagensPequenasLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
+        }
+        else{
+            if(listaAtual == "watching"){
+                delete leiArq;
+                lista = "1";
+                emit listaMensagem("Watching");
+            }
+            else if(listaAtual == "completed"){
+                delete leiArq;
+                lista = "2";
+                emit listaMensagem("Completed");
+            }
+            else if(listaAtual == "onhold"){
+                delete leiArq;
+                lista = "3";
+                emit listaMensagem("On Hold");
+            }
+            else if(listaAtual == "dropped"){
+                delete leiArq;
+                lista = "4";
+                emit listaMensagem("Dropped");
+            }
+            else if(listaAtual == "plantowatch"){
+                delete leiArq;
+                terminouLista = true;
+                emit listaMensagem("Plan to Watch");
+            }
+            setNextSmall();
+        }
+    }
+    else{
+        emit listaMensagem("all");
+    }
+}
