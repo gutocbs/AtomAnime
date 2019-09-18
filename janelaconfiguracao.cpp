@@ -19,12 +19,6 @@ JanelaConfiguracao::~JanelaConfiguracao()
     delete ui;
 }
 
-void JanelaConfiguracao::on_BotaoCancelar_clicked()
-{
-    emit cancelado();
-}
-
-
 void JanelaConfiguracao::setDiretoriosAnimes(){
     diretorioAnime.append("E:/Animes");
     diretorioAnime.append(QDir::homePath() + "/Downloads/Animes");
@@ -305,6 +299,18 @@ int JanelaConfiguracao::returnTempoDownload(){
     return ui->torrentTempo->toPlainText().toInt();
 }
 
+int JanelaConfiguracao::returnImagemBaixaQualidade(){
+    if(ui->qbImagemSim->isChecked() == true){
+        emit bDownload(0);
+        return 0;//Mudar isso pra um bool
+    }
+    else if(ui->qbImagemNao->isChecked() == true){
+        emit bDownload(1);
+        return 1;
+    }
+    return 1;
+}
+
 
 int JanelaConfiguracao::returnDownloadAutomatico(){
     if(ui->TorrentAutomaticoSim->isChecked() == true){
@@ -447,9 +453,16 @@ void JanelaConfiguracao::leArquivoConf(){
                for(int i = 0; i < ui->TorrentPadrao->count(); i++){
                    if(ui->TorrentPadrao->currentText() == torrent){
                        ui->TorrentPadrao->setCurrentIndex(i);
+
                        break;
                    }
                }
+           }
+           else if(linha.at(0).compare("imagemBaixaQualidade") == 0){
+               if(linha.at(1).toInt() == 0)
+                   ui->qbImagemSim->setChecked(true);
+               else
+                   ui->qbImagemNao->setChecked(true);
            }
        }
        inputFile.close();
@@ -481,4 +494,5 @@ void JanelaConfiguracao::on_BotaoSalvar_clicked()
     returnFansub();
     returnQualidade();
     returnTorrentPadrao();
+    returnImagemBaixaQualidade();
 }

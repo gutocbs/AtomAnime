@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pagina = 1;
     downl = 0;
     primeiraLeitura = false;
+    baixaQualidade = false;
 
     lista = "watching";
     leitorA = new leitorarquivos;
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
-//    ui->janela->addWidget(&jtorrent);
+    ui->janela->addWidget(&jtorrent);
 //    ui->janela768->addWidget(&main768);
 //    if(height == 1080){
 //        ui->janela768->hide();
@@ -52,43 +53,32 @@ MainWindow::MainWindow(QWidget *parent) :
 //        ui->janela768->setCurrentIndex(1);
 //    }
 
-//    jtorrent.getLeitorArquivos(leitorA);
+    jtorrent.getLeitorArquivos(leitorA);
+    jtorrent.getJConfig(&jConfig);
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
     ui->nomeUsuario->setText(configuracoes->retornaUser());
     Botoes();
+
+    QTimer::singleShot(600000, this, SLOT(mandaRefresh()));
 }
 
 MainWindow::~MainWindow()
 {
+    configuracoes->EscreveConfig();
+
+    delete leitorA;
+    delete configuracoes;
+    delete organiza;
+    delete pasta;
+
+    delete baixaBusca;
+
+    delete downImagemGrandeBusca;
+
+    delete runArquivo;
     delete ui;
-//    configuracoes->EscreveConfig();
-//    delete leitorWatching;
-//    delete leitorCompleted;
-//    delete leitorOnHold;
-//    delete leitorDropped;
-//    delete leitorPlanToWatch;
-//    delete leitorA;
-//    delete configuracoes;
-//    delete organiza;
-//    delete pasta;
-
-//    delete qdown;
-//    delete qdownload;
-//    delete baixaOnHold;
-//    delete baixaDropped;
-//    delete baixaPlanToWatch;
-//    delete baixaBusca;
-
-//    delete downImagemGrandeWatching;
-//    delete downImagemGrandeCompleted;
-//    delete downImagemGrandeOnHold;
-//    delete downImagemGrandeDropped;
-//    delete downImagemGrandePlanToWatch;
-//    delete downImagemGrandeBusca;
-
-//    delete runArquivo;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent * event){
@@ -143,6 +133,8 @@ void MainWindow::Botoes(){
     connect(ui->BotaoAnilist, SIGNAL(clicked()), this,SLOT(abreAnilist()));
 
     connect(&jConfig, SIGNAL(user()), this, SLOT(setUser()));
+    connect(&jConfig, SIGNAL(bDownload(int)), this, SLOT(mudouQualidade(int)));
+    connect(&jConfig, SIGNAL(tPadrao(QString)), &jtorrent, SLOT(mudaTorrentPadrao(QString)));
 }
 
 void MainWindow::setUser(){
@@ -187,20 +179,21 @@ void MainWindow::InstauraPrimeiraJanela(){
         idAnime = tamanhoLista - 28;
     }
 
-
-    ///IMPLEMENTAR ISSO
-//    if(jConfig.returnImagensPequenas == true)
-//        baixaImagensPequenas();
-//    else
-        baixaImagens();
-    baixaImagensGrandes();
+    baixaImagens();
+    if(jConfig.returnImagemBaixaQualidade() == 0){
+        baixaQualidade = true;
+        baixaImagensPequenas();
+    }
+    else{
+        baixaImagensGrandes();
+    }
 
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
 
     ui->Watching->setStyleSheet("background: red;");
-//    jtorrent.getOrganizador(organiza);
+    jtorrent.getOrganizador(organiza);
     carregaInfo();
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 }
@@ -427,6 +420,7 @@ void MainWindow::OrdenaVetor(){
 }
 
 void MainWindow::mandaRefresh(){
+    ui->label->setText("Atuaizando lista");
     runArquivo->botaoRefresh();
 }
 
@@ -434,7 +428,10 @@ void MainWindow::refreshArquivo(){
     //O download de imagens só acontece caso a lista tenha novos animes
     //e isso vai garantir que a função vai rodar toda vez que der refresh
     QString currentList = lista;
-    baixaImagens();
+    if(jConfig.returnImagemBaixaQualidade() == 0)
+        baixaImagensPequenas();
+    else
+        baixaImagens();
     baixaImagensGrandes();
     if(currentList == "watching"){
         BotaoWatching();
@@ -450,6 +447,18 @@ void MainWindow::refreshArquivo(){
     }
     else if(currentList == "plantowatch"){
         BotaoPlanToWatch();
+    }
+    QTimer::singleShot(600000, this, SLOT(mandaRefresh()));
+}
+
+void MainWindow::mudouQualidade(int Qualidade){
+    if(Qualidade == 0){
+        baixaImagensPequenas();
+        baixaQualidade = true;
+    }
+    else{
+        baixaImagens();
+        baixaQualidade = false;
     }
 }
 
@@ -491,7 +500,7 @@ void MainWindow::AbreEpisodio()
         else{
             ui->label->setText("Seu pc de bosta não tem o anime que você quer ver");
         }
-        QTimer::singleShot(240000, this, SLOT(RestauraJanela()));
+        QTimer::singleShot(240000, this, SLOT(mandaRefresh()));
     }
 }
 
@@ -570,27 +579,27 @@ void MainWindow::Configurar(){
     ui->janela->setCurrentIndex(1);
 }
 
-//void MainWindow::Torrent(){
-//    ui->Watching->blockSignals(true);
-//    ui->Completed->blockSignals(true);
-//    ui->Dropped->blockSignals(true);
-//    ui->OnHold->blockSignals(true);
-//    ui->PlanToWatch->blockSignals(true);
-//    ui->Refresh->blockSignals(true);
-//    ui->MudarListaBotao->blockSignals(true);
-//    ui->MudarLista->blockSignals(true);
-//    ui->OrdemAnime->blockSignals(true);
-//    ui->Busca->blockSignals(true);
-//    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
-//    ui->janela->setCurrentIndex(2);
-//}
+void MainWindow::Torrent(){
+    ui->Watching->blockSignals(true);
+    ui->Completed->blockSignals(true);
+    ui->Dropped->blockSignals(true);
+    ui->OnHold->blockSignals(true);
+    ui->PlanToWatch->blockSignals(true);
+    ui->Refresh->blockSignals(true);
+    ui->MudarListaBotao->blockSignals(true);
+    ui->MudarLista->blockSignals(true);
+    ui->OrdemAnime->blockSignals(true);
+    ui->Busca->blockSignals(true);
+    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->janela->setCurrentIndex(2);
+}
 
 void MainWindow::carregaAnime1(){
     if(idAnime <= tamanhoLista){
@@ -816,6 +825,7 @@ void MainWindow::carregaInfo(){
     else{
         ui->qEpiDisponivel->clear();//setText("Nenhum episódio disponível");
     }
+    //Le a string do próximo episódio e dá o display no label
     ui->ProxEpi->setText(QString::number(leitorA->retornaProgresso(anime0)) + "/" + leitorA->retornaNumEpi(anime0));
     ui->Progresso_2->setText(QString::number(leitorA->retornaProgresso(anime0)) + "/" + leitorA->retornaNumEpi(anime0));
     if(numEpisodios > 1){
@@ -831,15 +841,7 @@ void MainWindow::carregaInfo(){
     ui->Nota_2->setText(QString::number(leitorA->retornaScore(anime0)));
     int i = idAnime;
     if(i <= tamanhoLista && tamanhoLista > 0){
-        if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensGrandes), "jpg")){
-            ui->picBig->setScaledContents(true);
-            ui->picBig->setPixmap(pix);
-        }
-        else if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensGrandes), "png")){
-            ui->picBig->setScaledContents(true);
-            ui->picBig->setPixmap(pix);
-        }
-        else{
+        if(baixaQualidade == true){
             if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensMedio), "jpg")){
                 ui->picBig->setScaledContents(true);
                 ui->picBig->setPixmap(pix);
@@ -849,14 +851,46 @@ void MainWindow::carregaInfo(){
                 ui->picBig->setPixmap(pix);
             }
         }
+        else{
+            if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensGrandes), "jpg")){
+                ui->picBig->setScaledContents(true);
+                ui->picBig->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensGrandes), "png")){
+                ui->picBig->setScaledContents(true);
+                ui->picBig->setPixmap(pix);
+            }
+            else{
+                if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensMedio), "jpg")){
+                    ui->picBig->setScaledContents(true);
+                    ui->picBig->setPixmap(pix);
+                }
+                else if(pix.load(leitorA->imagem(anime0, configuracoes->diretorioImagensMedio), "png")){
+                    ui->picBig->setScaledContents(true);
+                    ui->picBig->setPixmap(pix);
+                }
+            }
+        }
         ui->anime1->setScaledContents(true);
         ui->anime1_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime1_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime1->setPixmap(pix);
+        ui->anime1_2->setAlignment(Qt::AlignCenter);
+        ui->anime1_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime1->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime1->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime1->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime1->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime1->setPixmap(pix);
+            }
         }
     }
     else{
@@ -869,11 +903,23 @@ void MainWindow::carregaInfo(){
         ui->anime2->setScaledContents(true);
         ui->anime2_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime2_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime2->setPixmap(pix);
+        ui->anime2_2->setAlignment(Qt::AlignCenter);
+        ui->anime2_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime2->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime2->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime2->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime2->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+1], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime2->setPixmap(pix);
+            }
         }
     }
     else{
@@ -886,11 +932,23 @@ void MainWindow::carregaInfo(){
         ui->anime3->setScaledContents(true);
         ui->anime3_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime3_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime3->setPixmap(pix);
+        ui->anime3_2->setAlignment(Qt::AlignCenter);
+        ui->anime3_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime3->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime3->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime3->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime3->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+2], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime3->setPixmap(pix);
+            }
         }
     }
     else{
@@ -902,12 +960,23 @@ void MainWindow::carregaInfo(){
     if(i+3 < tamanhoLista){
         ui->anime4->setScaledContents(true);
         ui->anime4_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime4_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime4->setPixmap(pix);
+        ui->anime4_2->setText(leitorA->retornaNome(i));        ui->anime1_2->setAlignment(Qt::AlignCenter);
+        ui->anime4_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime4->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime4->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime4->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime4->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime4->setPixmap(pix);
+            }
         }
     }
     else{
@@ -920,11 +989,23 @@ void MainWindow::carregaInfo(){
         ui->anime5->setScaledContents(true);
         ui->anime5_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime5_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime5->setPixmap(pix);
+        ui->anime5_2->setAlignment(Qt::AlignCenter);
+        ui->anime5_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime5->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime5->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime5->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime5->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+4], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime5->setPixmap(pix);
+            }
         }
     }
     else{
@@ -937,11 +1018,23 @@ void MainWindow::carregaInfo(){
         ui->anime6->setScaledContents(true);
         ui->anime6_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime6_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime6->setPixmap(pix);
+        ui->anime6_2->setAlignment(Qt::AlignCenter);
+        ui->anime6_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime6->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime6->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime6->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime6->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+5], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime6->setPixmap(pix);
+            }
         }
     }
     else{
@@ -954,11 +1047,23 @@ void MainWindow::carregaInfo(){
         ui->anime7->setScaledContents(true);
         ui->anime7_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime7_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime7->setPixmap(pix);
+        ui->anime7_2->setAlignment(Qt::AlignCenter);
+        ui->anime7_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime7->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime7->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime7->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime7->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+6], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime7->setPixmap(pix);
+            }
         }
     }
     else{
@@ -971,11 +1076,23 @@ void MainWindow::carregaInfo(){
         ui->anime8->setScaledContents(true);
         ui->anime8_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime8_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime8->setPixmap(pix);
+        ui->anime8_2->setAlignment(Qt::AlignCenter);
+        ui->anime8_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime8->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime8->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime8->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime8->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+7], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime8->setPixmap(pix);
+            }
         }
     }
     else{
@@ -988,11 +1105,23 @@ void MainWindow::carregaInfo(){
         ui->anime9->setScaledContents(true);
         ui->anime9_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime9_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime9->setPixmap(pix);
+        ui->anime9_2->setAlignment(Qt::AlignCenter);
+        ui->anime9_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime9->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime9->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime9->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime9->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+8], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime9->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1005,11 +1134,23 @@ void MainWindow::carregaInfo(){
         ui->anime10->setScaledContents(true);
         ui->anime10_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime10_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime10->setPixmap(pix);
+        ui->anime10_2->setAlignment(Qt::AlignCenter);
+        ui->anime10_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime10->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime10->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime10->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime10->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+9], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime10->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1022,11 +1163,23 @@ void MainWindow::carregaInfo(){
         ui->anime11->setScaledContents(true);
         ui->anime11_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime11_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime11->setPixmap(pix);
+        ui->anime11_2->setAlignment(Qt::AlignCenter);
+        ui->anime11_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime11->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime11->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime11->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime11->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+10], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime11->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1039,11 +1192,23 @@ void MainWindow::carregaInfo(){
         ui->anime12->setScaledContents(true);
         ui->anime12_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime12_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime12->setPixmap(pix);
+        ui->anime12_2->setAlignment(Qt::AlignCenter);
+        ui->anime12_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime12->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime12->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime12->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime12->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+11], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime12->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1056,11 +1221,23 @@ void MainWindow::carregaInfo(){
         ui->anime13->setScaledContents(true);
         ui->anime13_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime13_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime13->setPixmap(pix);
+        ui->anime13_2->setAlignment(Qt::AlignCenter);
+        ui->anime13_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime13->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime13->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime13->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime13->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+12], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime13->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1073,11 +1250,23 @@ void MainWindow::carregaInfo(){
         ui->anime14->setScaledContents(true);
         ui->anime14_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime14_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime14->setPixmap(pix);
+        ui->anime14_2->setAlignment(Qt::AlignCenter);
+        ui->anime14_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime14->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime14->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime14->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime14->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+13], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime14->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1090,11 +1279,23 @@ void MainWindow::carregaInfo(){
         ui->anime15->setScaledContents(true);
         ui->anime15_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime15_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime15->setPixmap(pix);
+        ui->anime15_2->setAlignment(Qt::AlignCenter);
+        ui->anime15_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime15->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime15->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime15->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime15->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+14], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime15->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1107,11 +1308,23 @@ void MainWindow::carregaInfo(){
         ui->anime16_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime16_2->setText(leitorA->retornaNome(i));
         ui->anime16->setScaledContents(true);
-        if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime16->setPixmap(pix);
+        ui->anime16_2->setAlignment(Qt::AlignCenter);
+        ui->anime16_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime16->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime16->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime16->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime16->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+15], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime16->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1124,11 +1337,23 @@ void MainWindow::carregaInfo(){
         ui->anime17->setScaledContents(true);
         ui->anime17_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime17_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime17->setPixmap(pix);
+        ui->anime17_2->setAlignment(Qt::AlignCenter);
+        ui->anime17_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime17->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime17->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime17->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime17->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+16], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime17->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1141,11 +1366,23 @@ void MainWindow::carregaInfo(){
         ui->anime18->setScaledContents(true);
         ui->anime18_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime18_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime18->setPixmap(pix);
+        ui->anime18_2->setAlignment(Qt::AlignCenter);
+        ui->anime18_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime18->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime18->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime18->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime18->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+17], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime18->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1158,11 +1395,23 @@ void MainWindow::carregaInfo(){
         ui->anime19->setScaledContents(true);
         ui->anime19_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime19_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime19->setPixmap(pix);
+        ui->anime19_2->setAlignment(Qt::AlignCenter);
+        ui->anime19_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime19->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime19->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime19->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime19->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+18], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime19->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1175,11 +1424,23 @@ void MainWindow::carregaInfo(){
         ui->anime20->setScaledContents(true);
         ui->anime20_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime20_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime20->setPixmap(pix);
+        ui->anime20_2->setAlignment(Qt::AlignCenter);
+        ui->anime20_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime20->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime20->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime20->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime20->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+19], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime20->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1192,11 +1453,23 @@ void MainWindow::carregaInfo(){
         ui->anime21->setScaledContents(true);
         ui->anime21_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime21_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime21->setPixmap(pix);
+        ui->anime21_2->setAlignment(Qt::AlignCenter);
+        ui->anime21_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime21->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime21->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime21->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime21->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+20], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime21->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1209,11 +1482,23 @@ void MainWindow::carregaInfo(){
         ui->anime22->setScaledContents(true);
         ui->anime22_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime22_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime22->setPixmap(pix);
+        ui->anime22_2->setAlignment(Qt::AlignCenter);
+        ui->anime22_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime22->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime22->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime22->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime22->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+21], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime22->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1226,11 +1511,23 @@ void MainWindow::carregaInfo(){
         ui->anime23->setScaledContents(true);
         ui->anime23_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime23_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime23->setPixmap(pix);
+        ui->anime23_2->setAlignment(Qt::AlignCenter);
+        ui->anime23_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime23->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime23->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime23->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime23->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+22], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime23->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1243,11 +1540,23 @@ void MainWindow::carregaInfo(){
         ui->anime24->setScaledContents(true);
         ui->anime24_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime24_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime24->setPixmap(pix);
+        ui->anime24_2->setAlignment(Qt::AlignCenter);
+        ui->anime24_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime24->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime24->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime24->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime24->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+23], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime24->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1260,11 +1569,23 @@ void MainWindow::carregaInfo(){
         ui->anime25->setScaledContents(true);
         ui->anime25_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime25_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime25->setPixmap(pix);
+        ui->anime25_2->setAlignment(Qt::AlignCenter);
+        ui->anime25_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime25->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime25->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime25->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime25->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+24], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime25->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1277,11 +1598,23 @@ void MainWindow::carregaInfo(){
         ui->anime26->setScaledContents(true);
         ui->anime26_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime26_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime26->setPixmap(pix);
+        ui->anime26_2->setAlignment(Qt::AlignCenter);
+        ui->anime26_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime26->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime26->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime26->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime26->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+25], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime26->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1294,11 +1627,23 @@ void MainWindow::carregaInfo(){
         ui->anime27->setScaledContents(true);
         ui->anime27_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime27_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime27->setPixmap(pix);
+        ui->anime27_2->setAlignment(Qt::AlignCenter);
+        ui->anime27_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime27->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime27->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime27->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime27->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+26], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime27->setPixmap(pix);
+            }
         }
     }
     else{
@@ -1311,11 +1656,23 @@ void MainWindow::carregaInfo(){
         ui->anime28->setScaledContents(true);
         ui->anime28_2->setStyleSheet("background-color : rgb(181, 181, 181);");
         ui->anime28_2->setText(leitorA->retornaNome(i));
-        if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "jpg")){
-            ui->anime28->setPixmap(pix);
+        ui->anime28_2->setAlignment(Qt::AlignCenter);
+        ui->anime28_2->setWordWrap(true);
+        if(baixaQualidade == true){
+            if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensPequenas), "jpg")){
+                ui->anime28->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensPequenas), "png")){
+                ui->anime28->setPixmap(pix);
+            }
         }
-        else if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "png")){
-            ui->anime28->setPixmap(pix);
+        else{
+            if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "jpg")){
+                ui->anime28->setPixmap(pix);
+            }
+            else if(pix.load(leitorA->imagem(vetorAnimes[i+27], configuracoes->diretorioImagensMedio), "png")){
+                ui->anime28->setPixmap(pix);
+            }
         }
     }
     else{

@@ -56,6 +56,7 @@ public slots:
     void setFansub(QString);
     void setQualidade(QString);
     void setTorrentPadrao(QString);
+    void setQualidadeImagem(int);
 
 private:
     anitomy::Anitomy *anitomy;
@@ -76,6 +77,7 @@ private:
     int downloadListas;
     int tempoDownload;
     int downloadAutomatico;
+    int qualidadeImagem;
 };
 
 #endif // CONFIGPC_H

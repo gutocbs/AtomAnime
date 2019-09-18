@@ -10,20 +10,35 @@ torrent::torrent(QWidget *parent) :
     listaWatching = false;
     ui->ListaTorrents->setColumnHidden(5, true);
     ui->ListaTorrents->setColumnWidth(1, 400);
+    downloadAutomatico = false;
 }
 
 torrent::~torrent()
 {
-    delete ui;
     delete anitomy;
     delete jconfig;
     delete qleitor;
     delete organiza;
     delete baixaXML;
+    delete ui;
 }
 
+//Recebe dados da janela de configuração
 void torrent::getJConfig(JanelaConfiguracao *JanelaConfig){
     jconfig = JanelaConfig;
+    prefTorrent = jconfig->returnTorrentPadrao();
+    diretorioDownloads = jconfig->returnDownloadFolder();
+    prefSub = jconfig->returnFansub();
+    prefQualidade = jconfig->returnQualidade();
+    //O tempo de download automático é definido em minutos, porém o timer é definido em milisegundos.
+    //Aqui é feita a conversão do tempo
+    tempoDownloadAutomatico = jconfig->returnTempoDownload() * 60000;
+    //Checa se o download automático de torrents está ligado ou não
+    if(jconfig->returnDownloadAutomatico() == 1){
+        downloadAutomatico = true;
+        //Caso esteja, automatiza o sistema pra download após o tempo certo
+        QTimer::singleShot(tempoDownloadAutomatico, this, SLOT(on_XML_clicked()));
+    }
 }
 
 void torrent::getLeitorArquivos(leitorarquivos *leitorArquiv){
@@ -32,12 +47,18 @@ void torrent::getLeitorArquivos(leitorarquivos *leitorArquiv){
 
 void torrent::getOrganizador(Organizador *organi){
     organiza = organi;
-//    qDebug() << "organi: " << organi->retornaEpisodiosDisponiveis();
 }
 
+void torrent::mudaTorrentPadrao(QString torrentPadrao){
+    prefTorrent = torrentPadrao;
+}
+
+
+//Baixa a lista de torrents disponíveis
 void torrent::getRss(){
     baixaXML = new QDownloader;
     baixaXML->setURL(jconfig->returnRSS());
+    //Espera alguns segundo para o arquivo terminar de ser salvo e fechado pelo objeto de download
     QObject::connect(baixaXML, SIGNAL(terminouDownload()), this, SLOT(leXML()));
 }
 
@@ -58,17 +79,14 @@ void torrent::on_XML_clicked()
     lista.clear();
     tier.clear();
 
-    //    ui->ListaTorrents->setRowCount(0);
-//    delete box;
-    ui->label->setText("Carregando lista");
+    ui->label->setText("Carregando lista.");
     getRss();
     getRss();
 }
 
 void torrent::Download(){
     for(int i = 1; i < nome.length(); i++){
-        if(box[i]->isChecked() == true){//If bool tabela x == true
-            //Mas e se a pessoa desmarcar?
+        if(box[i]->isChecked() == true){
             globalDownload = i;
             QDownloader *qdown = new QDownloader;
             qdown->setTorrent(link[i+1], nomeTorrent[i]);
@@ -78,21 +96,35 @@ void torrent::Download(){
 }
 
 
-void torrent::baixaTorrent(){//Por um botão pra escolher qual torrent quer usar nas configurações
-    QDesktopServices::openUrl(QUrl("file:///"+QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",QUrl::TolerantMode));
+//Abre o programa de torrent antes de abrir o arquivo
+void torrent::baixaTorrent(){
+    ui->label->setText("Carregando os torrents.");
+    if(prefTorrent == "uTorrent")
+        QDesktopServices::openUrl(QUrl("file:///"+QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",QUrl::TolerantMode));
+    else if(prefTorrent == "qBittorrent"){
+        QDesktopServices::openUrl(QUrl("file:///C:/Program Files/qBittorrent/qbittorrent.exe",QUrl::TolerantMode));
+    }
     //Espera o programa abrir pra colocar o torrent lá
     QTimer::singleShot(5000, this, SLOT(esperaTerminarSalvar()));
 }
 
+//O programa abre muito rápido. O programa começa o download muito rápido em comandos separados.
+//O programa demora demais pra abrir e começar o download em um único comando
 void torrent::esperaTerminarSalvar(){
     QProcess process;
-    process.execute(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",
-                    QStringList() << "/DIRECTORY" << diretorioDownloads + nome[globalDownload] <<
-                    QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
-//        QProcess process2;
-//        process2.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" + diretorioDownloads + nome[globalDownload],
-//                         QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
+    //Assim que baixar o arquivo e abrir o programa, começa a baixar o torrent
+    if(prefTorrent == "uTorrent"){
+        process.execute(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",
+                        QStringList() << "/DIRECTORY" << diretorioDownloads + nome[globalDownload] <<
+                        QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
+    }
+    else if(prefTorrent == "qBittorrent"){
+        process.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" + diretorioDownloads + nome[globalDownload],
+                         QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + nomeTorrent[globalDownload] + ".torrent");
+    }
     box[globalDownload]->setCheckState(Qt::Unchecked);
+    if(downloadAutomatico == true)
+        QTimer::singleShot(600000, this, SLOT(on_XML_clicked()));
 }
 void torrent::preencheTabela(){
     box.clear();
@@ -117,9 +149,7 @@ void torrent::preencheTabela(){
             item->setBackground(QColor("transparent"));
             item->setForeground(QColor::fromRgb(220,220,220));
             if(w == 0){
-                if(nome[i] == "Youjo Senki Movie")
-                    box[i]->setCheckState(Qt::Checked);
-                else if(tier[i] == "1"){
+                if(tier[i] == "1"){
                     box[i]->setCheckState(Qt::Checked);
                 }
                 else{
@@ -163,12 +193,15 @@ void torrent::preencheTabela(){
         }
     }
     ui->ListaTorrents->update();
+    if(downloadAutomatico == true)
+        Download();
 }
 
 void torrent::leXML(){
     ui->label->setText("Carregando torrents");
     QString arquivoLer = "Configurações/rss.xml";
     QFile lerXML(arquivoLer);
+    QString tempTorrentNome;
     QString tempTier;
     QString tempQualidade;
     QString tempEpisodioTorrent;
@@ -202,14 +235,27 @@ void torrent::leXML(){
                         anitomy.Parse(linha.toStdWString());
                         const auto& elements = anitomy.elements();
                         nome.append(QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle)));
+                        tempTorrentNome = QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle));
                         episodio.append(QString::fromStdWString(elements.get(anitomy::kElementEpisodeNumber)));
                         tempEpisodioTorrent = QString::fromStdWString(elements.get(anitomy::kElementEpisodeNumber));
                         fansub.append(QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup)));
                         tempSub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
                         resolucao.append(QString::fromStdWString(elements.get(anitomy::kElementVideoResolution)));
                         tempQualidade = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
+                        qleitor->leLinha("watching");
+
+                        tempTorrentNome.remove(".");
+                        tempTorrentNome.remove("?");
+                        tempTorrentNome.remove("S1");
+                        tempTorrentNome.remove("S2");
+                        tempTorrentNome.remove("s1");
+                        tempTorrentNome.remove("s2");
+                        tempTorrentNome.remove("s01");
+                        tempTorrentNome.remove("s02");
+                        tempTorrentNome= tempTorrentNome.simplified();
+
                         for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
-                            if(linha.contains(qleitor->retornaNome(i))){
+                            if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
                                 tempTier = "1";
                                 tempId = qleitor->retornaId(i);
                                 tempNome = qleitor->retornaNome(i);

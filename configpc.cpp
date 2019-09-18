@@ -36,6 +36,7 @@ void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
     connect(jconfig, SIGNAL(fSub(QString)), this, SLOT(setFansub(QString)));
     connect(jconfig, SIGNAL(quality(QString)), this, SLOT(setQualidade(QString)));
     connect(jconfig, SIGNAL(tPadrao(QString)), this, SLOT(setTorrentPadrao(QString)));
+    connect(jconfig, SIGNAL(bDownload(int)), this, SLOT(setQualidadeImagem(int)));
 }
 
 void configPC::addDir(QString dir){
@@ -91,6 +92,7 @@ void configPC::setUser(){
     preFfansub = jconfig->returnFansub();
     prefQualidade = jconfig->returnQualidade();
     prefTorrent = jconfig->returnTorrentPadrao();
+    qualidadeImagem = jconfig->returnImagemBaixaQualidade();
 }
 
 void configPC::setFeedBusca(QString jfb){
@@ -134,6 +136,9 @@ void configPC::setQualidade(QString jql){
 void configPC::setTorrentPadrao(QString jtp){
     prefTorrent = jtp;
 }
+void configPC::setQualidadeImagem(int jqi){
+    qualidadeImagem = jqi;
+}
 
 QString configPC::getOrdem(){
     return ordemLista;
@@ -176,6 +181,7 @@ void configPC::EscreveConfig(){
         stream << "fansub>" << preFfansub << endl;
         stream << "qualidade>" << prefQualidade << endl;
         stream << "torrent>" << prefTorrent << endl;
+        stream << "imagemBaixaQualidade>" << qualidadeImagem;
     }
 }
 

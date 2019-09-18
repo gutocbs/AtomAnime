@@ -38,6 +38,9 @@ public:
 
 signals:
     void volta();
+
+public slots:
+    void mudaTorrentPadrao(QString);
 private slots:
     void baixaTorrent();
     void on_pushButton_clicked();
@@ -47,9 +50,9 @@ private slots:
     void on_XML_clicked();
     void on_Download_clicked();
     void esperaTerminarSalvar();
-
 private:
     int globalDownload;
+    int tempoDownloadAutomatico;
 
     Ui::torrent *ui;
     anitomy::Anitomy *anitomy;
@@ -72,12 +75,13 @@ private:
     QVector<QString> link;
     QVector<QString> lista;
     QVector<QString> tier;
-    bool listaWatching;
 
+    bool listaWatching;
+    bool downloadAutomatico;
+
+    QString prefTorrent;
     QString prefQualidade;
     QString prefSub;
-    //Nome, nome alt, id, tempqualidade, prefqualidade, tempsub, prefsub, tempepisodiotorrent, tempepisodiolistawatching, temptorrent
-    bool filtros(QString, QString, QString, QString, QString, QString, QString, QString, QString, int);
 };
 
 #endif // TORRENT_H

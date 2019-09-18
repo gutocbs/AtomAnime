@@ -24,6 +24,7 @@ public:
     int returnDetection();
     int returnTempoDownload();
     int returnDownloadAutomatico();
+    int returnImagemBaixaQualidade();
     QString returnFeedBusca();
     QString returnFansub();
     QString returnQualidade();
@@ -71,11 +72,11 @@ signals:
     void fSub(QString);
     void quality(QString);
     void tPadrao(QString);
+    void bDownload(int);
 
 public slots:
     void mensagem(QString);
 private slots:
-    void on_BotaoCancelar_clicked();
     void on_DiretorioAnimesAdiciona_clicked();
     void on_BotaoAutorizar_clicked();
     void on_DiretorioAnimesRemove_clicked();

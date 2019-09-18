@@ -41,7 +41,7 @@ public:
 private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
-//    torrent jtorrent;
+    torrent jtorrent;
     mainwindow1366768 main768;
 
     //Download de imagens
@@ -72,6 +72,7 @@ private:
     QVector<int> qEpiDisponivel;
 
     bool primeiraLeitura;
+    bool baixaQualidade;
 
     QPixmap pix;
 
@@ -94,6 +95,7 @@ public slots:
 
     //Mexem com as janelas
     void OrdenaVetor();
+    void mudouQualidade(int);
 
     //Arquivos
     void mandaRefresh();
@@ -105,7 +107,6 @@ public slots:
     //Listas de animes
     void proximaPagina();
     void voltaPagina();
-
 
     //Botões de configuração
     void abrePasta();
@@ -159,7 +160,7 @@ public slots:
     //Mensagens
     void mensagemFimDownload(QString);
 private slots:
-//    void Torrent();
+    void Torrent();
     void keyPressEvent(QKeyEvent * event);
 };
 
