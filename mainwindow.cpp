@@ -28,10 +28,6 @@ MainWindow::MainWindow(QWidget *parent) :
     runArquivo->setConfigs(configuracoes);
     runArquivo->IniciaThread(cThread);
     runArquivo->moveToThread(&cThread);
-
-
-    ///BUG - thread fica em loop e nunca vai conseguir parar
-    ///concertar isso
     cThread.start();
 
     connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
@@ -106,7 +102,6 @@ void MainWindow::keyPressEvent(QKeyEvent * event){
 
 void MainWindow::Botoes(){
     connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(proximaPagina()));
-    connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(RestauraJanela()));
     connect(ui->PaginaAnterior, SIGNAL(clicked()),this,SLOT(voltaPagina()));
     connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
     connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));

@@ -1266,14 +1266,16 @@ void Config::run(){
             ParseTaiga();
             qPrimeiraEntrada = true;
         }
-        ParseCompleted();
-        ParseOnHold();
-        ParseDropped();
-        qWatching = false;
-        qAnimeId = false;
-        ParsePlanToWatch();
-        ParseTaiga();
-        emit refresh();
+        else{
+            ParseCompleted();
+            ParseOnHold();
+            ParseDropped();
+            qWatching = false;
+            qAnimeId = false;
+            ParsePlanToWatch();
+            ParseTaiga();
+            emit refresh();
+        }
     }
     else if(pastas->retornaUser().compare(user) != 0 && pastas->retornaUser() != ""){
         diretorio.setPath(QString::fromStdString(pastas->RetornaDiretorioTaiga())+ "/user/" + pastas->retornaUser() + "@anilist");

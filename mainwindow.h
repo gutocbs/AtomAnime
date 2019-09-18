@@ -41,7 +41,6 @@ public:
 private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
-    ///CRASH
 //    torrent jtorrent;
     mainwindow1366768 main768;
 

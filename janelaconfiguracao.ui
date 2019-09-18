@@ -49,7 +49,7 @@
     <string>Aplicar</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_3">
+  <widget class="QPushButton" name="BotaoSalvar">
    <property name="geometry">
     <rect>
      <x>10</x>

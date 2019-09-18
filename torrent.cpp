@@ -8,12 +8,7 @@ torrent::torrent(QWidget *parent) :
     ui->setupUi(this);
     anitomy = new anitomy::Anitomy;
     listaWatching = false;
-    prefQualidade = "1080p";
-    prefSub = "HorribleSubs";
-    diretorioDownloads = QDir::homePath() + "/Downloads/Animes/";
     ui->ListaTorrents->setColumnHidden(5, true);
-    ui->ListaTorrents->setColumnWidth(0,2);
-//    ui->ListaTorrents->setColumnWidth(1, 50);
     ui->ListaTorrents->setColumnWidth(1, 400);
 }
 
