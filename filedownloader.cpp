@@ -13,8 +13,8 @@ QDownloader::QDownloader(QObject *parent) :
 
 QDownloader::~QDownloader()
 {
-//    manager->deleteLater();
-    delete manager;
+    manager->deleteLater();
+//    delete manager;
     delete reply;
     delete file;
     delete configura;
@@ -25,7 +25,6 @@ void QDownloader::downloadImagensLista(QString fileURL, QString id){
     QString filePath = fileURL;
     QString saveFilePath;
     QStringList filePathList = filePath.split('/');
-//    fileURL.replace("medium", "small");
     QString arquivo = configura->diretorioImagensMedio;
     arquivo.append(id);
     arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
@@ -166,6 +165,9 @@ void QDownloader::setTorrent(QString url, QString nome){
         connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
         connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
         connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
+    }
+    else{
+        emit terminouDownload();
     }
 }
 
@@ -352,27 +354,27 @@ void QDownloader::setNextBig()
             if(listaAtual == "watching"){
                 delete leiArq;
                 lista = "1";
-                emit listaMensagem("Watching");
+//                emit listaMensagem("Watching");
             }
             else if(listaAtual == "completed"){
                 delete leiArq;
                 lista = "2";
-                emit listaMensagem("Completed");
+//                emit listaMensagem("Completed");
             }
             else if(listaAtual == "onhold"){
                 delete leiArq;
                 lista = "3";
-                emit listaMensagem("On Hold");
+//                emit listaMensagem("On Hold");
             }
             else if(listaAtual == "dropped"){
                 delete leiArq;
                 lista = "4";
-                emit listaMensagem("Dropped");
+//                emit listaMensagem("Dropped");
             }
             else if(listaAtual == "plantowatch"){
                 delete leiArq;
                 terminouLista = true;
-                emit listaMensagem("Plan to Watch");
+//                emit listaMensagem("Plan to Watch");
             }
             setNextBig();
         }

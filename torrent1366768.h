@@ -1,5 +1,5 @@
-#ifndef TORRENT_H
-#define TORRENT_H
+#ifndef TORRENT1366768_H
+#define TORRENT1366768_H
 
 #include <QWidget>
 #include <QDebug>
@@ -20,16 +20,17 @@
 #include "organizador.h"
 
 namespace Ui {
-class torrent;
+class torrent1366768;
 }
 
-class torrent : public QWidget
+class torrent1366768 : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit torrent(QWidget *parent = nullptr);
-    ~torrent();
+    explicit torrent1366768(QWidget *parent = nullptr);
+    ~torrent1366768();
+
     void getRss();
     void getJConfig(JanelaConfiguracao *JanelaConfig);
     void getLeitorArquivos(leitorarquivos *leitorArquiv);
@@ -53,10 +54,10 @@ private slots:
     void on_XML_clicked();
     void on_Download_clicked();
     void esperaTerminarSalvar();
-private:
-    int tempoDownloadAutomatico;
 
-    Ui::torrent *ui;
+private:
+    Ui::torrent1366768 *ui;
+    int tempoDownloadAutomatico;
     anitomy::Anitomy *anitomy;
     JanelaConfiguracao *jconfig;
     leitorarquivos *qleitor;
@@ -89,4 +90,4 @@ private:
     QString prefSub;
 };
 
-#endif // TORRENT_H
+#endif // TORRENT1366768_H

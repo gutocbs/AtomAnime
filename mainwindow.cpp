@@ -6,12 +6,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-//    QScreen *screen = QGuiApplication::primaryScreen();
-//    QRect  screenGeometry = screen->geometry();
-//    int height = screenGeometry.height();
-//    int width = screenGeometry.width();
-//    qDebug() << height << " - " << width;
-
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -45,21 +39,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
     ui->janela->addWidget(&jtorrent);
-//    ui->janela768->addWidget(&main768);
-//    if(height == 1080){
-//        ui->janela768->hide();
-//    }
-//    else if(height == 768){
-//        ui->janela768->setCurrentIndex(1);
-//    }
-
     jtorrent.getLeitorArquivos(leitorA);
     jtorrent.getJConfig(&jConfig);
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
     ui->nomeUsuario->setText(configuracoes->retornaUser());
-    Botoes();
 
     QTimer::singleShot(600000, this, SLOT(mandaRefresh()));
 }
@@ -67,17 +52,15 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     configuracoes->EscreveConfig();
-
     delete leitorA;
-    delete configuracoes;
-    delete organiza;
-    delete pasta;
-
-    delete baixaBusca;
-
-    delete downImagemGrandeBusca;
-
     delete runArquivo;
+
+    delete configuracoes;
+
+    delete DownImagemPequenaListas;
+    delete DownImagemGrandeListas;
+    delete DownImagemListas;
+    delete organiza;
     delete ui;
 }
 
@@ -91,11 +74,9 @@ void MainWindow::keyPressEvent(QKeyEvent * event){
 }
 
 void MainWindow::Botoes(){
-    connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(proximaPagina()));
-    connect(ui->PaginaAnterior, SIGNAL(clicked()),this,SLOT(voltaPagina()));
     connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
     connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));
-    connect(ui->AbreEpi, SIGNAL(clicked()),this,SLOT(AbreEpisodio()));
+    connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(mandaRefresh()));
 
     connect(ui->clickAnime1, SIGNAL(clicked()),this,SLOT(carregaAnime1()));
     connect(ui->clickAnime2, SIGNAL(clicked()),this,SLOT(carregaAnime2()));
@@ -126,11 +107,14 @@ void MainWindow::Botoes(){
     connect(ui->clickAnime27, SIGNAL(clicked()),this,SLOT(carregaAnime27()));
     connect(ui->clickAnime28, SIGNAL(clicked()),this,SLOT(carregaAnime28()));
 
+    connect(ui->PaginaProxima, SIGNAL(clicked()),this,SLOT(proximaPagina()));
+    connect(ui->PaginaAnterior, SIGNAL(clicked()),this,SLOT(voltaPagina()));
+    connect(ui->AbreEpi, SIGNAL(clicked()),this,SLOT(AbreEpisodio()));
     connect(ui->OrdemAnime, SIGNAL(currentIndexChanged(int)), this,SLOT(OrdenaVetor()));
     connect(ui->Busca, SIGNAL(clicked()), this,SLOT(BotaoBusca()));
-    connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(mandaRefresh()));
     connect(ui->BotaoPasta, SIGNAL(clicked()), this,SLOT(abrePasta()));
     connect(ui->BotaoAnilist, SIGNAL(clicked()), this,SLOT(abreAnilist()));
+    connect(ui->DownloadAnime, SIGNAL(clicked()),this,SLOT(BuscaTorrentAnimeEspecifico()));
 
     connect(&jConfig, SIGNAL(user()), this, SLOT(setUser()));
     connect(&jConfig, SIGNAL(bDownload(int)), this, SLOT(mudouQualidade(int)));
@@ -195,6 +179,7 @@ void MainWindow::InstauraPrimeiraJanela(){
     ui->Watching->setStyleSheet("background: red;");
     jtorrent.getOrganizador(organiza);
     carregaInfo();
+    Botoes();
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 }
 
@@ -375,8 +360,6 @@ void MainWindow::BotaoBusca(){
         if(numEncontros != 0){
             tamanhoLista = leitorA->retornaTamanhoLista();
 
-            baixaBusca = new QDownloader[leitorA->retornaTamanhoLista()];
-            downImagemGrandeBusca = new QDownloader[leitorA->retornaTamanhoLista()];
             if(idAnime >= tamanhoLista){
                 idAnime = tamanhoLista - 28;
             }
@@ -506,19 +489,21 @@ void MainWindow::AbreEpisodio()
 
 void MainWindow::baixaImagens()
 {
-    QDownloader *DownImagemListas = new QDownloader();
+    DownImagemListas = new QDownloader();
     DownImagemListas->setNext();
     connect(DownImagemListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
 void MainWindow::baixaImagensGrandes(){
-    QDownloader *DownImagemGrandeListas = new QDownloader();
+    DownImagemGrandeListas = new QDownloader();
     DownImagemGrandeListas->setNextBig();
+    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
 void MainWindow::baixaImagensPequenas(){
     QDownloader *DownImagemPequenaListas = new QDownloader();
     DownImagemPequenaListas->setNextSmall();
+    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
 void MainWindow::mensagemFimDownload(QString mensagem){
@@ -526,6 +511,39 @@ void MainWindow::mensagemFimDownload(QString mensagem){
         ui->label->setText("Todas as imagens foram carregadas");
     else
         ui->label->setText("As imagens da lista " + mensagem + " foram carregadas.");
+    delete DownImagemListas;
+}
+
+void MainWindow::BuscaTorrentAnimeEspecifico(){
+    QString nomeAnime = leitorA->retornaNome(anime0);
+    nomeAnime.remove(".");
+    nomeAnime.remove("?");
+    nomeAnime.remove("S1");
+    nomeAnime.remove("S2");
+    nomeAnime.remove("s1");
+    nomeAnime.remove("s2");
+    nomeAnime.remove("s01");
+    nomeAnime.remove("s02");
+    ui->Watching->blockSignals(true);
+    ui->Completed->blockSignals(true);
+    ui->Dropped->blockSignals(true);
+    ui->OnHold->blockSignals(true);
+    ui->PlanToWatch->blockSignals(true);
+    ui->Refresh->blockSignals(true);
+    ui->MudarListaBotao->blockSignals(true);
+    ui->MudarLista->blockSignals(true);
+    ui->OrdemAnime->blockSignals(true);
+    ui->Busca->blockSignals(true);
+    ui->Watching->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Completed->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Dropped->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->OnHold->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->PlanToWatch->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Refresh->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->MudarListaBotao->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->Busca->setStyleSheet("background: rgb(121, 121, 121);");
+    ui->janela->setCurrentIndex(2);
+    jtorrent.getRSSEspecifico(nomeAnime);
 }
 
 void MainWindow::ConfiguraArquivos(){

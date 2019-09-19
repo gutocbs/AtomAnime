@@ -2,7 +2,6 @@
 
 configPC::configPC()
 {
-//    arquivo = new leitorarquivos;
     anitomy = new anitomy::Anitomy;
     diretorioImagensPequenas = "Configurações/Imagens/Pequeno/";
     diretorioImagensMedio = "Configurações/Imagens/Medio/";
@@ -15,7 +14,6 @@ configPC::configPC()
 
 configPC::~configPC(){
     delete anitomy;
-    delete arquivo;
     delete jconfig;
 }
 

@@ -28,7 +28,6 @@ void Config::IniciaThread(QThread &cThread){
 void Config::setConfigs(configPC *Configura){
     pastas = Configura;
     user = pastas->retornaUser();
-//    user = "oi";
 }
 
 

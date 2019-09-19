@@ -4,9 +4,6 @@
 leitorarquivos::leitorarquivos(){
 }
 
-leitorarquivos::~leitorarquivos(){
-}
-
 void leitorarquivos::leLinha(QString lista)
 {
     QString watching = "Configurações/confTaiga.txt";

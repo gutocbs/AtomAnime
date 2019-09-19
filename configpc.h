@@ -60,7 +60,6 @@ public slots:
 
 private:
     anitomy::Anitomy *anitomy;
-    leitorarquivos *arquivo;
     JanelaConfiguracao *jconfig;
     QString diretorioTaiga;
     QVector<QString> diretorioAnimeEspecifico;

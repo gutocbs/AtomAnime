@@ -541,7 +541,7 @@ color: rgb(220, 220, 220);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background: red;</string>
+       <string notr="true">background-color : rgb(181, 181, 181);</string>
       </property>
       <property name="text">
        <string/>
@@ -2367,6 +2367,22 @@ color: white</string>
        <string>+</string>
       </property>
      </widget>
+     <widget class="QPushButton" name="DownloadAnime">
+      <property name="geometry">
+       <rect>
+        <x>1090</x>
+        <y>430</y>
+        <width>88</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Download</string>
+      </property>
+     </widget>
      <zorder>sinopse</zorder>
      <zorder>anime7_2</zorder>
      <zorder>anime19_2</zorder>
@@ -2484,6 +2500,7 @@ color: white</string>
      <zorder>ProgressoMenos</zorder>
      <zorder>Nota_2</zorder>
      <zorder>NotaMais</zorder>
+     <zorder>DownloadAnime</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Busca">

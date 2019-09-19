@@ -1,20 +1,20 @@
-#include "torrent.h"
-#include "ui_torrent.h"
+#include "torrent1366768.h"
+#include "ui_torrent1366768.h"
 
-torrent::torrent(QWidget *parent) :
+torrent1366768::torrent1366768(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::torrent)
+    ui(new Ui::torrent1366768)
 {
     ui->setupUi(this);
     anitomy = new anitomy::Anitomy;
     listaWatching = false;
     ui->ListaTorrents->setColumnHidden(7, true);
-    ui->ListaTorrents->setColumnWidth(1, 400);
-    ui->ListaTorrents->setColumnWidth(6, 600);
+    ui->ListaTorrents->setColumnWidth(1, 300);
+    ui->ListaTorrents->setColumnWidth(6, 500);
     downloadAutomatico = false;
 }
 
-torrent::~torrent()
+torrent1366768::~torrent1366768()
 {
     qDeleteAll(box.begin(),box.end());
     qDeleteAll(pWidget.begin(), pWidget.end());
@@ -29,7 +29,7 @@ torrent::~torrent()
 }
 
 //Recebe dados da janela de configuração
-void torrent::getJConfig(JanelaConfiguracao *JanelaConfig){
+void torrent1366768::getJConfig(JanelaConfiguracao *JanelaConfig){
     jconfig = JanelaConfig;
     prefTorrent = jconfig->returnTorrentPadrao();
     diretorioDownloads = jconfig->returnDownloadFolder();
@@ -46,21 +46,21 @@ void torrent::getJConfig(JanelaConfiguracao *JanelaConfig){
     }
 }
 
-void torrent::getLeitorArquivos(leitorarquivos *leitorArquiv){
+void torrent1366768::getLeitorArquivos(leitorarquivos *leitorArquiv){
     qleitor = leitorArquiv;
 }
 
-void torrent::getOrganizador(Organizador *organi){
+void torrent1366768::getOrganizador(Organizador *organi){
     organiza = organi;
 }
 
-void torrent::mudaTorrentPadrao(QString torrentPadrao){
+void torrent1366768::mudaTorrentPadrao(QString torrentPadrao){
     prefTorrent = torrentPadrao;
 }
 
 
 //Baixa a lista de torrents disponíveis
-void torrent::getRss(){
+void torrent1366768::getRss(){
     QStringList feed = jconfig->returnFeedBusca().split("-");
     baixaXML = new QDownloader;
 //    baixaXML->setURL(jconfig->returnRSS());
@@ -71,12 +71,12 @@ void torrent::getRss(){
 }
 
 
-void torrent::on_pushButton_clicked()
+void torrent1366768::on_pushButton_clicked()
 {
     emit volta();
 }
 
-void torrent::on_XML_clicked()
+void torrent1366768::on_XML_clicked()
 {
     nomeTorrent.clear();
     nome.clear();
@@ -94,7 +94,7 @@ void torrent::on_XML_clicked()
     getRss();
 }
 
-void torrent::Download(){
+void torrent1366768::Download(){
     for(int i = 0; i < nome.length(); i++){
         if(box[i]->isChecked() == true){
             globalDownload.append(i);
@@ -108,7 +108,7 @@ void torrent::Download(){
 
 
 //Abre o programa de torrent antes de abrir o arquivo
-void torrent::baixaTorrent(){
+void torrent1366768::baixaTorrent(){
     ui->label->setText("Carregando os torrents.");
     if(prefTorrent == "uTorrent")
         QDesktopServices::openUrl(QUrl("file:///"+ QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",QUrl::TolerantMode));
@@ -121,7 +121,7 @@ void torrent::baixaTorrent(){
 
 //O programa abre muito rápido. O programa começa o download muito rápido em comandos separados.
 //O programa demora demais pra abrir e começar o download em um único comando
-void torrent::esperaTerminarSalvar(){
+void torrent1366768::esperaTerminarSalvar(){
     QProcess process;
     //Assim que baixar o arquivo e abrir o programa, começa a baixar o torrent
     if(prefTorrent == "uTorrent"){
@@ -139,7 +139,7 @@ void torrent::esperaTerminarSalvar(){
     if(downloadAutomatico == true)
         QTimer::singleShot(600000, this, SLOT(on_XML_clicked()));
 }
-void torrent::preencheTabela(){
+void torrent1366768::preencheTabela(){
     box.clear();
     pWidget.clear();
     pLayout.clear();
@@ -219,7 +219,7 @@ void torrent::preencheTabela(){
         Download();
 }
 
-void torrent::leXML(){
+void torrent1366768::leXML(){
     ui->label->setText("Carregando torrents");
     QString arquivoLer = "Configurações/rss.xml";
     QFile lerXML(arquivoLer);
@@ -338,7 +338,7 @@ void torrent::leXML(){
     preencheTabela();
 }
 
-void torrent::getRSSEspecifico(QString nomeAnime){
+void torrent1366768::getRSSEspecifico(QString nomeAnime){
     ui->label->setText("Buscando torrents.");
     nomeTorrent.clear();
     nome.clear();
@@ -362,7 +362,7 @@ void torrent::getRSSEspecifico(QString nomeAnime){
     QObject::connect(baixaXML, SIGNAL(terminouDownload()), this, SLOT(leXMLEspecifico()));
 }
 
-void torrent::leXMLEspecifico(){
+void torrent1366768::leXMLEspecifico(){
     ui->label->setText("Carregando torrents");
     QString arquivoLer = "Configurações/rss.xml";
     QFile lerXML(arquivoLer);
@@ -414,7 +414,7 @@ void torrent::leXMLEspecifico(){
 }
 
 
-void torrent::on_Download_clicked()
+void torrent1366768::on_Download_clicked()
 {
     Download();
 }

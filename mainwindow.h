@@ -21,8 +21,6 @@
 
 #include "janelaconfiguracao.h"
 #include "torrent.h"
-#include "mainwindow1366768.h"
-
 
 namespace Ui {
 class MainWindow;
@@ -42,16 +40,15 @@ private:
     Ui::MainWindow *ui;
     JanelaConfiguracao jConfig;
     torrent jtorrent;
-    mainwindow1366768 main768;
 
     //Download de imagens
-    QDownloader *baixaBusca;
-    QDownloader *downImagemGrandeBusca;
+    QDownloader *DownImagemListas;
+    QDownloader *DownImagemGrandeListas;
+    QDownloader *DownImagemPequenaListas;
 
     //Leitores
     leitorarquivos *leitorA;
 
-    infoanime *pasta;
     Organizador *organiza;
     configPC *configuracoes;
     Config *runArquivo;
@@ -92,6 +89,7 @@ public slots:
     void baixaImagens();
     void baixaImagensGrandes();
     void baixaImagensPequenas();
+    void BuscaTorrentAnimeEspecifico();
 
     //Mexem com as janelas
     void OrdenaVetor();

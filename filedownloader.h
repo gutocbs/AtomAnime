@@ -19,7 +19,7 @@ class QDownloader : public QObject
     Q_OBJECT
 public:
     explicit QDownloader(QObject *parent = nullptr);
-    virtual ~QDownloader();
+    ~QDownloader();
     void setURL(QString);
     void setTorrent(QString, QString);
     void downloadImagensLista(QString, QString);

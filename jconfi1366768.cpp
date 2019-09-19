@@ -1,12 +1,11 @@
-#include "janelaconfiguracao.h"
-#include "ui_janelaconfiguracao.h"
+#include "jconfi1366768.h"
+#include "ui_jconfi1366768.h"
 
-JanelaConfiguracao::JanelaConfiguracao(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::JanelaConfiguracao)
+jconfi1366768::jconfi1366768(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::jconfi1366768)
 {
     ui->setupUi(this);
-//    setDiretoriosAnimes();
     leArquivoConf();
     ui->FeedTorrentGeral->setPlainText("https://www.tokyotosho.info/rss.php?filter=1,11&zwnj=0");
     ui->FeedTorrentEspecfico->setPlainText("https://nyaa.si/?page=rss&c=1_2&f=0&q=%title%");
@@ -17,42 +16,42 @@ JanelaConfiguracao::JanelaConfiguracao(QWidget *parent) :
     ui->torrentTempo->setMaximumBlockCount(1);
 }
 
-JanelaConfiguracao::~JanelaConfiguracao()
+jconfi1366768::~jconfi1366768()
 {
     delete ui;
 }
 
-void JanelaConfiguracao::setDiretoriosAnimes(){
+void jconfi1366768::setDiretoriosAnimes(){
     diretorioAnime.append("E:/Animes");
     diretorioAnime.append(QDir::homePath() + "/Downloads/Animes");
 }
 
 //Retorna os dois como uma string.
 //Devem ser separados com uma string list para ser lidos
-QString JanelaConfiguracao::returnFeedBusca(){
+QString jconfi1366768::returnFeedBusca(){
     emit fBusca(ui->FeedTorrentGeral->toPlainText() + "-" + ui->FeedTorrentEspecfico->toPlainText());
     return ui->FeedTorrentGeral->toPlainText() + "-" + ui->FeedTorrentEspecfico->toPlainText();
 }
 
-QVector<QString> JanelaConfiguracao::retornaDiretorioAnime(){
+QVector<QString> jconfi1366768::retornaDiretorioAnime(){
     return diretorioAnime;
 }
 
-QString JanelaConfiguracao::returnUserAnilist(){
+QString jconfi1366768::returnUserAnilist(){
     return userAnilist;
 }
 
-QString JanelaConfiguracao::returnOrdemLista(){
+QString jconfi1366768::returnOrdemLista(){
     return ordem;
 }
 
-QString JanelaConfiguracao::returnRSS(){
+QString jconfi1366768::returnRSS(){
 //    https://www.tokyotosho.info/rss.php?filter=1&terms=%5B1080%5D
 //    https://www.tokyotosho.info/rss.php?filter=1,11&zwnj=0
     return "https://www.tokyotosho.info/rss.php?filter=1,11&zwnj=0";
 }
 
-int JanelaConfiguracao::returnDetection(){
+int jconfi1366768::returnDetection(){
     //Caso os dois estejam marcados
     if(ui->DetectionPlayer->checkState() == 2 && ui->DetectionStream->checkState() == 2){
         emit detec(3);
@@ -75,7 +74,7 @@ int JanelaConfiguracao::returnDetection(){
     }
 }
 
-void JanelaConfiguracao::setDetection(int dtc){
+void jconfi1366768::setDetection(int dtc){
     if(dtc == 3){
         ui->DetectionPlayer->setCheckState(Qt::Checked);
         ui->DetectionStream->setCheckState(Qt::Checked);
@@ -97,7 +96,7 @@ void JanelaConfiguracao::setDetection(int dtc){
     }
 }
 
-int JanelaConfiguracao::returnDownloadListas(){
+int jconfi1366768::returnDownloadListas(){
     if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 2 &&
             ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 2){
         emit dListas(15);
@@ -183,7 +182,7 @@ int JanelaConfiguracao::returnDownloadListas(){
     }
 }
 
-void JanelaConfiguracao::setDownloadListas(int jdl){
+void jconfi1366768::setDownloadListas(int jdl){
     if(jdl == 15){
         ui->DownloadWatching->setCheckState(Qt::Checked);
         ui->DownloadDropped->setCheckState(Qt::Checked);
@@ -287,27 +286,27 @@ void JanelaConfiguracao::setDownloadListas(int jdl){
 }
 
 
-QString JanelaConfiguracao::returnFansub(){
+QString jconfi1366768::returnFansub(){
     emit fSub(ui->StringFansub->toPlainText());
     return ui->StringFansub->toPlainText();
 }
 
-QString JanelaConfiguracao::returnQualidade(){
+QString jconfi1366768::returnQualidade(){
     emit quality(ui->QualidadeTorrent->currentText());
     return ui->QualidadeTorrent->currentText();
 }
 
-int JanelaConfiguracao::returnTempoDownload(){
+int jconfi1366768::returnTempoDownload(){
     emit tDownload(ui->torrentTempo->toPlainText().toInt());
     return ui->torrentTempo->toPlainText().toInt();
 }
 
-int JanelaConfiguracao::returnImagemBaixaQualidade(){
-    if(ui->qbImagemSim->isChecked() == true){
+int jconfi1366768::returnImagemBaixaQualidade(){
+    if(ui->qbImagemSim_2->isChecked() == true){
         emit bDownload(0);
         return 0;//Mudar isso pra um bool
     }
-    else if(ui->qbImagemNao->isChecked() == true){
+    else if(ui->qbImagemNao_2->isChecked() == true){
         emit bDownload(1);
         return 1;
     }
@@ -315,7 +314,7 @@ int JanelaConfiguracao::returnImagemBaixaQualidade(){
 }
 
 
-int JanelaConfiguracao::returnDownloadAutomatico(){
+int jconfi1366768::returnDownloadAutomatico(){
     if(ui->TorrentAutomaticoSim->isChecked() == true){
         emit dAutomatico(0);
         return 0;
@@ -327,19 +326,19 @@ int JanelaConfiguracao::returnDownloadAutomatico(){
 }
 
 
-void JanelaConfiguracao::setDownloadAutomatico(int jda){
+void jconfi1366768::setDownloadAutomatico(int jda){
     if(jda == 1)
         ui->TorrentAutomaticoSim->setChecked(true);
     else
         ui->TorrentAutomaticoNao->setChecked(true);
 }
 
-QString JanelaConfiguracao::returnTorrentPadrao(){
+QString jconfi1366768::returnTorrentPadrao(){
     emit tPadrao(ui->TorrentPadrao->currentText());
     return ui->TorrentPadrao->currentText();
 }
 
-void JanelaConfiguracao::on_DiretorioAnimesAdiciona_clicked()
+void jconfi1366768::on_DiretorioAnimesAdiciona_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(dir != ""){
@@ -349,20 +348,20 @@ void JanelaConfiguracao::on_DiretorioAnimesAdiciona_clicked()
     }
 }
 
-void JanelaConfiguracao::on_DiretorioAnimesRemove_clicked()
+void jconfi1366768::on_DiretorioAnimesRemove_clicked()
 {
     QString CI = ui->DiretorioAnimesLista->currentItem()->text();
     qDeleteAll(ui->DiretorioAnimesLista->selectedItems());
     emit dirRem(CI);
 }
 
-void JanelaConfiguracao::on_BotaoAutorizar_clicked()
+void jconfi1366768::on_BotaoAutorizar_clicked()
 {
     userAnilist = ui->anilistUsername->toPlainText();
     emit user();
 }
 
-void JanelaConfiguracao::mensagem(QString mens){
+void jconfi1366768::mensagem(QString mens){
     if(mens.compare("EUsr") == 0){
         ui->displayMensagem->setText("Erro: Usuário não encontrado.");
         userAnilist = "";
@@ -373,7 +372,7 @@ void JanelaConfiguracao::mensagem(QString mens){
     }
 }
 
-void JanelaConfiguracao::leArquivoConf(){
+void jconfi1366768::leArquivoConf(){
     QFile inputFile("Configurações/conf.txt");
     if (inputFile.open(QIODevice::ReadOnly))
     {
@@ -463,9 +462,9 @@ void JanelaConfiguracao::leArquivoConf(){
            }
            else if(linha.at(0).compare("imagemBaixaQualidade") == 0){
                if(linha.at(1).toInt() == 0)
-                   ui->qbImagemSim->setChecked(true);
+                   ui->qbImagemSim_2->setChecked(true);
                else
-                   ui->qbImagemNao->setChecked(true);
+                   ui->qbImagemNao_2->setChecked(true);
            }
        }
        inputFile.close();
@@ -473,7 +472,7 @@ void JanelaConfiguracao::leArquivoConf(){
     ui->DiretorioAnimesLista->update();
 }
 
-void JanelaConfiguracao::on_BotaoSelecionarPasta_clicked()
+void jconfi1366768::on_BotaoSelecionarPasta_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if(dir != ""){
@@ -483,11 +482,11 @@ void JanelaConfiguracao::on_BotaoSelecionarPasta_clicked()
 
 }
 
-QString JanelaConfiguracao::returnDownloadFolder(){
+QString jconfi1366768::returnDownloadFolder(){
     return ui->PastaDownloads->toPlainText();
 }
 
-void JanelaConfiguracao::on_BotaoSalvar_clicked()
+void jconfi1366768::on_BotaoSalvar_clicked()
 {
     returnDownloadListas();
     returnDetection();

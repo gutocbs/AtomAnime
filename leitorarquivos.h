@@ -16,7 +16,6 @@ class leitorarquivos
 public:
 
     leitorarquivos();
-    ~leitorarquivos();
 
     void abreEpisodio(int);
     void Script();
