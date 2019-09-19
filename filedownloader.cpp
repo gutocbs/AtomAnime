@@ -15,10 +15,10 @@ QDownloader::~QDownloader()
 {
     manager->deleteLater();
 //    delete manager;
-    delete reply;
-    delete file;
-    delete configura;
-    delete leiArq;
+//    delete reply;
+//    delete file;
+//    delete configura;
+//    delete leiArq;
 }
 
 void QDownloader::downloadImagensLista(QString fileURL, QString id){
@@ -185,7 +185,7 @@ void QDownloader::onFinished(QNetworkReply * reply)
 //            qDebug("file is downloaded successfully.");
         }break;
         default:{
-            qDebug(reply->errorString().toLatin1());
+//            qDebug(reply->errorString().toLatin1());
         }
     }
 

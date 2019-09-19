@@ -8,7 +8,7 @@ Organizador::Organizador(configPC *conf)
 
 Organizador::~Organizador(){
     delete anitomy;
-    delete conf;
+//    delete conf;
 }
 
 //Checa se a pasta já existe

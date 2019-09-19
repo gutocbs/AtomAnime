@@ -73,6 +73,7 @@ signals:
     void quality(QString);
     void tPadrao(QString);
     void bDownload(int);
+    void salvaArquivo();
 
 public slots:
     void mensagem(QString);

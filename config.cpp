@@ -13,8 +13,8 @@ Config::Config(QObject *parent) : QObject(parent)
 }
 
 Config::~Config(){
-    delete pastas;
-    this->thread()->exit(0);
+    pastas->deleteLater();
+    this->thread()->deleteLater();
 }
 
 void Config::quebraloop(){
@@ -1281,11 +1281,13 @@ void Config::run(){
         if(diretorio.exists()){
             user = pastas->retornaUser();
             emit mensagemConfig("AUsr");
+            run();
+            qDebug() << "Achou";
         }
         else{
             emit mensagemConfig("EUsr");
         }
     }
-    if(this->thread()->isInterruptionRequested())
+    if(this->thread()->isInterruptionRequested() == true)
         this->thread()->exit(0);
 }

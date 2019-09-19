@@ -489,6 +489,7 @@ QString JanelaConfiguracao::returnDownloadFolder(){
 
 void JanelaConfiguracao::on_BotaoSalvar_clicked()
 {
+    returnUserAnilist();
     returnDownloadListas();
     returnDetection();
     returnTempoDownload();
@@ -498,4 +499,5 @@ void JanelaConfiguracao::on_BotaoSalvar_clicked()
     returnQualidade();
     returnTorrentPadrao();
     returnImagemBaixaQualidade();
+    emit salvaArquivo();
 }

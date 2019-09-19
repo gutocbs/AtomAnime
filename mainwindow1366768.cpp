@@ -19,10 +19,6 @@ mainwindow1366768::mainwindow1366768(QWidget *parent) :
     configuracoes->CriaPastasBase();
 
     runArquivo = new Config();
-    runArquivo->setConfigs(configuracoes);
-    runArquivo->IniciaThread(cThread);
-    runArquivo->moveToThread(&cThread);
-    cThread.start();
 
     connect(runArquivo, SIGNAL(mensagemConfig(QString)), &jConfig,SLOT(mensagem(QString)));
     connect(runArquivo, SIGNAL(refresh()),this,SLOT(refreshArquivo()));
@@ -34,6 +30,7 @@ mainwindow1366768::mainwindow1366768(QWidget *parent) :
 
     anime0 = -1;
     numEpisodios = 0;
+
     ui->setupUi(this);
     ui->janela->addWidget(&jConfig);
     ui->janela->addWidget(&jtorrent);
@@ -42,23 +39,25 @@ mainwindow1366768::mainwindow1366768(QWidget *parent) :
     ui->StringBusca->setMaximumBlockCount(1);
 
     ui->label->setText("Carregando lista de animes");
-    ui->nomeUsuario->setText(configuracoes->retornaUser());
+    if(configuracoes->retornaUser() != ""){
+        setUser();
+    }
 
+    Botoes();
     QTimer::singleShot(600000, this, SLOT(mandaRefresh()));
 }
 
 mainwindow1366768::~mainwindow1366768()
 {
-    configuracoes->EscreveConfig();
+//    configuracoes->EscreveConfig();
     delete leitorA;
-    delete runArquivo;
+//    runArquivo->deleteLater();
+//    configuracoes->deleteLater();
 
-    delete configuracoes;
-
-    delete DownImagemPequenaListas;
-    delete DownImagemGrandeListas;
-    delete DownImagemListas;
-    delete organiza;
+//    delete DownImagemPequenaListas;
+//    delete DownImagemGrandeListas;
+//    delete DownImagemListas;
+//    delete organiza;
     delete ui;
 }
 
@@ -72,9 +71,9 @@ void mainwindow1366768::keyPressEvent(QKeyEvent * event){
 }
 
 void mainwindow1366768::Botoes(){
-    connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
-    connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));
     connect(ui->Refresh, SIGNAL(clicked()), this,SLOT(mandaRefresh()));
+    connect(ui->BotaoTorrent, SIGNAL(clicked()),this,SLOT(Torrent()));
+    connect(ui->BotaoConfig, SIGNAL(clicked()),this,SLOT(Configurar()));
 
     connect(ui->clickAnime1_3, SIGNAL(clicked()),this,SLOT(carregaAnime1()));
     connect(ui->clickAnime2_3, SIGNAL(clicked()),this,SLOT(carregaAnime2()));
@@ -121,6 +120,10 @@ void mainwindow1366768::Botoes(){
 
 void mainwindow1366768::setUser(){
     ui->nomeUsuario->setText(configuracoes->retornaUser());
+    runArquivo->setConfigs(configuracoes);
+    runArquivo->IniciaThread(cThread);
+    runArquivo->moveToThread(&cThread);
+    cThread.start();
 }
 
 void mainwindow1366768::LiberaBotaoCompleted(){
@@ -142,6 +145,7 @@ void mainwindow1366768::LiberaBotaoPlanToWatch(){
         ui->label->setText("tudo pronto! - Se as imagens não carregarem, estão sendo baixadas. Dê um refresh que talvez elas apareçam!");
         primeiraLeitura = true;
     }
+    baixaImagens();
 }
 
 void mainwindow1366768::InstauraPrimeiraJanela(){
@@ -161,15 +165,6 @@ void mainwindow1366768::InstauraPrimeiraJanela(){
         idAnime = tamanhoLista - 28;
     }
 
-    baixaImagens();
-    if(jConfig.returnImagemBaixaQualidade() == 0){
-        baixaQualidade = true;
-        baixaImagensPequenas();
-    }
-    else{
-        baixaImagensGrandes();
-    }
-
     for(int w = 0; w < tamanhoLista; w++){
         vetorAnimes.append(w);
     }
@@ -177,7 +172,6 @@ void mainwindow1366768::InstauraPrimeiraJanela(){
     ui->Watching->setStyleSheet("background: red;");
     jtorrent.getOrganizador(organiza);
     carregaInfo();
-    Botoes();
     connect(ui->Watching, SIGNAL(clicked()),this,SLOT(BotaoWatching()));
 }
 
@@ -409,11 +403,7 @@ void mainwindow1366768::refreshArquivo(){
     //O download de imagens só acontece caso a lista tenha novos animes
     //e isso vai garantir que a função vai rodar toda vez que der refresh
     QString currentList = lista;
-    if(jConfig.returnImagemBaixaQualidade() == 0)
-        baixaImagensPequenas();
-    else
-        baixaImagens();
-    baixaImagensGrandes();
+    baixaImagens();
     if(currentList == "watching"){
         BotaoWatching();
     }
@@ -495,13 +485,13 @@ void mainwindow1366768::baixaImagens()
 void mainwindow1366768::baixaImagensGrandes(){
     DownImagemGrandeListas = new QDownloader();
     DownImagemGrandeListas->setNextBig();
-    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
+//    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
 void mainwindow1366768::baixaImagensPequenas(){
     QDownloader *DownImagemPequenaListas = new QDownloader();
     DownImagemPequenaListas->setNextSmall();
-    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
+//    connect(DownImagemGrandeListas, SIGNAL(listaMensagem(QString)), this, SLOT(mensagemFimDownload(QString)));
 }
 
 void mainwindow1366768::mensagemFimDownload(QString mensagem){
@@ -509,7 +499,19 @@ void mainwindow1366768::mensagemFimDownload(QString mensagem){
         ui->label->setText("Todas as imagens foram carregadas");
     else
         ui->label->setText("As imagens da lista " + mensagem + " foram carregadas.");
-    delete DownImagemListas;
+//    delete DownImagemListas;
+    if(mensagem == "all")
+        ui->label->setText("Todas as imagens foram carregadas");
+    else
+        ui->label->setText("As imagens da lista " + mensagem + " foram carregadas.");
+//    delete DownImagemListas;
+    if(jConfig.returnImagemBaixaQualidade() == 0){
+        baixaQualidade = true;
+        baixaImagensPequenas();
+    }
+    else{
+        baixaImagensGrandes();
+    }
 }
 
 void mainwindow1366768::BuscaTorrentAnimeEspecifico(){

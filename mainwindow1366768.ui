@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-image: url(:/Imagens/Imagens/fundo/MainBackground.jpg);</string>
+   <string notr="true">background-color: rgb(20,20,20)</string>
   </property>
   <widget class="QLabel" name="nomeUsuario">
    <property name="geometry">

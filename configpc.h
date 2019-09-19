@@ -24,7 +24,6 @@ public:
     int BuscaPastasAnimesEspecificos(QString, QString, QString);
 
     void EscreveArquivo();//Arquivo de configuração do software
-    void EscreveConfig();
     void CriaPastasBase();
     void recebeJConfig(JanelaConfiguracao *JanelaConfg);
     void setOrdem(QString);
@@ -57,6 +56,7 @@ public slots:
     void setQualidade(QString);
     void setTorrentPadrao(QString);
     void setQualidadeImagem(int);
+    void EscreveConfig();
 
 private:
     anitomy::Anitomy *anitomy;

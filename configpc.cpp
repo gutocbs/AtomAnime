@@ -14,7 +14,7 @@ configPC::configPC()
 
 configPC::~configPC(){
     delete anitomy;
-    delete jconfig;
+//    jconfig->deleteLater();
 }
 
 void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
@@ -35,6 +35,7 @@ void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
     connect(jconfig, SIGNAL(quality(QString)), this, SLOT(setQualidade(QString)));
     connect(jconfig, SIGNAL(tPadrao(QString)), this, SLOT(setTorrentPadrao(QString)));
     connect(jconfig, SIGNAL(bDownload(int)), this, SLOT(setQualidadeImagem(int)));
+    connect(jconfig, SIGNAL(salvaArquivo()), this, SLOT(EscreveConfig()));
 }
 
 void configPC::addDir(QString dir){
@@ -163,8 +164,8 @@ void configPC::EscreveArquivo(){
 
 void configPC::EscreveConfig(){
     QString filename = "Configurações/user.txt";
+    QFile::remove(filename);
     QFile file(filename);
-    file.remove();
     if (file.open(QIODevice::ReadWrite)) {
         QTextStream stream(&file);
         stream << "user>" << usernameAnilist << endl;

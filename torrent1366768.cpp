@@ -21,10 +21,10 @@ torrent1366768::~torrent1366768()
     qDeleteAll(pLayout.begin(), pLayout.end());
 
     delete anitomy;
-    delete jconfig;
-    delete qleitor;
-    delete organiza;
-    delete baixaXML;
+//    delete jconfig;
+//    delete qleitor;
+//    delete organiza;
+//    delete baixaXML;
     delete ui;
 }
 

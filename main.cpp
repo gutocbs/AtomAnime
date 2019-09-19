@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "mainwindow1366768.h"
+#include "telainicial.h"
 #include "telainicial.h"
 #include <QApplication>
 #include <QtDebug>
@@ -8,12 +10,20 @@ int main(int argc, char *argv[])
 {
 
     QApplication a(argc, argv);
-//    MainWindow w;
-    telainicial w;
-    w.showMaximized();
+    QScreen *screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    int height = screenGeometry.height();
+//        int width = screenGeometry.width();
+    MainWindow w;
+    mainwindow1366768 w1;
+    if(height == 1080){
+        w.showMaximized();
+        w1.close();
+    }
+    else{
+        w1.showMaximized();
+        w.close();
+    }
 
-//    JanelaConfiguracao as;
-//    as.showMaximized();
-    //Basicamente, criar uma janela pra cada resolução é a melhor escolha
     return a.exec();
 }
