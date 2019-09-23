@@ -14,7 +14,7 @@ configPC::configPC()
 
 configPC::~configPC(){
     delete anitomy;
-//    jconfig->deleteLater();
+    jconfig->deleteLater();
 }
 
 void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
@@ -26,7 +26,7 @@ void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
     connect(jconfig, SIGNAL(dirAdd(QString)), this, SLOT(addDir(QString)));
     connect(jconfig, SIGNAL(dirRem(QString)), this, SLOT(rmvDir(QString)));
     connect(jconfig, SIGNAL(detec(int)), this, SLOT(setDetection(int)));
-    connect(jconfig, SIGNAL(dListas(int)), this, SLOT(setDownloadListas(int)));
+    connect(jconfig, SIGNAL(dListas(QString)), this, SLOT(setDownloadListas(QString)));
     connect(jconfig, SIGNAL(tDownload(int)), this, SLOT(setTempoDownload(int)));
     connect(jconfig, SIGNAL(dAutomatico(int)), this, SLOT(setDownloadAutomatico(int)));
     connect(jconfig, SIGNAL(dFolder(QString)), this, SLOT(setDownloadFolder(QString)));
@@ -41,6 +41,7 @@ void configPC::recebeJConfig(JanelaConfiguracao *JanelaConfg){
 void configPC::addDir(QString dir){
     diretorioAnimes.append(dir);
     EscreveArquivo();
+//    BuscaPastasAnimesEspecificos()//arrumar aqui pra rodar sempre que adicionar um diretorio novo
 }
 
 void configPC::rmvDir(QString dir){
@@ -108,7 +109,7 @@ void configPC::setDetection(int jdet){
     detection = jdet;
 }
 
-void configPC::setDownloadListas(int jdl){
+void configPC::setDownloadListas(QString jdl){
     downloadListas = jdl;
 }
 

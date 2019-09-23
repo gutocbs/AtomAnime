@@ -20,7 +20,6 @@ public:
     ~JanelaConfiguracao();
     void setDiretoriosAnimes();
     void leArquivoConf();
-    int returnDownloadListas();
     int returnDetection();
     int returnTempoDownload();
     int returnDownloadAutomatico();
@@ -30,6 +29,7 @@ public:
     QString returnQualidade();
     QString returnTorrentPadrao();
     QString returnDownloadFolder();
+    QString returnDownloadListas();
 
     QVector<QString> retornaDiretorioAnime();
     QString returnUserAnilist();
@@ -37,7 +37,7 @@ public:
     QString returnRSS();
 
     void setDetection(int);
-    void setDownloadListas(int);
+    void setDownloadListas(QString);
     void setDownloadAutomatico(int);
 
 private:
@@ -52,9 +52,9 @@ private:
     QString fansub;
     QString qualidade;
     QString torrent;
+    QString downloadListas;
 
     int detection;
-    int downloadListas;
     int tempoDownload;
     int downloadAutomatico;
 signals:
@@ -64,7 +64,7 @@ signals:
     void dirAdd(QString);
     void dirRem(QString);
     void detec(int);
-    void dListas(int);
+    void dListas(QString);
     void tDownload(int);
     void dAutomatico(int);
     void dFolder(QString);

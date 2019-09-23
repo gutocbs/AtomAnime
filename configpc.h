@@ -48,7 +48,7 @@ public slots:
     void rmvDir(QString);
     void setFeedBusca(QString);
     void setDetection(int);
-    void setDownloadListas(int);
+    void setDownloadListas(QString);
     void setTempoDownload(int);
     void setDownloadAutomatico(int);
     void setDownloadFolder(QString);
@@ -72,8 +72,8 @@ private:
     QString preFfansub;
     QString prefQualidade;
     QString prefTorrent;
+    QString downloadListas;
     int detection;
-    int downloadListas;
     int tempoDownload;
     int downloadAutomatico;
     int qualidadeImagem;

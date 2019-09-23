@@ -17,8 +17,8 @@ QDownloader::~QDownloader()
 //    delete manager;
 //    delete reply;
 //    delete file;
-//    delete configura;
-//    delete leiArq;
+    delete configura;
+    delete leiArq;
 }
 
 void QDownloader::downloadImagensLista(QString fileURL, QString id){
@@ -129,7 +129,8 @@ void QDownloader::downloadImagensPequenasLista(QString fileURL, QString id){
 void QDownloader::setURL(QString url){
     QString saveFilePath = "Configurações/rss.xml";
     bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-    QFile::remove(saveFilePath);
+    if(fileExists)
+        QFile::remove(saveFilePath);
     if(!fileExists){
         QNetworkRequest request;
         request.setUrl(QUrl(url));
@@ -173,7 +174,7 @@ void QDownloader::setTorrent(QString url, QString nome){
 
 void QDownloader::onDownloadProgress(qint64 bytesRead,qint64 bytesTotal)
 {
-    qDebug(QString::number(bytesRead).toLatin1() +" - "+ QString::number(bytesTotal).toLatin1());
+    qDebug() << QString::number(bytesRead).toLatin1() +" - "+ QString::number(bytesTotal).toLatin1();
 }
 
 void QDownloader::onFinished(QNetworkReply * reply)
@@ -261,6 +262,7 @@ void QDownloader::setNext()
     }
     lista = "9";
     indexLista++;
+//    if(para = true) por algo assim pra parar
     if(terminouLista == false){
         if(indexLista < tamanhoLista){
             downloadImagensLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));

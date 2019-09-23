@@ -1,7 +1,5 @@
 #include "mainwindow.h"
 #include "mainwindow1366768.h"
-#include "telainicial.h"
-#include "telainicial.h"
 #include <QApplication>
 #include <QtDebug>
 #include <QScreen>

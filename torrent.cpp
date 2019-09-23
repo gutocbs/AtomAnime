@@ -19,7 +19,6 @@ torrent::~torrent()
     qDeleteAll(box.begin(),box.end());
     qDeleteAll(pWidget.begin(), pWidget.end());
     qDeleteAll(pLayout.begin(), pLayout.end());
-
     delete anitomy;
 //    delete jconfig;
 //    delete qleitor;
@@ -35,6 +34,7 @@ void torrent::getJConfig(JanelaConfiguracao *JanelaConfig){
     diretorioDownloads = jconfig->returnDownloadFolder();
     prefSub = jconfig->returnFansub();
     prefQualidade = jconfig->returnQualidade();
+    listasAnime = jconfig->returnDownloadListas();
     //O tempo de download automático é definido em minutos, porém o timer é definido em milisegundos.
     //Aqui é feita a conversão do tempo
     tempoDownloadAutomatico = jconfig->returnTempoDownload() * 60000;
@@ -70,24 +70,20 @@ void torrent::getRss(){
     QObject::connect(baixaXML, SIGNAL(terminouDownload()), this, SLOT(leXML()));
 }
 
-
-void torrent::on_pushButton_clicked()
-{
-    emit volta();
-}
-
 void torrent::on_XML_clicked()
 {
-    nomeTorrent.clear();
-    nome.clear();
-    fansub.clear();
-    episodio.clear();
-    resolucao.clear();
-    link.clear();
-    lista.clear();
-    tier.clear();
-    dublado.clear();
-    comentario.clear();
+    if(nomeTorrent.isEmpty() == false){
+        nomeTorrent.clear();
+        nome.clear();
+        fansub.clear();
+        episodio.clear();
+        resolucao.clear();
+        link.clear();
+        lista.clear();
+        tier.clear();
+        dublado.clear();
+        comentario.clear();
+    }
 
     ui->label->setText("Carregando lista.");
     getRss();
@@ -147,7 +143,6 @@ void torrent::preencheTabela(){
     ui->ListaTorrents->setRowCount(0);
     ui->ListaTorrents->setRowCount(nome.length());
     ui->ListaTorrents->setSortingEnabled(true);
-    ui->ListaTorrents->sortByColumn(7, Qt::AscendingOrder);
 
     for(int i = 0; i < nome.length(); i++){
         box.append(new QCheckBox);
@@ -178,7 +173,7 @@ void torrent::preencheTabela(){
             }
             else if(w == 2){
 //                item->setForeground(QColor::fromRgb(220,220,220));
-                item->setText(episodio[i]);
+                item->setData(Qt::EditRole, episodio[i].toInt());
                 ui->ListaTorrents->setItem(i,w, item);
             }
             else if(w == 3){
@@ -203,7 +198,6 @@ void torrent::preencheTabela(){
             }
             else if(w == 6){
                 item->setText(comentario[i]);
-//                qDebug() << comentario[i];
                 ui->ListaTorrents->setItem(i,w,item);
             }
             else if(w == 7){
@@ -214,6 +208,7 @@ void torrent::preencheTabela(){
         }
     }
 
+    ui->ListaTorrents->sortByColumn(7, Qt::AscendingOrder);
     ui->ListaTorrents->update();
     if(downloadAutomatico == true)
         Download();
@@ -224,7 +219,7 @@ void torrent::leXML(){
     QString arquivoLer = "Configurações/rss.xml";
     QFile lerXML(arquivoLer);
     QString tempTorrentNome;
-    QString tempTier;
+    QString tempTier = "90";
     QString tempQualidade;
     QString tempEpisodioTorrent;
     QString tempId;
@@ -232,7 +227,7 @@ void torrent::leXML(){
     QString tempSub;
     QVector<int> tempEpiD;
     bool tempDown = false;
-        int tempEpisodioListaWatching = 0;
+    int tempEpisodioListaWatching = 0;
     if(lerXML.size() != 0){
         //Checa se o arquivo pode ser aberto
         if (lerXML.open(QIODevice::ReadOnly))
@@ -264,7 +259,6 @@ void torrent::leXML(){
                         tempSub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
                         resolucao.append(QString::fromStdWString(elements.get(anitomy::kElementVideoResolution)));
                         tempQualidade = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
-                        qleitor->leLinha("watching");
 
                         tempTorrentNome.remove(".");
                         tempTorrentNome.remove("?");
@@ -276,15 +270,60 @@ void torrent::leXML(){
                         tempTorrentNome.remove("s02");
                         tempTorrentNome= tempTorrentNome.simplified();
 
-                        for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
-                            if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
-                                tempTier = "1";
-                                tempId = qleitor->retornaId(i);
-                                tempNome = qleitor->retornaNome(i);
-                                tempNomeAlternativo = qleitor->retornaNomeIngles(i);
-                                organiza->retornaNumEpiNaPasta(0, tempId.toInt(), qleitor->retornaNumEpi(i).toInt());
-                                tempEpisodioListaWatching = qleitor->retornaProgresso(i);
-                                break;
+                        if(listasAnime.contains("w") == true){
+                            qleitor->leLinha("watching");
+                            for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
+                                if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
+                                    tempTier = "1";
+                                    tempId = qleitor->retornaId(i);
+                                    tempNome = qleitor->retornaNome(i);
+                                    tempNomeAlternativo = qleitor->retornaNomeIngles(i);
+                                    organiza->retornaNumEpiNaPasta(0, tempId.toInt(), qleitor->retornaNumEpi(i).toInt());
+                                    tempEpisodioListaWatching = qleitor->retornaProgresso(i);
+                                    break;
+                                }
+                            }
+                        }
+                        if(listasAnime.contains("o") == true){
+                            qleitor->leLinha("onhold");
+                            for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
+                                if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
+                                    tempTier = "1";
+                                    tempId = qleitor->retornaId(i);
+                                    tempNome = qleitor->retornaNome(i);
+                                    tempNomeAlternativo = qleitor->retornaNomeIngles(i);
+                                    organiza->retornaNumEpiNaPasta(0, tempId.toInt(), qleitor->retornaNumEpi(i).toInt());
+                                    tempEpisodioListaWatching = qleitor->retornaProgresso(i);
+                                    break;
+                                }
+                            }
+                        }
+                        if(listasAnime.contains("d") == true){
+                            qleitor->leLinha("dropped");
+                            for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
+                                if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
+                                    tempTier = "1";
+                                    tempId = qleitor->retornaId(i);
+                                    tempNome = qleitor->retornaNome(i);
+                                    tempNomeAlternativo = qleitor->retornaNomeIngles(i);
+                                    organiza->retornaNumEpiNaPasta(0, tempId.toInt(), qleitor->retornaNumEpi(i).toInt());
+                                    tempEpisodioListaWatching = qleitor->retornaProgresso(i);
+                                    break;
+                                }
+                            }
+                        }
+                        if(listasAnime.contains("p") == true){
+                            qleitor->leLinha("plantowatch");
+                            for(int i = 0; i < qleitor->retornaTamanhoLista(); i++){
+                                if(qleitor->retornaNome(i).contains(tempTorrentNome) || qleitor->retornaNomeIngles(i).contains(tempTorrentNome)){
+                                    tempTier = "1";
+                                    tempId = qleitor->retornaId(i);
+                                    tempNome = qleitor->retornaNome(i);
+                                    tempNomeAlternativo = qleitor->retornaNomeIngles(i);
+                                    organiza->retornaNumEpiNaPasta(0, tempId.toInt(), qleitor->retornaNumEpi(i).toInt());
+                                    tempEpisodioListaWatching = qleitor->retornaProgresso(i);
+                                    break;
+                                }
                             }
                         }
                         if(tempTier == "1"){
@@ -293,6 +332,8 @@ void torrent::leXML(){
                             if(tempEpiD.isEmpty() == false && tempEpisodioTorrent.toInt() == tempEpiD.last()+1){
                                 tempDown = true;
                             }
+                            if(prefSub == "")
+                                prefSub = tempSub;
                         }
                         if(tempTier == "1" && tempQualidade == prefQualidade && tempEpisodioTorrent.toInt() > tempEpisodioListaWatching
                             && tempDown == true && tempSub == prefSub)
@@ -313,16 +354,9 @@ void torrent::leXML(){
                         linha.remove("]]></link>");
                         link.append(linha);
                     }
-                    else if(linha.contains("Comment")){
-                        if(linha.contains("|]]></description>"))
-                            linha.remove("|]]></description>");
-                        else
-                            linha.remove("]]></description>");
-//                        qDebug() << linha;
+                    if(linha.contains("]]></description>")){
+                        linha.remove("]]></description>");
                         comentario.append(linha);
-                    }
-                    else if(linha.contains("</description>") == true && linha.contains("Comment") == false){
-                            comentario.append("");
                     }
                 }
                 tempDown = false;

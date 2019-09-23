@@ -6,6 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+//    apiget api;
+//    api.postRequest();
     anime0 = -1;
     idAnime = 0;
     pagina = 1;
@@ -53,13 +55,13 @@ MainWindow::~MainWindow()
 //    configuracoes->EscreveConfig();
 
     delete leitorA;
-//    runArquivo->deleteLater();
-//    configuracoes->deleteLater();
-
+    runArquivo->deleteLater();
+    configuracoes->deleteLater();
+//    DownImagemListas->
 //    DownImagemPequenaListas->deleteLater();
 //    DownImagemGrandeListas->deleteLater();
 //    DownImagemListas->deleteLater();
-//    delete organiza;
+    delete organiza;
     delete ui;
 }
 
@@ -793,6 +795,7 @@ void MainWindow::carregaInfo(){
     ui->NumPagina->setText("Página "+ QString::number(pagina) + "/" + QString::number(((tamanhoLista-1)/28)+1));
     ui->Nome->setWordWrap(true);
     ui->Nome->setText(leitorA->retornaNome(anime0));
+//    ui->Nome->setText(QString::fromUtf8(leitorA->retornaNome(anime0).toLatin1()));
     ui->NomeIngles->setWordWrap(true);
     ui->NomeIngles->setText(leitorA->retornaNomeIngles(anime0));
     ui->Status->setWordWrap(true);
@@ -918,7 +921,7 @@ void MainWindow::carregaInfo(){
     if(i+1 < tamanhoLista){
         ui->anime2->setScaledContents(true);
         ui->anime2_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime2_2->setText(leitorA->retornaNome(i));
+        ui->anime2_2->setText(leitorA->retornaNome(i+1));
         ui->anime2_2->setAlignment(Qt::AlignCenter);
         ui->anime2_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -947,7 +950,7 @@ void MainWindow::carregaInfo(){
     if(i+2 < tamanhoLista){
         ui->anime3->setScaledContents(true);
         ui->anime3_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime3_2->setText(leitorA->retornaNome(i));
+        ui->anime3_2->setText(leitorA->retornaNome(i+2));
         ui->anime3_2->setAlignment(Qt::AlignCenter);
         ui->anime3_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -976,7 +979,7 @@ void MainWindow::carregaInfo(){
     if(i+3 < tamanhoLista){
         ui->anime4->setScaledContents(true);
         ui->anime4_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime4_2->setText(leitorA->retornaNome(i));        ui->anime1_2->setAlignment(Qt::AlignCenter);
+        ui->anime4_2->setText(leitorA->retornaNome(i+3));        ui->anime1_2->setAlignment(Qt::AlignCenter);
         ui->anime4_2->setWordWrap(true);
         if(baixaQualidade == true){
             if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensPequenas), "jpg")){
@@ -1004,7 +1007,7 @@ void MainWindow::carregaInfo(){
     if(i+4 < tamanhoLista){
         ui->anime5->setScaledContents(true);
         ui->anime5_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime5_2->setText(leitorA->retornaNome(i));
+        ui->anime5_2->setText(leitorA->retornaNome(i+4));
         ui->anime5_2->setAlignment(Qt::AlignCenter);
         ui->anime5_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1033,7 +1036,7 @@ void MainWindow::carregaInfo(){
     if(i+5 < tamanhoLista){
         ui->anime6->setScaledContents(true);
         ui->anime6_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime6_2->setText(leitorA->retornaNome(i));
+        ui->anime6_2->setText(leitorA->retornaNome(i+5));
         ui->anime6_2->setAlignment(Qt::AlignCenter);
         ui->anime6_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1062,7 +1065,7 @@ void MainWindow::carregaInfo(){
     if(i+6 < tamanhoLista){
         ui->anime7->setScaledContents(true);
         ui->anime7_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime7_2->setText(leitorA->retornaNome(i));
+        ui->anime7_2->setText(leitorA->retornaNome(i+6));
         ui->anime7_2->setAlignment(Qt::AlignCenter);
         ui->anime7_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1091,7 +1094,7 @@ void MainWindow::carregaInfo(){
     if(i+7 < tamanhoLista){
         ui->anime8->setScaledContents(true);
         ui->anime8_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime8_2->setText(leitorA->retornaNome(i));
+        ui->anime8_2->setText(leitorA->retornaNome(i+7));
         ui->anime8_2->setAlignment(Qt::AlignCenter);
         ui->anime8_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1120,7 +1123,7 @@ void MainWindow::carregaInfo(){
     if(i+8 < tamanhoLista){
         ui->anime9->setScaledContents(true);
         ui->anime9_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime9_2->setText(leitorA->retornaNome(i));
+        ui->anime9_2->setText(leitorA->retornaNome(i+8));
         ui->anime9_2->setAlignment(Qt::AlignCenter);
         ui->anime9_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1149,7 +1152,7 @@ void MainWindow::carregaInfo(){
     if(i+9 < tamanhoLista){
         ui->anime10->setScaledContents(true);
         ui->anime10_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime10_2->setText(leitorA->retornaNome(i));
+        ui->anime10_2->setText(leitorA->retornaNome(i+9));
         ui->anime10_2->setAlignment(Qt::AlignCenter);
         ui->anime10_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1178,7 +1181,7 @@ void MainWindow::carregaInfo(){
     if(i+10 < tamanhoLista){
         ui->anime11->setScaledContents(true);
         ui->anime11_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime11_2->setText(leitorA->retornaNome(i));
+        ui->anime11_2->setText(leitorA->retornaNome(i+10));
         ui->anime11_2->setAlignment(Qt::AlignCenter);
         ui->anime11_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1207,7 +1210,7 @@ void MainWindow::carregaInfo(){
     if(i+11 < tamanhoLista){
         ui->anime12->setScaledContents(true);
         ui->anime12_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime12_2->setText(leitorA->retornaNome(i));
+        ui->anime12_2->setText(leitorA->retornaNome(i+11));
         ui->anime12_2->setAlignment(Qt::AlignCenter);
         ui->anime12_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1236,7 +1239,7 @@ void MainWindow::carregaInfo(){
     if(i+12 < tamanhoLista){
         ui->anime13->setScaledContents(true);
         ui->anime13_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime13_2->setText(leitorA->retornaNome(i));
+        ui->anime13_2->setText(leitorA->retornaNome(i+12));
         ui->anime13_2->setAlignment(Qt::AlignCenter);
         ui->anime13_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1265,7 +1268,7 @@ void MainWindow::carregaInfo(){
     if(i+13 < tamanhoLista){
         ui->anime14->setScaledContents(true);
         ui->anime14_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime14_2->setText(leitorA->retornaNome(i));
+        ui->anime14_2->setText(leitorA->retornaNome(i+13));
         ui->anime14_2->setAlignment(Qt::AlignCenter);
         ui->anime14_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1294,7 +1297,7 @@ void MainWindow::carregaInfo(){
     if(i+14 < tamanhoLista){
         ui->anime15->setScaledContents(true);
         ui->anime15_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime15_2->setText(leitorA->retornaNome(i));
+        ui->anime15_2->setText(leitorA->retornaNome(i+14));
         ui->anime15_2->setAlignment(Qt::AlignCenter);
         ui->anime15_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1322,7 +1325,7 @@ void MainWindow::carregaInfo(){
     }
     if(i+15 < tamanhoLista){
         ui->anime16_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime16_2->setText(leitorA->retornaNome(i));
+        ui->anime16_2->setText(leitorA->retornaNome(i+15));
         ui->anime16->setScaledContents(true);
         ui->anime16_2->setAlignment(Qt::AlignCenter);
         ui->anime16_2->setWordWrap(true);
@@ -1352,7 +1355,7 @@ void MainWindow::carregaInfo(){
     if(i+16 < tamanhoLista){
         ui->anime17->setScaledContents(true);
         ui->anime17_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime17_2->setText(leitorA->retornaNome(i));
+        ui->anime17_2->setText(leitorA->retornaNome(i+16));
         ui->anime17_2->setAlignment(Qt::AlignCenter);
         ui->anime17_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1381,7 +1384,7 @@ void MainWindow::carregaInfo(){
     if(i+17 < tamanhoLista){
         ui->anime18->setScaledContents(true);
         ui->anime18_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime18_2->setText(leitorA->retornaNome(i));
+        ui->anime18_2->setText(leitorA->retornaNome(i+17));
         ui->anime18_2->setAlignment(Qt::AlignCenter);
         ui->anime18_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1410,7 +1413,7 @@ void MainWindow::carregaInfo(){
     if(i+18 < tamanhoLista){
         ui->anime19->setScaledContents(true);
         ui->anime19_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime19_2->setText(leitorA->retornaNome(i));
+        ui->anime19_2->setText(leitorA->retornaNome(i+18));
         ui->anime19_2->setAlignment(Qt::AlignCenter);
         ui->anime19_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1439,7 +1442,7 @@ void MainWindow::carregaInfo(){
     if(i+19 < tamanhoLista){
         ui->anime20->setScaledContents(true);
         ui->anime20_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime20_2->setText(leitorA->retornaNome(i));
+        ui->anime20_2->setText(leitorA->retornaNome(i+19));
         ui->anime20_2->setAlignment(Qt::AlignCenter);
         ui->anime20_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1468,7 +1471,7 @@ void MainWindow::carregaInfo(){
     if(i+20 < tamanhoLista){
         ui->anime21->setScaledContents(true);
         ui->anime21_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime21_2->setText(leitorA->retornaNome(i));
+        ui->anime21_2->setText(leitorA->retornaNome(i+20));
         ui->anime21_2->setAlignment(Qt::AlignCenter);
         ui->anime21_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1497,7 +1500,7 @@ void MainWindow::carregaInfo(){
     if(i+21 < tamanhoLista){
         ui->anime22->setScaledContents(true);
         ui->anime22_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime22_2->setText(leitorA->retornaNome(i));
+        ui->anime22_2->setText(leitorA->retornaNome(i+21));
         ui->anime22_2->setAlignment(Qt::AlignCenter);
         ui->anime22_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1526,7 +1529,7 @@ void MainWindow::carregaInfo(){
     if(i+22 < tamanhoLista){
         ui->anime23->setScaledContents(true);
         ui->anime23_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime23_2->setText(leitorA->retornaNome(i));
+        ui->anime23_2->setText(leitorA->retornaNome(i+22));
         ui->anime23_2->setAlignment(Qt::AlignCenter);
         ui->anime23_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1555,7 +1558,7 @@ void MainWindow::carregaInfo(){
     if(i+23 < tamanhoLista){
         ui->anime24->setScaledContents(true);
         ui->anime24_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime24_2->setText(leitorA->retornaNome(i));
+        ui->anime24_2->setText(leitorA->retornaNome(i+23));
         ui->anime24_2->setAlignment(Qt::AlignCenter);
         ui->anime24_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1584,7 +1587,7 @@ void MainWindow::carregaInfo(){
     if(i+24 < tamanhoLista){
         ui->anime25->setScaledContents(true);
         ui->anime25_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime25_2->setText(leitorA->retornaNome(i));
+        ui->anime25_2->setText(leitorA->retornaNome(i+24));
         ui->anime25_2->setAlignment(Qt::AlignCenter);
         ui->anime25_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1613,7 +1616,7 @@ void MainWindow::carregaInfo(){
     if(i+25 < tamanhoLista){
         ui->anime26->setScaledContents(true);
         ui->anime26_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime26_2->setText(leitorA->retornaNome(i));
+        ui->anime26_2->setText(leitorA->retornaNome(i+25));
         ui->anime26_2->setAlignment(Qt::AlignCenter);
         ui->anime26_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1642,7 +1645,7 @@ void MainWindow::carregaInfo(){
     if(i+26 < tamanhoLista){
         ui->anime27->setScaledContents(true);
         ui->anime27_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime27_2->setText(leitorA->retornaNome(i));
+        ui->anime27_2->setText(leitorA->retornaNome(i+26));
         ui->anime27_2->setAlignment(Qt::AlignCenter);
         ui->anime27_2->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1671,7 +1674,7 @@ void MainWindow::carregaInfo(){
     if(i+27 < tamanhoLista){
         ui->anime28->setScaledContents(true);
         ui->anime28_2->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime28_2->setText(leitorA->retornaNome(i));
+        ui->anime28_2->setText(leitorA->retornaNome(i+27));
         ui->anime28_2->setAlignment(Qt::AlignCenter);
         ui->anime28_2->setWordWrap(true);
         if(baixaQualidade == true){

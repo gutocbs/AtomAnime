@@ -17,7 +17,7 @@
 #include "leitorarquivos.h"
 #include "organizador.h"
 #include "configpc.h"
-
+#include "apiget.h"
 
 #include "janelaconfiguracao.h"
 #include "torrent.h"

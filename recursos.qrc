@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/Imagens">
-        <file>C:/Users/Guto/Desktop/Menus.jpg</file>
         <file>Imagens/fundo/MainBackground.jpg</file>
         <file>Imagens/fundo/MainBackground1366768.jpg</file>
     </qresource>

@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QTimer>
 #include <QBoxLayout>
+#include <QtConcurrent>
 
 #include "anitomy/anitomy.h"
 #include "filedownloader.h"
@@ -68,6 +69,7 @@ private:
 
     QString url;
     QString diretorioDownloads;
+    QString listasAnime;
 
     QVector<QString> nomeTorrent;
     QVector<QString> nome;

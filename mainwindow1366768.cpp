@@ -51,13 +51,13 @@ mainwindow1366768::~mainwindow1366768()
 {
 //    configuracoes->EscreveConfig();
     delete leitorA;
-//    runArquivo->deleteLater();
-//    configuracoes->deleteLater();
+    runArquivo->deleteLater();
+    configuracoes->deleteLater();
 
 //    delete DownImagemPequenaListas;
 //    delete DownImagemGrandeListas;
 //    delete DownImagemListas;
-//    delete organiza;
+    delete organiza;
     delete ui;
 }
 
@@ -920,7 +920,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+1 < tamanhoLista){
         ui->anime2_6->setScaledContents(true);
         ui->anime2_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime2_5->setText(leitorA->retornaNome(i));
+        ui->anime2_5->setText(leitorA->retornaNome(i+1));
         ui->anime2_5->setAlignment(Qt::AlignCenter);
         ui->anime2_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -941,15 +941,15 @@ void mainwindow1366768::carregaInfo(){
         }
     }
     else{
-        ui->anime6_6->clear();
-        ui->anime6_6->setStyleSheet("background: transparent;");
+        ui->anime2_6->clear();
+        ui->anime2_6->setStyleSheet("background: transparent;");
         ui->anime2_5->setStyleSheet("background: transparent;");
         ui->anime2_5->clear();
     }
     if(i+2 < tamanhoLista){
         ui->anime3_6->setScaledContents(true);
         ui->anime3_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime3_5->setText(leitorA->retornaNome(i));
+        ui->anime3_5->setText(leitorA->retornaNome(i+2));
         ui->anime3_5->setAlignment(Qt::AlignCenter);
         ui->anime3_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -978,7 +978,8 @@ void mainwindow1366768::carregaInfo(){
     if(i+3 < tamanhoLista){
         ui->anime4_6->setScaledContents(true);
         ui->anime4_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime4_5->setText(leitorA->retornaNome(i));        ui->anime1_5->setAlignment(Qt::AlignCenter);
+        ui->anime4_5->setText(leitorA->retornaNome(i+3));
+        ui->anime1_5->setAlignment(Qt::AlignCenter);
         ui->anime4_5->setWordWrap(true);
         if(baixaQualidade == true){
             if(pix.load(leitorA->imagem(vetorAnimes[i+3], configuracoes->diretorioImagensPequenas), "jpg")){
@@ -1006,7 +1007,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+4 < tamanhoLista){
         ui->anime5_6->setScaledContents(true);
         ui->anime5_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime5_5->setText(leitorA->retornaNome(i));
+        ui->anime5_5->setText(leitorA->retornaNome(i+4));
         ui->anime5_5->setAlignment(Qt::AlignCenter);
         ui->anime5_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1035,7 +1036,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+5 < tamanhoLista){
         ui->anime6_6->setScaledContents(true);
         ui->anime6_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime6_5->setText(leitorA->retornaNome(i));
+        ui->anime6_5->setText(leitorA->retornaNome(i+5));
         ui->anime6_5->setAlignment(Qt::AlignCenter);
         ui->anime6_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1064,7 +1065,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+6 < tamanhoLista){
         ui->anime7_6->setScaledContents(true);
         ui->anime7_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime7_5->setText(leitorA->retornaNome(i));
+        ui->anime7_5->setText(leitorA->retornaNome(i+6));
         ui->anime7_5->setAlignment(Qt::AlignCenter);
         ui->anime7_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1093,7 +1094,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+7 < tamanhoLista){
         ui->anime8_6->setScaledContents(true);
         ui->anime8_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime8_5->setText(leitorA->retornaNome(i));
+        ui->anime8_5->setText(leitorA->retornaNome(i+7));
         ui->anime8_5->setAlignment(Qt::AlignCenter);
         ui->anime8_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1122,7 +1123,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+8 < tamanhoLista){
         ui->anime9_6->setScaledContents(true);
         ui->anime9_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime9_5->setText(leitorA->retornaNome(i));
+        ui->anime9_5->setText(leitorA->retornaNome(i+8));
         ui->anime9_5->setAlignment(Qt::AlignCenter);
         ui->anime9_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1151,7 +1152,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+9 < tamanhoLista){
         ui->anime10_6->setScaledContents(true);
         ui->anime10_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime10_5->setText(leitorA->retornaNome(i));
+        ui->anime10_5->setText(leitorA->retornaNome(i+9));
         ui->anime10_5->setAlignment(Qt::AlignCenter);
         ui->anime10_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1180,7 +1181,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+10 < tamanhoLista){
         ui->anime11_6->setScaledContents(true);
         ui->anime11_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime11_5->setText(leitorA->retornaNome(i));
+        ui->anime11_5->setText(leitorA->retornaNome(i+10));
         ui->anime11_5->setAlignment(Qt::AlignCenter);
         ui->anime11_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1209,7 +1210,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+11 < tamanhoLista){
         ui->anime12_6->setScaledContents(true);
         ui->anime12_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime12_5->setText(leitorA->retornaNome(i));
+        ui->anime12_5->setText(leitorA->retornaNome(i+11));
         ui->anime12_5->setAlignment(Qt::AlignCenter);
         ui->anime12_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1230,15 +1231,15 @@ void mainwindow1366768::carregaInfo(){
         }
     }
     else{
-        ui->anime16_6->clear();
-        ui->anime16_6->setStyleSheet("background: transparent;");
+        ui->anime12_6->clear();
+        ui->anime12_6->setStyleSheet("background: transparent;");
         ui->anime12_5->setStyleSheet("background: transparent;");
         ui->anime12_5->clear();
     }
     if(i+12 < tamanhoLista){
         ui->anime13_6->setScaledContents(true);
         ui->anime13_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime13_5->setText(leitorA->retornaNome(i));
+        ui->anime13_5->setText(leitorA->retornaNome(i+12));
         ui->anime13_5->setAlignment(Qt::AlignCenter);
         ui->anime13_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1267,7 +1268,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+13 < tamanhoLista){
         ui->anime14_6->setScaledContents(true);
         ui->anime14_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime14_5->setText(leitorA->retornaNome(i));
+        ui->anime14_5->setText(leitorA->retornaNome(i+13));
         ui->anime14_5->setAlignment(Qt::AlignCenter);
         ui->anime14_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1296,7 +1297,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+14 < tamanhoLista){
         ui->anime15_6->setScaledContents(true);
         ui->anime15_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime15_5->setText(leitorA->retornaNome(i));
+        ui->anime15_5->setText(leitorA->retornaNome(i+14));
         ui->anime15_5->setAlignment(Qt::AlignCenter);
         ui->anime15_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1325,7 +1326,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+15 < tamanhoLista){
         ui->anime16_6->setScaledContents(true);
         ui->anime16_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime16_5->setText(leitorA->retornaNome(i));
+        ui->anime16_5->setText(leitorA->retornaNome(i+15));
         ui->anime16_5->setAlignment(Qt::AlignCenter);
         ui->anime16_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1354,7 +1355,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+16 < tamanhoLista){
         ui->anime17_6->setScaledContents(true);
         ui->anime17_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime17_5->setText(leitorA->retornaNome(i));
+        ui->anime17_5->setText(leitorA->retornaNome(i+16));
         ui->anime17_5->setAlignment(Qt::AlignCenter);
         ui->anime17_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1383,7 +1384,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+17 < tamanhoLista){
         ui->anime18_6->setScaledContents(true);
         ui->anime18_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime18_5->setText(leitorA->retornaNome(i));
+        ui->anime18_5->setText(leitorA->retornaNome(i+17));
         ui->anime18_5->setAlignment(Qt::AlignCenter);
         ui->anime18_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1412,7 +1413,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+18 < tamanhoLista){
         ui->anime19_6->setScaledContents(true);
         ui->anime19_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime19_5->setText(leitorA->retornaNome(i));
+        ui->anime19_5->setText(leitorA->retornaNome(i+18));
         ui->anime19_5->setAlignment(Qt::AlignCenter);
         ui->anime19_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1441,7 +1442,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+19 < tamanhoLista){
         ui->anime20_6->setScaledContents(true);
         ui->anime20_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime20_5->setText(leitorA->retornaNome(i));
+        ui->anime20_5->setText(leitorA->retornaNome(i+19));
         ui->anime20_5->setAlignment(Qt::AlignCenter);
         ui->anime20_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1470,7 +1471,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+20 < tamanhoLista){
         ui->anime21_6->setScaledContents(true);
         ui->anime21_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime21_5->setText(leitorA->retornaNome(i));
+        ui->anime21_5->setText(leitorA->retornaNome(i+20));
         ui->anime21_5->setAlignment(Qt::AlignCenter);
         ui->anime21_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1499,7 +1500,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+21 < tamanhoLista){
         ui->anime22_6->setScaledContents(true);
         ui->anime22_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime22_5->setText(leitorA->retornaNome(i));
+        ui->anime22_5->setText(leitorA->retornaNome(i+21));
         ui->anime22_5->setAlignment(Qt::AlignCenter);
         ui->anime22_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1520,15 +1521,15 @@ void mainwindow1366768::carregaInfo(){
         }
     }
     else{
-        ui->anime26_6->clear();
-        ui->anime26_6->setStyleSheet("background: transparent;");
+        ui->anime22_6->clear();
+        ui->anime22_6->setStyleSheet("background: transparent;");
         ui->anime22_5->setStyleSheet("background: transparent;");
         ui->anime22_5->clear();
     }
     if(i+22 < tamanhoLista){
         ui->anime23_6->setScaledContents(true);
         ui->anime23_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime23_5->setText(leitorA->retornaNome(i));
+        ui->anime23_5->setText(leitorA->retornaNome(i+22));
         ui->anime23_5->setAlignment(Qt::AlignCenter);
         ui->anime23_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1557,7 +1558,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+23 < tamanhoLista){
         ui->anime24_6->setScaledContents(true);
         ui->anime24_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime24_5->setText(leitorA->retornaNome(i));
+        ui->anime24_5->setText(leitorA->retornaNome(i+23));
         ui->anime24_5->setAlignment(Qt::AlignCenter);
         ui->anime24_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1586,7 +1587,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+24 < tamanhoLista){
         ui->anime25_6->setScaledContents(true);
         ui->anime25_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime25_5->setText(leitorA->retornaNome(i));
+        ui->anime25_5->setText(leitorA->retornaNome(i+24));
         ui->anime25_5->setAlignment(Qt::AlignCenter);
         ui->anime25_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1615,7 +1616,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+25 < tamanhoLista){
         ui->anime26_6->setScaledContents(true);
         ui->anime26_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime26_5->setText(leitorA->retornaNome(i));
+        ui->anime26_5->setText(leitorA->retornaNome(i+25));
         ui->anime26_5->setAlignment(Qt::AlignCenter);
         ui->anime26_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1644,7 +1645,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+26 < tamanhoLista){
         ui->anime27_6->setScaledContents(true);
         ui->anime27_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime27_5->setText(leitorA->retornaNome(i));
+        ui->anime27_5->setText(leitorA->retornaNome(i+26));
         ui->anime27_5->setAlignment(Qt::AlignCenter);
         ui->anime27_5->setWordWrap(true);
         if(baixaQualidade == true){
@@ -1673,7 +1674,7 @@ void mainwindow1366768::carregaInfo(){
     if(i+27 < tamanhoLista){
         ui->anime28_6->setScaledContents(true);
         ui->anime28_5->setStyleSheet("background-color : rgb(181, 181, 181);");
-        ui->anime28_5->setText(leitorA->retornaNome(i));
+        ui->anime28_5->setText(leitorA->retornaNome(i+27));
         ui->anime28_5->setAlignment(Qt::AlignCenter);
         ui->anime28_5->setWordWrap(true);
         if(baixaQualidade == true){

@@ -69,6 +69,7 @@ private:
 
     QString url;
     QString diretorioDownloads;
+    QString listasAnime;
 
     QVector<QString> nomeTorrent;
     QVector<QString> nome;

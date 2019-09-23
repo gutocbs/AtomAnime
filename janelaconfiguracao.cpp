@@ -97,193 +97,37 @@ void JanelaConfiguracao::setDetection(int dtc){
     }
 }
 
-int JanelaConfiguracao::returnDownloadListas(){
-    if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(15);
-        return 15;
-    }
-    //Caso apenas 3 estejam marcadas
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(14);
-        return 14;
-    }
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(13);
-        return 13;
-    }
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(12);
-        return 12;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(11);
-        return 11;
-    }
-    //Caso apenas 2 estejam marcados
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(10);
-        return 10;
-    }
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(9);
-        return 9;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(8);
-        return 8;
-    }
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(7);
-        return 7;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(6);
-        return 6;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(5);
-        return 5;
-    }
-    //Caso apenas um esteja marcado
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 2){
-        emit dListas(4);
-        return 4;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 2 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(3);
-        return 3;
-    }
-    else if(ui->DownloadWatching->checkState() == 0 && ui->DownloadDropped->checkState() == 2 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(2);
-        return 2;
-    }
-    else if(ui->DownloadWatching->checkState() == 2 && ui->DownloadDropped->checkState() == 0 &&
-            ui->DownloadOnHold->checkState() == 0 && ui->DownloadPlanToWatch->checkState() == 0){
-        emit dListas(1);
-        return 1;
-    }
-    //Caso nenhum esteja marcado
-    else{
-        emit dListas(0);
-        return 0;
-    }
+QString JanelaConfiguracao::returnDownloadListas(){
+    QString marcado = "";
+    if(ui->DownloadWatching->checkState() == 2)
+        marcado.append("w");
+    if(ui->DownloadOnHold->checkState() == 2)
+        marcado.append("o");
+    if(ui->DownloadDropped->checkState() == 2)
+        marcado.append("d");
+    if(ui->DownloadPlanToWatch->checkState() == 2)
+        marcado.append("p");
+    emit dListas(marcado);
+    return marcado;
 }
 
-void JanelaConfiguracao::setDownloadListas(int jdl){
-    if(jdl == 15){
+void JanelaConfiguracao::setDownloadListas(QString jdl){
+    if(jdl.contains("w") == true)
         ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    //Caso apenas 3 estejam marcadas
-    else if(jdl == 14){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 13){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    else if(jdl == 12){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    else if(jdl == 11){
+    else
         ui->DownloadWatching->setCheckState(Qt::Unchecked);
+    if(jdl.contains("d") == true)
         ui->DownloadDropped->setCheckState(Qt::Checked);
+    else
+        ui->DownloadDropped->setCheckState(Qt::Unchecked);
+    if(jdl.contains("o") == true)
         ui->DownloadOnHold->setCheckState(Qt::Checked);
+    else
+        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
+    if(jdl.contains("p") == true)
         ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    //Caso apenas 2 estejam marcados
-    else if(jdl == 10){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
+    else
         ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 9){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 8){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 7){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    else if(jdl == 6){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    else if(jdl == 5){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    //Caso apenas um esteja marcado
-    else if(jdl == 4){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Checked);
-    }
-    else if(jdl == 3){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Checked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 2){
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Checked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    else if(jdl == 1){
-        ui->DownloadWatching->setCheckState(Qt::Checked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
-    //Caso nenhum esteja marcado
-    else{
-        ui->DownloadWatching->setCheckState(Qt::Unchecked);
-        ui->DownloadDropped->setCheckState(Qt::Unchecked);
-        ui->DownloadOnHold->setCheckState(Qt::Unchecked);
-        ui->DownloadPlanToWatch->setCheckState(Qt::Unchecked);
-    }
 }
 
 
@@ -423,7 +267,7 @@ void JanelaConfiguracao::leArquivoConf(){
                setDetection(detection);
            }
            else if(linha.at(0).compare("downloadlistas") == 0){
-                downloadListas = linha.at(1).toInt();
+                downloadListas = linha.at(1);
                 setDownloadListas(downloadListas);
            }
            else if(linha.at(0).compare("tempodownload") == 0){
