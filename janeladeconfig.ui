@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ToolBox</class>
- <widget class="QToolBox" name="ToolBox">
+ <class>janeladeconfig</class>
+ <widget class="QWidget" name="janeladeconfig">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>789</width>
-    <height>612</height>
+    <width>1920</width>
+    <height>821</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>ToolBox</string>
+   <string>Form</string>
   </property>
  </widget>
  <resources/>

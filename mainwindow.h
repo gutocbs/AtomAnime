@@ -2,164 +2,76 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtDebug>
 #include <QPixmap>
-#include <QKeyEvent>
-#include <QTimer>
-#include <QVector>
-#include <QtConcurrent>
-#include <QProcess>
-#include <QScreen>
+#include <QDebug>
+#include <algorithm>
+#include <QDir>
 
-#include "infoanime.h"
-#include "config.h"
+#include "leitorlistaanimes.h"
+#include "confbase.h"
 #include "filedownloader.h"
-#include "leitorarquivos.h"
-#include "organizador.h"
-#include "configpc.h"
-#include "apiget.h"
+#include "arquivos.h"
+#include "confusuario.h"
+#include "logger.h"
 
-#include "janelaconfiguracao.h"
-#include "torrent.h"
-
-namespace Ui {
-class MainWindow;
-}
+QT_BEGIN_NAMESPACE
+namespace Ui { class MainWindow; }
+QT_END_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-    //Essa função é pública por causa do future
-    void ConfiguraArquivos();
+
+    void finfoAnimeSelecionado();
+    void fcarregaImagensLista();
+
+private slots:
+    void on_botaoAnime00_clicked();
+    void on_botaoAnime01_clicked();
+    void on_botaoAnime02_clicked();
+    void on_botaoAnime03_clicked();
+    void on_botaoAnime04_clicked();
+    void on_botaoAnime05_clicked();
+    void on_botaoAnime06_clicked();
+    void on_botaoAnime07_clicked();
+    void on_botaoAnime08_clicked();
+    void on_botaoAnime09_clicked();
+    void on_botaoAnime10_clicked();
+    void on_botaoAnime11_clicked();
+
+    void on_botaoProximaPagina_clicked();
+    void on_botaoPaginaAnterior_clicked();
+
+    void on_Watching_clicked();
+    void on_Completed_clicked();
+    void on_OnHold_clicked();
+    void on_Dropped_clicked();
+    void on_PlanToWatch_clicked();
+
+    void on_botaoProximoEpisodio_clicked();
+    void on_BotaoPasta_clicked();
+    void on_botaoBusca_clicked();
+
+    void on_boxOrdemLista_activated(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;
-    JanelaConfiguracao jConfig;
-    torrent jtorrent;
+    leitorlistaanimes *cleitorListaAnimes;
+    filedownloader *cfiledownloader;
+    arquivos *carquivos;
 
-    //Download de imagens
-    QDownloader *DownImagemListas;
-    QDownloader *DownImagemGrandeListas;
-    QDownloader *DownImagemPequenaListas;
+    QVector<anime*> vlistaSelecionada;
+    QPointer<confBase> cconfBase;
+    QPointer<confUsuario> cconfUsuario;
 
-    //Leitores
-    leitorarquivos *leitorA;
-
-    Organizador *organiza;
-    configPC *configuracoes;
-    Config *runArquivo;
-
-    QThread cThread; //Thread de baixar os animes
-///
-    int anime0, anime1, anime2, anime3, anime4;
-    int idAnime;
-    int tamanhoLista;
-    int numEpisodios;
-    int pagina;
-    int downl;
-
-    QString ordemVetorWatching, ordemVetorCompleted, ordemVetorDropped, ordemVetorPaused, ordemVetorPlantoWatch;
-    QString lista;
-
-    QVector<int> vetorAnimes;
-    QVector<int> qEpiDisponivel;
-
-    bool primeiraLeitura;
-    bool baixaQualidade;
-
-    QPixmap pix;
-
-public slots:
-    //Construtores de janelas
-    void InstauraPrimeiraJanela();
-    void BotaoWatching();
-    void BotaoCompleted();
-    void BotaoOnHold();
-    void BotaoDropped();
-    void BotaoPlanToWatch();
-    void BotaoBusca();
-    void on_Lista_clicked();
-    void Configurar();
-
-    //Downloads
-    void baixaImagens();
-    void baixaImagensGrandes();
-    void baixaImagensPequenas();
-    void BuscaTorrentAnimeEspecifico();
-
-    //Mexem com as janelas
-    void OrdenaVetor();
-    void mudouQualidade(int);
-
-    //Arquivos
-    void mandaRefresh();
-    void refreshArquivo();
-
-    //Informações dos animes
-    void carregaInfo();
-
-    //Listas de animes
-    void proximaPagina();
-    void voltaPagina();
-
-    //Botões de configuração
-    void abrePasta();
-    void abreAnilist();
-    void AbreEpisodio();
-    void on_NotaMais_clicked();
-    void on_NotaMenos_clicked();
-    void on_ProgressoMais_clicked();
-    void on_ProgressoMenos_clicked();
-
-    ///Carrega botões
-    void Botoes();
-    void LiberaBotaoCompleted();
-    void LiberaBotaoOnHold();
-    void LiberaBotaoDropped();
-    void LiberaBotaoPlanToWatch();
-
-    ///Botões de carregar animes
-    void carregaAnime1();
-    void carregaAnime2();
-    void carregaAnime3();
-    void carregaAnime4();
-    void carregaAnime5();
-    void carregaAnime6();
-    void carregaAnime7();
-    void carregaAnime8();
-    void carregaAnime9();
-    void carregaAnime10();
-    void carregaAnime11();
-    void carregaAnime12();
-    void carregaAnime13();
-    void carregaAnime14();
-    void carregaAnime15();
-    void carregaAnime16();
-    void carregaAnime17();
-    void carregaAnime18();
-    void carregaAnime19();
-    void carregaAnime20();
-    void carregaAnime21();
-    void carregaAnime22();
-    void carregaAnime23();
-    void carregaAnime24();
-    void carregaAnime25();
-    void carregaAnime26();
-    void carregaAnime27();
-    void carregaAnime28();
-
-    void setUser();
-
-
-    //Mensagens
-    void mensagemFimDownload(QString);
-private slots:
-    void Torrent();
-    void keyPressEvent(QKeyEvent * event);
+    //Variáveis globais
+    int vanimeSelecionado;
+    int vpagina;
+    QString vordem;
+    QString vlistaAtual;
 };
-
 #endif // MAINWINDOW_H

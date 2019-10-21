@@ -1,183 +1,339 @@
 #include "filedownloader.h"
-#include <QDesktopServices>
 
-QDownloader::QDownloader(QObject *parent) :
-    QObject(parent)
+filedownloader::filedownloader(QObject *parent) : QObject(parent)
 {
-    configura = new configPC;
-    manager = new QNetworkAccessManager;
-    lista = "0";
-    fileIsOpen = false;
-    terminouLista = false;
+    vmanager = new QNetworkAccessManager;
+    cconfBase = new confBase;
+    vfileIsOpen = false;
+    vterminouLista = false;
+    vlista = 0;
 }
 
-QDownloader::~QDownloader()
-{
-    manager->deleteLater();
-//    delete manager;
-//    delete reply;
-//    delete file;
-    delete configura;
-    delete leiArq;
+filedownloader::~filedownloader(){
+    vmanager->deleteLater();
+    cconfBase->deleteLater();
 }
 
-void QDownloader::downloadImagensLista(QString fileURL, QString id){
-    QString filePath = fileURL;
-    QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
-    QString arquivo = configura->diretorioImagensMedio;
-    arquivo.append(id);
-    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+void filedownloader::fsetLeitorListaAnimes(leitorlistaanimes *lleitorlistaanimes){
+    cleitorlistaanimes = lleitorlistaanimes;
+}
 
-    saveFilePath = arquivo;
+void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
+{
+    QString lsaveFilePath = cconfBase->vdiretorioImagensMedio;
+    lsaveFilePath.append(id);
+    lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
-    if(QFile(saveFilePath).size() == 0)
-        QFile(saveFilePath).remove();
+    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
 
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+    bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
 
     if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(fileURL));
-        reply = manager->get(request);
+        QNetworkRequest lrequest;
+        lrequest.setUrl(QUrl(fileURL));
+        vreply = vmanager->get(lrequest);
 
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
+        vfile = new QFile;
+        vfile->setFileName(lsaveFilePath);
+        vfile->open(QIODevice::WriteOnly);
 
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(setNext()));
-        fileIsOpen = true;
+        connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(vreply,SIGNAL(finished()),this,SLOT(fsetNext()));
+        vfileIsOpen = true;
     }
     else{
-        fileIsOpen = false;
-        setNext();
+        vfileIsOpen = false;
+        fsetNext();
     }
 }
-void QDownloader::downloadImagensGrandesLista(QString fileURL, QString id){
-    QString filePath = fileURL;
-    QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
+
+void filedownloader::fdownloadImagensGrandesLista(QString fileURL, QString id)
+{
     fileURL.replace("medium", "large");
-    QString arquivo = configura->diretorioImagensGrandes;
-    arquivo.append(id);
-    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+    QString lsaveFilePath = cconfBase->vdiretorioImagensGrandes;
+    lsaveFilePath.append(id);
+    lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
-    saveFilePath = arquivo;
+    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
 
-    if(QFile(saveFilePath).size() == 0)
-        QFile(saveFilePath).remove();
-
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
+    bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
 
     if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(fileURL));
-        reply = manager->get(request);
+        QNetworkRequest lrequest;
+        lrequest.setUrl(QUrl(fileURL));
+        vreply = vmanager->get(lrequest);
 
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
+        vfile = new QFile;
+        vfile->setFileName(lsaveFilePath);
+        vfile->open(QIODevice::WriteOnly);
 
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(setNextBig()));
-        fileIsOpen = true;
+        connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(vreply,SIGNAL(finished()),this,SLOT(fsetNextBig()));
+        vfileIsOpen = true;
     }
     else{
-        fileIsOpen = false;
-        setNextBig();
+        vfileIsOpen = false;
+        fsetNextBig();
     }
 }
 
-void QDownloader::downloadImagensPequenasLista(QString fileURL, QString id){
-    QString filePath = fileURL;
-    QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
-    fileURL.replace("medium", "small");
-    QString arquivo = configura->diretorioImagensPequenas;
-    arquivo.append(id);
-    arquivo.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
-
-    saveFilePath = arquivo;
-
-    if(QFile(saveFilePath).size() == 0)
-        QFile(saveFilePath).remove();
-
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(fileURL));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(setNextSmall()));
-        fileIsOpen = true;
-    }
-    else{
-        fileIsOpen = false;
-        setNextSmall();
-    }
-}
-void QDownloader::setURL(QString url){
-    QString saveFilePath = "Configurações/rss.xml";
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-    if(fileExists)
-        QFile::remove(saveFilePath);
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(url));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-
-//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
-    }
-}
-
-void QDownloader::setTorrent(QString url, QString nome){
-    QString saveFilePath = "Configurações/Temp/Torrents/" + nome + ".torrent";
-    QFile::remove(saveFilePath);
-    bool fileExists = QFileInfo::exists(saveFilePath) && QFileInfo(saveFilePath).isFile();
-    if(!fileExists){
-        QNetworkRequest request;
-        request.setUrl(QUrl(url));
-        reply = manager->get(request);
-
-        file = new QFile;
-        file->setFileName(saveFilePath);
-        file->open(QIODevice::WriteOnly);
-
-
-//        connect(reply,SIGNAL(downloadProgress(qint64,qint64)),this,SLOT(onDownloadProgress(qint64,qint64)));
-        connect(manager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
-        connect(reply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(reply,SIGNAL(finished()),this,SLOT(onReplyFinished()));
-    }
-    else{
-        emit terminouDownload();
-    }
-}
-
-void QDownloader::onDownloadProgress(qint64 bytesRead,qint64 bytesTotal)
+void filedownloader::fdownloadImagensPequenasLista(QString fileURL, QString id)
 {
-    qDebug() << QString::number(bytesRead).toLatin1() +" - "+ QString::number(bytesTotal).toLatin1();
+    fileURL.replace("medium", "small");
+    QString lsaveFilePath = cconfBase->vdiretorioImagensMedio;
+    QStringList lfilePathList = fileURL.split('/');
+    lsaveFilePath.append(id);
+    lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+
+    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
+
+    bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
+
+    if(!fileExists){
+        QNetworkRequest lrequest;
+        lrequest.setUrl(QUrl(fileURL));
+        vreply = vmanager->get(lrequest);
+
+        vfile = new QFile;
+        vfile->setFileName(lsaveFilePath);
+        vfile->open(QIODevice::WriteOnly);
+
+        connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+        connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+        connect(vreply,SIGNAL(finished()),this,SLOT(fsetNextSmall()));
+        vfileIsOpen = true;
+    }
+    else{
+        vfileIsOpen = false;
+        fsetNextSmall();
+    }
 }
 
-void QDownloader::onFinished(QNetworkReply * reply)
+void filedownloader::fsetNext()
+{
+    if(vfileIsOpen == true){
+        if(vfile->isOpen())
+        {
+            vfile->close();
+            vfile->deleteLater();
+        }
+    }
+    if(vlista == 0){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
+        vlistaAtual = "watching";
+        vindexLista = -1;
+    }
+    else if(vlista == 1){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
+        vlistaAtual = "completed";
+        vindexLista = -1;
+    }
+    else if(vlista == 2){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
+        vlistaAtual = "onhold";
+        vindexLista = -1;
+    }
+    else if(vlista == 3){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
+        vlistaAtual = "dropped";
+        vindexLista = -1;
+    }
+    else if(vlista == 4){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
+        vlistaAtual = "plantowatch";
+        vindexLista = -1;
+    }
+    vlista = 9;
+    vindexLista++;
+    if(vterminouLista == false){
+        if(vindexLista < vlistaSelecionada.size()){
+            fdownloadImagensLista(vlistaSelecionada[vindexLista]->vLinkImagemMedia, vlistaSelecionada[vindexLista]->vid);
+        }
+        else{
+            if(vlistaAtual == "watching"){
+                vlista = 1;
+                emit slistaMensagem("Watching");
+            }
+            else if(vlistaAtual == "completed"){
+                vlista = 2;
+                emit slistaMensagem("Completed");
+            }
+            else if(vlistaAtual == "onhold"){
+                vlista = 3;
+                emit slistaMensagem("On Hold");
+            }
+            else if(vlistaAtual == "dropped"){
+                vlista = 4;
+                emit slistaMensagem("Dropped");
+            }
+            else if(vlistaAtual == "plantowatch"){
+                vterminouLista = true;
+                emit slistaMensagem("Plan to Watch");
+            }
+            fsetNext();
+        }
+    }
+    else{
+        emit slistaMensagem("all");
+        vfileIsOpen = false;
+        vterminouLista = false;
+        vlista = 0;
+        qDebug() << "Starting download for large images";
+        fsetNextBig();
+    }
+}
+
+void filedownloader::fsetNextBig()
+{
+    if(vfileIsOpen == true){
+        if(vfile->isOpen())
+        {
+            vfile->close();
+            vfile->deleteLater();
+        }
+    }
+    if(vlista == 0){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
+        vlistaAtual = "watching";
+        vindexLista = -1;
+    }
+    else if(vlista == 1){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
+        vlistaAtual = "completed";
+        vindexLista = -1;
+    }
+    else if(vlista == 2){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
+        vlistaAtual = "onhold";
+        vindexLista = -1;
+    }
+    else if(vlista == 3){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
+        vlistaAtual = "dropped";
+        vindexLista = -1;
+    }
+    else if(vlista == 4){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
+        vlistaAtual = "plantowatch";
+        vindexLista = -1;
+    }
+    vlista = 9;
+    vindexLista++;
+    if(vterminouLista == false){
+        if(vindexLista < vlistaSelecionada.size()){
+            fdownloadImagensGrandesLista(vlistaSelecionada[vindexLista]->vLinkImagemMedia, vlistaSelecionada[vindexLista]->vid);
+        }
+        else{
+            if(vlistaAtual == "watching"){
+                vlista = 1;
+                emit slistaMensagem("Watching");
+            }
+            else if(vlistaAtual == "completed"){
+                vlista = 2;
+                emit slistaMensagem("Completed");
+            }
+            else if(vlistaAtual == "onhold"){
+                vlista = 3;
+                emit slistaMensagem("On Hold");
+            }
+            else if(vlistaAtual == "dropped"){
+                vlista = 4;
+                emit slistaMensagem("Dropped");
+            }
+            else if(vlistaAtual == "plantowatch"){
+                vterminouLista = true;
+                emit slistaMensagem("Plan to Watch");
+            }
+            fsetNextBig();
+        }
+    }
+    else{
+        emit slistaMensagem("big");
+        vfileIsOpen = false;
+        vterminouLista = false;
+        vlista = 0;
+    }
+}
+
+void filedownloader::fsetNextSmall()
+{
+    if(vfileIsOpen == true){
+        if(vfile->isOpen())
+        {
+            vfile->close();
+            vfile->deleteLater();
+        }
+    }
+    if(vlista == 0){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
+        vlistaAtual = "watching";
+        vindexLista = -1;
+    }
+    else if(vlista == 1){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
+        vlistaAtual = "completed";
+        vindexLista = -1;
+    }
+    else if(vlista == 2){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
+        vlistaAtual = "onhold";
+        vindexLista = -1;
+    }
+    else if(vlista == 3){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
+        vlistaAtual = "dropped";
+        vindexLista = -1;
+    }
+    else if(vlista == 4){
+        vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
+        vlistaAtual = "plantowatch";
+        vindexLista = -1;
+    }
+    vlista = 9;
+    vindexLista++;
+    if(vterminouLista == false){
+        if(vindexLista < vlistaSelecionada.size()){
+            fdownloadImagensPequenasLista(vlistaSelecionada[vindexLista]->vLinkImagemMedia, vlistaSelecionada[vindexLista]->vid);
+        }
+        else{
+            if(vlistaAtual == "watching"){
+                vlista = 1;
+                emit slistaMensagem("Watching");
+            }
+            else if(vlistaAtual == "completed"){
+                vlista = 2;
+                emit slistaMensagem("Completed");
+            }
+            else if(vlistaAtual == "onhold"){
+                vlista = 3;
+                emit slistaMensagem("On Hold");
+            }
+            else if(vlistaAtual == "dropped"){
+                vlista = 4;
+                emit slistaMensagem("Dropped");
+            }
+            else if(vlistaAtual == "plantowatch"){
+                vterminouLista = true;
+                emit slistaMensagem("Plan to Watch");
+            }
+            fsetNextSmall();
+        }
+    }
+    else{
+        emit slistaMensagem("small");
+        vfileIsOpen = false;
+        vterminouLista = false;
+        vlista = 0;
+    }
+}
+
+
+void filedownloader::onFinished(QNetworkReply * reply)
 {
     switch(reply->error())
     {
@@ -190,283 +346,14 @@ void QDownloader::onFinished(QNetworkReply * reply)
         }
     }
 
-    if(file->isOpen())
+    if(vfile->isOpen())
     {
-        file->close();
-        file->deleteLater();
+        vfile->close();
+        vfile->deleteLater();
     }
 }
 
-void QDownloader::onReadyRead()
+void filedownloader::onReadyRead()
 {
-    file->write(reply->readAll());
-}
-
-void QDownloader::onReplyFinished()
-{
-//    qDebug() << "Terminou";
-    if(file->isOpen())
-    {
-        file->close();
-        file->deleteLater();
-    }
-//    qDebug() << "oi";
-    emit terminouDownload();
-//    setFile(A, i+1);
-}
-
-void QDownloader::setNext()
-{
-    if(fileIsOpen == true){
-        if(file->isOpen())
-        {
-            file->close();
-            file->deleteLater();
-        }
-    }
-    if(lista == "0"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("watching");
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        listaAtual = "watching";
-        indexLista = -1;
-    }
-    else if(lista == "1"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("completed");
-        listaAtual = "completed";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "2"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("onhold");
-        listaAtual = "onhold";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "3"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("dropped");
-        listaAtual = "dropped";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "4"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("plantowatch");
-        listaAtual = "plantowatch";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-//        tamanhoLista = 709;
-        indexLista = -1;
-    }
-    lista = "9";
-    indexLista++;
-//    if(para = true) por algo assim pra parar
-    if(terminouLista == false){
-        if(indexLista < tamanhoLista){
-            downloadImagensLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
-        }
-        else{
-            if(listaAtual == "watching"){
-                delete leiArq;
-                lista = "1";
-                emit listaMensagem("Watching");
-            }
-            else if(listaAtual == "completed"){
-                delete leiArq;
-                lista = "2";
-                emit listaMensagem("Completed");
-            }
-            else if(listaAtual == "onhold"){
-                delete leiArq;
-                lista = "3";
-                emit listaMensagem("On Hold");
-            }
-            else if(listaAtual == "dropped"){
-                delete leiArq;
-                lista = "4";
-                emit listaMensagem("Dropped");
-            }
-            else if(listaAtual == "plantowatch"){
-                delete leiArq;
-                terminouLista = true;
-                emit listaMensagem("Plan to Watch");
-            }
-            setNext();
-        }
-    }
-    else{
-        emit listaMensagem("all");
-    }
-}
-
-void QDownloader::setNextBig()
-{
-    if(fileIsOpen == true){
-        if(file->isOpen())
-        {
-            file->close();
-            file->deleteLater();
-        }
-    }
-    if(lista == "0"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("watching");
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        listaAtual = "watching";
-        indexLista = -1;
-    }
-    else if(lista == "1"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("completed");
-        listaAtual = "completed";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "2"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("onhold");
-        listaAtual = "onhold";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "3"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("dropped");
-        listaAtual = "dropped";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "4"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("plantowatch");
-        listaAtual = "plantowatch";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-//        tamanhoLista = 709;
-        indexLista = -1;
-    }
-    lista = "9";
-    indexLista++;
-    if(terminouLista == false){
-        if(indexLista < tamanhoLista){
-            downloadImagensGrandesLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
-        }
-        else{
-            if(listaAtual == "watching"){
-                delete leiArq;
-                lista = "1";
-//                emit listaMensagem("Watching");
-            }
-            else if(listaAtual == "completed"){
-                delete leiArq;
-                lista = "2";
-//                emit listaMensagem("Completed");
-            }
-            else if(listaAtual == "onhold"){
-                delete leiArq;
-                lista = "3";
-//                emit listaMensagem("On Hold");
-            }
-            else if(listaAtual == "dropped"){
-                delete leiArq;
-                lista = "4";
-//                emit listaMensagem("Dropped");
-            }
-            else if(listaAtual == "plantowatch"){
-                delete leiArq;
-                terminouLista = true;
-//                emit listaMensagem("Plan to Watch");
-            }
-            setNextBig();
-        }
-    }
-    else{
-        emit listaMensagem("big");
-    }
-}
-
-void QDownloader::setNextSmall()
-{
-    if(fileIsOpen == true){
-        if(file->isOpen())
-        {
-            file->close();
-            file->deleteLater();
-        }
-    }
-    if(lista == "0"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("watching");
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        listaAtual = "watching";
-        indexLista = -1;
-    }
-    else if(lista == "1"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("completed");
-        listaAtual = "completed";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "2"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("onhold");
-        listaAtual = "onhold";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "3"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("dropped");
-        listaAtual = "dropped";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-        indexLista = -1;
-    }
-    else if(lista == "4"){
-        leiArq = new leitorarquivos;
-        leiArq->leLinha("plantowatch");
-        listaAtual = "plantowatch";
-        tamanhoLista = leiArq->retornaTamanhoLista();
-//        tamanhoLista = 709;
-        indexLista = -1;
-    }
-    lista = "9";
-    indexLista++;
-    if(terminouLista == false){
-        if(indexLista < tamanhoLista){
-            downloadImagensPequenasLista(leiArq->retornaLink(indexLista), leiArq->retornaId(indexLista));
-        }
-        else{
-            if(listaAtual == "watching"){
-                delete leiArq;
-                lista = "1";
-                emit listaMensagem("Watching");
-            }
-            else if(listaAtual == "completed"){
-                delete leiArq;
-                lista = "2";
-                emit listaMensagem("Completed");
-            }
-            else if(listaAtual == "onhold"){
-                delete leiArq;
-                lista = "3";
-                emit listaMensagem("On Hold");
-            }
-            else if(listaAtual == "dropped"){
-                delete leiArq;
-                lista = "4";
-                emit listaMensagem("Dropped");
-            }
-            else if(listaAtual == "plantowatch"){
-                delete leiArq;
-                terminouLista = true;
-                emit listaMensagem("Plan to Watch");
-            }
-            setNextSmall();
-        }
-    }
-    else{
-        emit listaMensagem("all");
-    }
+    vfile->write(vreply->readAll());
 }

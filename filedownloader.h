@@ -1,58 +1,54 @@
-#ifndef QDOWNLOADER_H
-#define QDOWNLOADER_H
+#ifndef FILEDOWNLOADER_H
+#define FILEDOWNLOADER_H
 
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include <QFile>
-#include <QStringList>
-#include <QString>
-#include <QFileInfo>
-#include <QThread>
+#include <QPointer>
 
-#include "configpc.h"
-#include "leitorarquivos.h"
+#include "leitorlistaanimes.h"
+#include "confbase.h"
 
-class QDownloader : public QObject
+class filedownloader : public QObject
 {
     Q_OBJECT
 public:
-    explicit QDownloader(QObject *parent = nullptr);
-    ~QDownloader();
-    void setURL(QString);
-    void setTorrent(QString, QString);
-    void downloadImagensLista(QString, QString);
-    void downloadImagensGrandesLista(QString, QString);
-    void downloadImagensPequenasLista(QString, QString);
-private:
-    QNetworkAccessManager *manager;
-    QNetworkReply *reply;
-    QFile *file;
-    configPC *configura;
-    leitorarquivos *leiArq;
-
-    int indexLista;
-    bool fileIsOpen;
-    bool terminouLista;
-    int tamanhoLista;
-    QString lista;
-    QString listaAtual;
-    QString tamanho;
+    explicit filedownloader(QObject *parent = nullptr);
+    ~filedownloader();
+    void fsetTorrent(QString, QString);
+    void fsetXMl(QString);
+    void fdownloadImagensLista(QString, QString);
+    void fdownloadImagensGrandesLista(QString, QString);
+    void fdownloadImagensPequenasLista(QString, QString);
+    void fsetLeitorListaAnimes(leitorlistaanimes*);
 
 signals:
-    void terminouDownload();
-    void filexists();
-    void listaMensagem(QString);
+    void slistaMensagem(QString);//Falta implementar alguns slots e sinais.
 public slots:
-    void setNext();
-    void setNextBig();
-    void setNextSmall();
+    void fsetNext();
+    void fsetNextBig();
+    void fsetNextSmall();
+
 private slots:
-    void onDownloadProgress(qint64,qint64);
     void onFinished(QNetworkReply*);
     void onReadyRead();
-    void onReplyFinished();
+
+private:
+    QNetworkAccessManager *vmanager;
+    QNetworkReply *vreply;
+    QFile *vfile;
+
+    QPointer<confBase> cconfBase;
+    QPointer<leitorlistaanimes> cleitorlistaanimes;
+
+    QVector<anime*> vlistaSelecionada;
+
+    QString vlistaAtual;//Lista que está sendo lida
+    bool vfileIsOpen;
+    bool vterminouLista;
+    int vlista;
+    int vindexLista;
 };
 
-#endif // QDOWNLOADER_H
+#endif // FILEDOWNLOADER_H
