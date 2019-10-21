@@ -1,9 +1,4 @@
-
-AtomAnime.pro.user.c2d244a
-AtomAnime.pro.user
-AtomAnime.pro
-AtomAnime.pro.user.4.10-pre1
-mainwindow.ui.autosave
-.gitignore.txt
-organizalistanimes.cpp
-organizalistanimes.h
+visuais.qrc
+*.ui
+*.pro
+*.user
