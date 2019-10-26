@@ -10,6 +10,10 @@ logger::logger(QObject *parent) : QObject(parent)
 }
 
 void logger::fattachLogger(){
+    QFile llog("Configurações/Temp/log.txt");
+    if(llog.exists())
+        llog.remove();
+
     vlogging = true;
     qInstallMessageHandler(fhandlerMensagem);
 }

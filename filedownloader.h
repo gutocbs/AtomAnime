@@ -22,7 +22,7 @@ public:
     void fdownloadImagensGrandesLista(QString, QString);
     void fdownloadImagensPequenasLista(QString, QString);
     void fsetLeitorListaAnimes(leitorlistaanimes*);
-
+    void fsetConfBase(confBase*);
 signals:
     void slistaMensagem(QString);//Falta implementar alguns slots e sinais.
 public slots:

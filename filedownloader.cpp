@@ -3,7 +3,6 @@
 filedownloader::filedownloader(QObject *parent) : QObject(parent)
 {
     vmanager = new QNetworkAccessManager;
-    cconfBase = new confBase;
     vfileIsOpen = false;
     vterminouLista = false;
     vlista = 0;
@@ -16,6 +15,10 @@ filedownloader::~filedownloader(){
 
 void filedownloader::fsetLeitorListaAnimes(leitorlistaanimes *lleitorlistaanimes){
     cleitorlistaanimes = lleitorlistaanimes;
+}
+
+void filedownloader::fsetConfBase(confBase *rconfbase){
+    cconfBase = rconfbase;
 }
 
 void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
@@ -124,6 +127,7 @@ void filedownloader::fsetNext()
         }
     }
     if(vlista == 0){
+        qDebug() << "Checking images";
         vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
         vlistaAtual = "watching";
         vindexLista = -1;
@@ -183,7 +187,6 @@ void filedownloader::fsetNext()
         vfileIsOpen = false;
         vterminouLista = false;
         vlista = 0;
-        qDebug() << "Starting download for large images";
         fsetNextBig();
     }
 }
@@ -248,8 +251,8 @@ void filedownloader::fsetNextBig()
             else if(vlistaAtual == "plantowatch"){
                 vterminouLista = true;
                 emit slistaMensagem("Plan to Watch");
+                fsetNextBig();
             }
-            fsetNextBig();
         }
     }
     else{
@@ -257,6 +260,7 @@ void filedownloader::fsetNextBig()
         vfileIsOpen = false;
         vterminouLista = false;
         vlista = 0;
+        qDebug() << "Finished downloading all images avaliable";
     }
 }
 
