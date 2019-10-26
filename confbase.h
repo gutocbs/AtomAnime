@@ -15,7 +15,7 @@ public:
     QString vdiretorioImagensGrandes;
     QString vdiretorioImagensPequenas;
     void fcriaDiretoriosBase();
-    void fcriaArquivoLog();
+//    void fcriaArquivoLog();
 
 signals:
 

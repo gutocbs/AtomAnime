@@ -6,9 +6,8 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     logger::fattachLogger();
-    cconfBase = new confBase;
-    cconfBase->fcriaArquivoLog();
     qInfo() << QDateTime::currentDateTime().toString();
+    cconfBase = new confBase;
     cconfBase->fcriaDiretoriosBase();
     qDebug() << "Main configuration is up";
     carquivos = new arquivos;
@@ -23,12 +22,12 @@ MainWindow::MainWindow(QWidget *parent)
     else
         qDebug() << "There was a problem reading the anime list";
     cfiledownloader = new filedownloader;
-    qDebug() << "Download system is up";
+    qDebug() << "The download system is up";
+    cfiledownloader->fsetConfBase(cconfBase);
     cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
-    qDebug() << "The images from the list are ready to be downloaded";
     //Baixa imagens ao abrir o programa
     cfiledownloader->fsetNext();
-    qDebug() << "Downloading images from animes";
+    qDebug() << "Images ready";
 
     // Já aciona a lista de modo ordenado
     vordem = "";
