@@ -20,7 +20,9 @@ void logger::fattachLogger(){
 
 void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontexto, const QString &rmensagem){
     if(vlogging){
+        bool lcrash = false;
         QString lmensagemLog;
+        QFile lfile(logger::varquivo);
         switch (rtipo) {
             case QtInfoMsg:
                 lmensagemLog = QString("Info: %1").arg(rmensagem);
@@ -36,9 +38,9 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
             break;
             case QtFatalMsg:
                 lmensagemLog = QString("FATAL ERROR: %1").arg(rmensagem);
+                lcrash = true;
             break;
         }
-        QFile lfile(logger::varquivo);
         if(lfile.open(QIODevice::WriteOnly | QIODevice::Append)) {
             QTextStream lstreamTexto(&lfile);
             QString larquivo = rcontexto.file;
@@ -47,6 +49,8 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
             lstreamTexto.flush();
             lfile.close();
         }
+        if(lcrash)
+            lfile.copy(QDir::currentPath() + QDir::separator() + "Configurações/Temp/" + QDir::separator() + "log-crash.txt");
     }
     (*QT_DEFAULT_MESSAGE_HANDLER)(rtipo, rcontexto, rmensagem);
 }

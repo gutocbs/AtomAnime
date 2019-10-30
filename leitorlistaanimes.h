@@ -18,8 +18,8 @@ public:
     explicit leitorlistaanimes(QObject *parent = nullptr);
     ~leitorlistaanimes();
     bool fadicionaAnimes();
+    bool fleJson();
     void fdeletaListaAnimes();
-
     QVector<anime*> retornaListaWatching();
     QVector<anime*> retornaListaCompleted();
     QVector<anime*> retornaListaOnHold();

@@ -58,30 +58,37 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 QString lnomeAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnome);
                 QString lnomeInglesAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeIngles);
                 //Compara os nomes, sempre ignorando letras maiusculas e minusculas para garantir que o anime será encontrado.
-                if(lnomeAnime.compare(lnomeAnimeLista,Qt::CaseInsensitive) == 0){
+                if(lnomeAnime.compare(lnomeAnimeLista,Qt::CaseInsensitive) == 0 && lnomeAnime.isEmpty() == false){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else if(lnomeAnime.compare(lnomeInglesAnimeLista, Qt::CaseInsensitive) == 0){
+                else if(lnomeAnime.compare(lnomeInglesAnimeLista, Qt::CaseInsensitive) == 0 && lnomeInglesAnimeLista.isEmpty() == false){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else{
-                    //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
-                    //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
-                    for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
-                        QString lnomeAlternativoAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeAlternativo.at(z));
-                        if(lnomeAnime.compare(lnomeAlternativoAnimeLista, Qt::CaseInsensitive) == 0){
-                            vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
-                            vlistaAnimes.remove(w);
-                            break;
-                        }
-                    }
-                }
+//                else{
+//                    //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
+//                    //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
+//                    for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
+//                        QString lnomeAlternativoAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeAlternativo.at(z));
+//                        if(lnomeAnime.compare(lnomeAlternativoAnimeLista, Qt::CaseInsensitive) == 0){
+//                            vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
+//                            vlistaAnimes.remove(w);
+//                            break;
+//                        }
+//                    }
+//                }
             }
         }
+    }
+}
+
+///POSSO REMOVER ESSA FUNÇÃO CASO NECESSÁRIO, SERVE APENAS PARA DEBUG
+void confUsuario::fmostraPastas(){
+    foreach (QString key, vdiretorioEspecificoAnime.keys()) {
+        qDebug() << key << " - " << vdiretorioEspecificoAnime.value(key);
     }
 }
 

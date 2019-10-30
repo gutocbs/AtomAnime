@@ -251,8 +251,8 @@ void filedownloader::fsetNextBig()
             else if(vlistaAtual == "plantowatch"){
                 vterminouLista = true;
                 emit slistaMensagem("Plan to Watch");
-                fsetNextBig();
             }
+            fsetNextBig();
         }
     }
     else{

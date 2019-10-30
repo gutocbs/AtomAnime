@@ -6,7 +6,13 @@ leitorlistaanimes::leitorlistaanimes(QObject *parent) : QObject(parent)
 }
 
 leitorlistaanimes::~leitorlistaanimes(){
-    fdeletaListaAnimes();
+//    fdeletaListaAnimes();
+    qDeleteAll(vlistaWatching.begin(),vlistaWatching.end()); //Deletar todas as listas
+    qDeleteAll(vlistaCompleted.begin(),vlistaCompleted.end()); //Deletar todas as listas
+    qDeleteAll(vlistaDropped.begin(),vlistaDropped.end()); //Deletar todas as listas
+    qDeleteAll(vlistaOnHold.begin(),vlistaOnHold.end()); //Deletar todas as listas
+    qDeleteAll(vlistaPlanToWatch.begin(),vlistaPlanToWatch.end()); //Deletar todas as listas
+    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
 }
 
 bool leitorlistaanimes::fadicionaAnimes(){
@@ -249,23 +255,23 @@ bool leitorlistaanimes::fadicionaAnimes(){
                     lnovoAnime->vseason = lseason;
                     lnovoAnime->vdataEstreia = lestreia;
                     if(llista == "1"){
-                        lnovoAnime->vlista = "watching";
+                        lnovoAnime->vlista = "Watching";
                         vlistaWatching.append(lnovoAnime);
                     }
                     else if(llista == "2"){
-                        lnovoAnime->vlista = "completed";
+                        lnovoAnime->vlista = "Completed";
                         vlistaCompleted.append(lnovoAnime);
                     }
                     else if(llista == "3"){
-                        lnovoAnime->vlista = "onhold";
+                        lnovoAnime->vlista = "On hold";
                         vlistaOnHold.append(lnovoAnime);
                     }
                     else if(llista == "4"){
-                        lnovoAnime->vlista = "dropped";
+                        lnovoAnime->vlista = "Dropped";
                         vlistaDropped.append(lnovoAnime);
                     }
                     else if(llista == "5"){
-                        lnovoAnime->vlista = "plantowatch";
+                        lnovoAnime->vlista = "Plan to Watch";
                         vlistaPlanToWatch.append(lnovoAnime);
                     }
                 }
@@ -281,19 +287,263 @@ bool leitorlistaanimes::fadicionaAnimes(){
     return true;
 }
 
+bool leitorlistaanimes::fleJson(){
+    QFile lleJson("Configurações/Temp/animeList.txt");
+    QTextStream json(&lleJson);
+    json.setCodec("UTF-8");
+    QString lid;
+    QString lnome;
+    QString lnomeIngles;
+    QString lnomeJapones;
+    QStringList lnomeAlternativo; //StringList por que pode ter lários nomes alternativos
+    QString lnumEpisodiosTotais;
+    QString lvnumEpisodiosAssistidos;
+    QString lnotaMediaSite;
+    QString lLinkImagemMedia;
+    QString lnotaMediaPessoal;
+    QString lsinopse;
+    QString lseason;
+    QString lstatus;
+    QString llista;
+    QString lformato;
+    QString lproximoEpisodio;
+    QString lano;
+    QString lmes;
+    QDate ldataEstreia;
+    if(lleJson.open(QIODevice::ReadOnly)){
+        while(!json.atEnd()){
+            QString llinha = json.readLine();
+            //Procura pelo primeiro dado do anime, a capa
+            if(llinha.contains("null")){
+                llinha.replace("null", "?");
+                llinha.replace("null,", "?");
+            }
+            if(llinha.contains("\"large\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("large: ");
+                lLinkImagemMedia = llinha.trimmed();
+            }
+            else if(llinha.contains("\"description\":")){
+                llinha.remove("\",");
+                llinha.remove("\\n");
+                llinha.remove("\\r");
+                llinha.remove("\\");
+                llinha.remove("\"description\": \"");
+                llinha = llinha.trimmed();
+                lsinopse = llinha.toUtf8();
+            }
+            else if(llinha.contains("\"episodes\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("episodes: ");
+                lnumEpisodiosTotais = llinha.trimmed();
+            }
+            else if(llinha.contains("\"format\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("format: ");
+                lformato = llinha.trimmed();
+            }
+            else if(llinha.contains("\"id\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("id: ");
+                lid = llinha.trimmed();
+            }
+            else if(llinha.contains("\"nextAiringEpisode\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("nextAiringEpisode: ");
+                lproximoEpisodio = llinha.trimmed();
+            }
+            else if(llinha.contains("\"season\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("season: ");
+                llinha = llinha.trimmed();
+                llinha = llinha.toLower();
+                llinha[0] = llinha.at(0).toUpper();
+                lseason = llinha;
+            }
+            else if(llinha.contains("\"month\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("month: ");
+                lmes = llinha.trimmed();
+            }
+            else if(llinha.contains("\"year\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("year: ");
+                lano = llinha.trimmed();
+            }
+            else if(llinha.contains("\"status\":")){
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("status: ");
+                llinha = llinha.trimmed();
+                if(llinha == "FINISHED")
+                    lstatus = "Finished Airing";
+                else if(llinha == "RELEASING")
+                    lstatus = "Ongoing";
+                else
+                    lstatus = "Not Aired Yet";
+            }
+            else if(llinha.contains("\"synonyms\":")){
+                llinha = json.readLine();
+                while(!llinha.contains("],")){
+                    llinha.remove("\",");
+                    llinha.remove("\"");
+                    lnomeAlternativo.append(llinha.trimmed());
+                    llinha = json.readLine();
+                }
+            }
+            else if(llinha.contains("\"english\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("english:");
+                lnomeIngles = llinha.trimmed();
+            }
+            else if(llinha.contains("\"romaji\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("romaji:");
+                lnome = llinha.trimmed();
+            }
+            else if(llinha.contains("\"progress\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("progress: ");
+                lvnumEpisodiosAssistidos = llinha.trimmed();
+            }
+            else if(llinha.contains("\"averageScore\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("averageScore: ");
+                lnotaMediaSite = llinha.trimmed();
+            }
+            else if(llinha.contains("\"score\":")){
+                llinha.remove(",");
+                llinha.remove("\"");
+                llinha.remove("score: ");
+                lnotaMediaPessoal = llinha.trimmed();
+                llinha = json.readLine();
+                llinha.remove("\",");
+                llinha.remove("\"");
+                llinha.remove("status: ");
+                llista = llinha.trimmed();
+                QPointer<anime> lnovoAnime(new anime);
+                if(lnome == "?")
+                    lnome = lnomeIngles;
+                else if (lnomeIngles == "?")
+                    lnomeIngles = lnome;
+                lnovoAnime->vnome = lnome;
+                lnovoAnime->vnomeIngles = lnomeIngles;
+                if(!lnomeAlternativo.isEmpty()){
+                    lnovoAnime->vnomeAlternativo = lnomeAlternativo;
+                    lnomeAlternativo.empty();
+                }
+                lnovoAnime->vnumEpisodiosTotais = lnumEpisodiosTotais;
+                if(!lnotaMediaSite.isEmpty())
+                    lnovoAnime->vnotaMediaSite = lnotaMediaSite;
+                else
+                    lnovoAnime->vnotaMediaSite = "-";
+                if(lano != "?" && lmes != "?"){
+                    ldataEstreia.setDate(lano.toInt(), lmes.toInt(), 1);
+                }
+                else if(lmes != "?"){
+                    if(lseason == "Winter")
+                        lmes = "3";
+                    else if(lseason == "Spring")
+                        lmes = "6";
+                    else if(lseason == "Summer")
+                        lmes = "9";
+                    else
+                        lmes = "12";
+                    if(lmes == "?")
+                        lmes = "12";
+                    ldataEstreia.setDate(lano.toInt(), lmes.toInt(), 31);
+                }
+                else if(lano != "?"){
+                    if(lmes == "?")
+                        lmes = "12";
+                    ldataEstreia.setDate(2050, lmes.toInt(), 31);
+                }
+                lnovoAnime->vLinkImagemMedia = lLinkImagemMedia;
+                lnovoAnime->vnotaMediaPessoal = lnotaMediaPessoal;
+                lnovoAnime->vstatus = lstatus;
+                lnovoAnime->vsinopse = lsinopse;
+                lnovoAnime->vid = lid;
+                lnovoAnime->vseason = lseason + " " + lano;
+                lnovoAnime->vnumProximoEpisodioLancado = lproximoEpisodio;
+                lnovoAnime->vnumEpisodiosAssistidos = lvnumEpisodiosAssistidos;
+                lnovoAnime->vformato = lformato;
+                lnovoAnime->vdataEstreia = ldataEstreia;
+                if(lformato != "MANGA" && lformato != "NOVEL" && lformato != "ONE_SHOT"){
+                    if(llinha.trimmed() == "CURRENT"){
+                        lnovoAnime->vlista = "Watching";
+                        vlistaWatching.append(lnovoAnime);
+                    }
+                    else if(llinha.trimmed() == "COMPLETED"){
+                        lnovoAnime->vlista = "Completed";
+                        vlistaCompleted.append(lnovoAnime);
+                    }
+                    else if(llinha.trimmed() == "PLANNING"){
+                        lnovoAnime->vlista = "Plan to Watch";
+                        vlistaPlanToWatch.append(lnovoAnime);
+                    }
+                    else if(llinha.trimmed() == "DROPPED"){
+                        lnovoAnime->vlista = "Dropped";
+                        vlistaDropped.append(lnovoAnime);
+                    }
+                    else if(llinha.trimmed() == "PAUSED"){
+                        lnovoAnime->vlista = "On Hold";
+                        vlistaOnHold.append(lnovoAnime);
+                    }
+                }
+                lnome.clear();
+                lnomeIngles.clear();
+                lnomeAlternativo.clear();
+                lnumEpisodiosTotais.clear();
+                lnotaMediaSite.clear();
+                lLinkImagemMedia.clear();
+                lnotaMediaPessoal.clear();
+                lstatus.clear();
+                lsinopse.clear();
+                lid.clear();
+                lseason.clear();
+                lproximoEpisodio.clear();
+                lvnumEpisodiosAssistidos.clear();
+                lformato.clear();
+                lformato.clear();
+            }
+        }
+        lleJson.close();
+    }
+    return true;
+}
+
+
 void leitorlistaanimes::fdeletaListaAnimes(){
-    qDeleteAll(vlistaWatching.begin(),vlistaWatching.end()); //Deletar todas as listas
-    vlistaWatching.clear();
-    qDeleteAll(vlistaCompleted.begin(),vlistaCompleted.end()); //Deletar todas as listas
-    vlistaCompleted.clear();
-    qDeleteAll(vlistaDropped.begin(),vlistaDropped.end()); //Deletar todas as listas
-    vlistaDropped.clear();
-    qDeleteAll(vlistaOnHold.begin(),vlistaOnHold.end()); //Deletar todas as listas
-    vlistaOnHold.clear();
-    qDeleteAll(vlistaPlanToWatch.begin(),vlistaPlanToWatch.end()); //Deletar todas as listas
-    vlistaPlanToWatch.clear();
-    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
-    vlistaBusca.clear();
+    if(!vlistaWatching.isEmpty()){
+        vlistaWatching.clear();
+    }
+    if(!vlistaCompleted.isEmpty()){
+        vlistaCompleted.clear();
+    }
+    if(!vlistaDropped.isEmpty()){
+        vlistaDropped.clear();
+    }
+    if(!vlistaOnHold.isEmpty()){
+        vlistaOnHold.clear();
+    }
+    if(!vlistaPlanToWatch.isEmpty()){
+        vlistaPlanToWatch.clear();
+    }
+    if(!vlistaBusca.isEmpty()){
+        vlistaBusca.clear();
+    }
 }
 
 QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
@@ -328,13 +578,20 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
                         }
                     }
                     else if(rordem == "cprogresso"){
-                        if(llistaTemp[i]->vnumEpisodiosAssistidos > llistaTemp[w]->vnumEpisodiosAssistidos){
+                        int lnumEpiTotali = llistaTemp[i]->vnumEpisodiosTotais.toInt();
+                        int lnumEpiTotalw = llistaTemp[w]->vnumEpisodiosTotais.toInt();
+                        if(lnumEpiTotali == 0)
+                            lnumEpiTotali = 1000000;
+                        if(lnumEpiTotalw == 0)
+                            lnumEpiTotalw = 1000000;
+                        if((float)llistaTemp[i]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotali
+                                > (float)llistaTemp[w]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotalw){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
                     }
                     else if(rordem == "cnota"){
-                        if(llistaTemp[i]->vnotaMediaPessoal > llistaTemp[w]->vnotaMediaPessoal){
+                        if(llistaTemp[i]->vnotaMediaPessoal.toInt() > llistaTemp[w]->vnotaMediaPessoal.toInt()){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
@@ -354,13 +611,20 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
                         }
                     }
                     else if(rordem == "dprogresso"){
-                        if(llistaTemp[i]->vnumEpisodiosAssistidos < llistaTemp[w]->vnumEpisodiosAssistidos){
+                        int lnumEpiTotali = llistaTemp[i]->vnumEpisodiosTotais.toInt();
+                        int lnumEpiTotalw = llistaTemp[w]->vnumEpisodiosTotais.toInt();
+                        if(lnumEpiTotali == 0)
+                            lnumEpiTotali = 1000000;
+                        if(lnumEpiTotalw == 0)
+                            lnumEpiTotalw = 1000000;
+                        if((float)llistaTemp[i]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotali
+                                < (float)llistaTemp[w]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotalw){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
                     }
                     else if(rordem == "dnota"){
-                        if(llistaTemp[i]->vnotaMediaPessoal < llistaTemp[w]->vnotaMediaPessoal){
+                        if(llistaTemp[i]->vnotaMediaPessoal.toInt() < llistaTemp[w]->vnotaMediaPessoal.toInt()){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
@@ -373,10 +637,11 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
 }
 
 QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
-    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
+    //Essa função faz crashar. Se eu deleto os animes e tento procurar por eles, eles não existem mais no endereço certo e causam bad alloc
+//    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
     vlistaBusca.clear();
     for(int i = 0; i < vlistaWatching.size(); i++){
-        if(vlistaWatching[i]->vnome.contains(rnome, Qt::CaseInsensitive) == true ||
+            if(vlistaWatching[i]->vnome.contains(rnome, Qt::CaseInsensitive) == true ||
                 vlistaWatching[i]->vnomeIngles.contains(rnome, Qt::CaseInsensitive) == true){
             vlistaBusca.append(vlistaWatching[i]);
         }
