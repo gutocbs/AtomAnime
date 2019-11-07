@@ -45,7 +45,7 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
 QString arquivos::fprocuraEpisodio(anime *ranimeBuscado){
     //Verifica se a função retorna um valor que não está vazio, ou seja
     //Se existe uma pasta com o nome do anime
-    if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
+        if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
         //Começa a iterar a pasta em busca das pastas de animes
         QDirIterator lit(cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()), QDirIterator::Subdirectories);
         while(lit.hasNext()){
@@ -85,6 +85,7 @@ QString arquivos::fremoveCaracteresDiferentes(QString rnome)
     rnome = rnome.toLower();
     rnome.remove(".");
     rnome.remove("?");
+    rnome.remove("!");
     rnome.remove(":");
     rnome.remove("-");
     rnome.remove("s1");

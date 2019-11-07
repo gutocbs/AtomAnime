@@ -68,18 +68,18 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                     vlistaAnimes.remove(w);
                     break;
                 }
-//                else{
-//                    //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
-//                    //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
-//                    for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
-//                        QString lnomeAlternativoAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeAlternativo.at(z));
-//                        if(lnomeAnime.compare(lnomeAlternativoAnimeLista, Qt::CaseInsensitive) == 0){
-//                            vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
-//                            vlistaAnimes.remove(w);
-//                            break;
-//                        }
-//                    }
-//                }
+                else{
+                    //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
+                    //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
+                    for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
+                        QString lnomeAlternativoAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeAlternativo.at(z));
+                        if(lnomeAnime.compare(lnomeAlternativoAnimeLista, Qt::CaseInsensitive) == 0){
+                            vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
+                            vlistaAnimes.remove(w);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }

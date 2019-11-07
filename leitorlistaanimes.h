@@ -8,6 +8,7 @@
 #include <QTextStream> //Lê linhas do arquivo
 #include <QDir> ///Abre os arquivos do taiga - Remover depois
 #include <QPointer> // Crio o ponteiro pro anime
+#include <QDateTime> //Data que lança o episódio
 
 #include "anime.h"
 
@@ -17,8 +18,8 @@ class leitorlistaanimes : public QObject
 public:
     explicit leitorlistaanimes(QObject *parent = nullptr);
     ~leitorlistaanimes();
-    bool fadicionaAnimes();
     bool fleJson();
+    bool fmudaLista(QString, QString);
     void fdeletaListaAnimes();
     QVector<anime*> retornaListaWatching();
     QVector<anime*> retornaListaCompleted();

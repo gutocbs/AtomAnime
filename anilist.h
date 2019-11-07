@@ -19,17 +19,25 @@ class anilist : public QObject
 public:
     explicit anilist(QObject *parent = nullptr);
     ~anilist();
-    bool fgetList();
     bool fmudaLista(int, QString);
     bool fmudaNota(int, int);
+    ///id, progresso
     bool fmudaProgresso(int, int);
 
+    QString fretornaAvatar();
+
+    void fbaixaListaThread(QThread &cThread);
+
+public slots:
+    bool fgetList();
+
+signals:
+    void sterminouDownload(bool);
 private:
     QNetworkReply *vreply = nullptr;
     QString vtoken;
     QString vusername;
-//    QOAuth2AuthorizationCodeFlow oauth2;
-//    QOAuthHttpServerReplyHandler *replyHandler{nullptr};
+    QString vavatar;
 };
 
 #endif // ANILIST_H
