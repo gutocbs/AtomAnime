@@ -10,6 +10,7 @@ class anime : public QObject
     Q_OBJECT
 public:
     explicit anime(QObject *parent = nullptr);
+    //Eu realmente preciso disso?
     bool operator<(const anime& other) const {
             return vnome < other.vnome; // sort by namefile
     }
@@ -19,6 +20,7 @@ public:
     QStringList vnomeAlternativo; //StringList por que pode ter vários nomes alternativos
     QString vnumEpisodiosTotais;
     QString vnumEpisodiosAssistidos;
+    QString vnumProximoEpisodioLancado;
     QString vnotaMediaSite;
     QString vLinkImagemMedia;
     QString vnotaMediaPessoal;
@@ -27,6 +29,10 @@ public:
     QString vid;
     QString vseason;
     QString vlista; //Esse atributo será usado para a função de busca e para função de mudar a lista do anime
+    QString vformato; //Usado pra organizar a lista
+    QString vdataEpisodio;
+    QString vstreamCrunchyroll;
+    QString vsiteAnilist;
     QDate vdataEstreia;
     bool vfinalizado;
     //Adicionar mais depois

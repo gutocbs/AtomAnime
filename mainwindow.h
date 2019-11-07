@@ -6,6 +6,10 @@
 #include <QDebug>
 #include <algorithm>
 #include <QDir>
+#include <QFuture> //Importante para baixar as imagens no background
+#include <QtConcurrent> //E rodar a função em uma thread separada
+#include <QTimer> //Para atualizar a lista automaticamente
+#include <QDesktopServices> //Abre sites
 
 #include "leitorlistaanimes.h"
 #include "confbase.h"
@@ -13,6 +17,9 @@
 #include "arquivos.h"
 #include "confusuario.h"
 #include "logger.h"
+#include "anilist.h"
+
+#include "janeladeconfig.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -26,8 +33,15 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void finfoAnimeSelecionado();
+    bool fcarregaImagensBackground();
     void fcarregaImagensLista();
+    void finfoAnimeSelecionado();
+    void fatualizaRefreshTimer();
+    void fatualizaAnilist();
+
+    void fbloqueiaSinaisBotoes();
+    void fliberaSinaisBotoes();
+    void frefreshListas(bool);
 
 private slots:
     void on_botaoAnime00_clicked();
@@ -53,25 +67,59 @@ private slots:
     void on_PlanToWatch_clicked();
 
     void on_botaoProximoEpisodio_clicked();
-    void on_BotaoPasta_clicked();
+    void on_botaoAbrePasta_clicked();
     void on_botaoBusca_clicked();
-
+    void on_botaoRefresh_clicked();
     void on_boxOrdemLista_activated(const QString &arg1);
+    void on_botaoHome_clicked();
+    void on_botaoConfiguracao_clicked();
+    void on_botaoNotaMais_clicked();
+    void on_botaoNotaMenos_clicked();
+    void on_botaoProgressoMais_clicked();
+    void on_botaoProgressoMenos_clicked();
+    void on_botaoMudarPraLista_clicked();
+    void on_botaoAnilist_clicked();
+    void on_botaoCrunchyroll_clicked();
 
 private:
     Ui::MainWindow *ui;
+
     leitorlistaanimes *cleitorListaAnimes;
     filedownloader *cfiledownloader;
     arquivos *carquivos;
+    anilist *canilist;
 
+    //Esses dois vetores não estão criando uma lista, mas recebendo uma lista criada na classe leitorListaAnimes.
+    //A classe já está deletando todos os ponteiros. Tentar deletar isso vai ser tentar deletar uma lista vaiza e possivelemnte irá
+    //Crashar o programa
     QVector<anime*> vlistaSelecionada;
+    QVector<anime*> vcarregaListaBackground;
+
     QPointer<confBase> cconfBase;
     QPointer<confUsuario> cconfUsuario;
+
+    //Thread que vai carregar as imagens do anime. Como essa thread fica dentro da própria classe, temos que usar QFuture
+    QFuture<void> vfuture;
 
     //Variáveis globais
     int vanimeSelecionado;
     int vpagina;
+    int vtimerSegundos;
     QString vordem;
     QString vlistaAtual;
+    bool vrefreshAcontecendo = false;
+    bool vlistaLidaSucesso = false;
+
+    QTimer *timer;
+    QTimer *timerRefresh;
+    QTimer *timerAcao;
+
+    QMap<QStringList, QString> vlistaAcoes;
+
+    //Thread que vai baixar a lista de animes. Como essa thread fica fora da classe, temos que usar QThread
+    QThread cThread;
+
+    //Janelas
+    janeladeconfig jconfig;
 };
 #endif // MAINWINDOW_H

@@ -21,6 +21,26 @@ void filedownloader::fsetConfBase(confBase *rconfbase){
     cconfBase = rconfbase;
 }
 
+void filedownloader::fdownloadAvatarUsuario(QString fileURL){
+    QString lsaveFilePath = "Configurações/Temp/Imagens/avatar";
+    lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
+
+    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
+
+    QNetworkRequest lrequest;
+    lrequest.setUrl(QUrl(fileURL));
+    vreply = vmanager->get(lrequest);
+
+    vfile = new QFile;
+    vfile->setFileName(lsaveFilePath);
+    vfile->open(QIODevice::WriteOnly);
+
+    connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+    connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+    connect(vreply,SIGNAL(finished()),this,SIGNAL(savatar()));
+}
+
 void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
 {
     QString lsaveFilePath = cconfBase->vdiretorioImagensMedio;
@@ -251,8 +271,8 @@ void filedownloader::fsetNextBig()
             else if(vlistaAtual == "plantowatch"){
                 vterminouLista = true;
                 emit slistaMensagem("Plan to Watch");
-                fsetNextBig();
             }
+            fsetNextBig();
         }
     }
     else{

@@ -21,7 +21,7 @@ public:
     QVector<QString> fretornaDiretoriosAnimes();
     void fbuscaDiretoriosAnimes();
     void frecebeListaAnime(QVector<anime*>);
-
+    void fmostraPastas();
 signals:
 
 public slots:

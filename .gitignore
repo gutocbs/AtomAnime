@@ -2,3 +2,12 @@ visuais.qrc
 *.ui
 *.pro
 *.user
+Imagens/design - Copia.jpg
+*.autosave
+loadingscreen.cpp
+loadingscreen.h
+media.cpp
+media.h
+MediaList.gql
+medialist.h
+user.h

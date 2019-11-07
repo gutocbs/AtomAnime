@@ -58,12 +58,12 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 QString lnomeAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnome);
                 QString lnomeInglesAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeIngles);
                 //Compara os nomes, sempre ignorando letras maiusculas e minusculas para garantir que o anime será encontrado.
-                if(lnomeAnime.compare(lnomeAnimeLista,Qt::CaseInsensitive) == 0){
+                if(lnomeAnime.compare(lnomeAnimeLista,Qt::CaseInsensitive) == 0 && lnomeAnime.isEmpty() == false){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else if(lnomeAnime.compare(lnomeInglesAnimeLista, Qt::CaseInsensitive) == 0){
+                else if(lnomeAnime.compare(lnomeInglesAnimeLista, Qt::CaseInsensitive) == 0 && lnomeInglesAnimeLista.isEmpty() == false){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
@@ -82,6 +82,13 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 }
             }
         }
+    }
+}
+
+///POSSO REMOVER ESSA FUNÇÃO CASO NECESSÁRIO, SERVE APENAS PARA DEBUG
+void confUsuario::fmostraPastas(){
+    foreach (QString key, vdiretorioEspecificoAnime.keys()) {
+        qDebug() << key << " - " << vdiretorioEspecificoAnime.value(key);
     }
 }
 

@@ -23,8 +23,10 @@ public:
     void fdownloadImagensPequenasLista(QString, QString);
     void fsetLeitorListaAnimes(leitorlistaanimes*);
     void fsetConfBase(confBase*);
+    void fdownloadAvatarUsuario(QString);
 signals:
     void slistaMensagem(QString);//Falta implementar alguns slots e sinais.
+    void savatar();
 public slots:
     void fsetNext();
     void fsetNextBig();
