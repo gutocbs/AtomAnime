@@ -4,8 +4,7 @@ const QUrl graphqlUrl("https://graphql.anilist.co");
 
 anilist::anilist(QObject *parent) : QObject(parent)
 {
-    vusername = "\"y\"";
-    vtoken = "x";
+
 }
 
 anilist::~anilist(){
@@ -46,7 +45,7 @@ bool anilist::fgetList(){
     //Verificamos se é uma mensagem de erro
     if(lastpage.contains("errors") == true){
         this->thread()->exit(0);
-        sterminouDownload(false);
+        emit sterminouDownload(false);
         return false;
     }
     lastpage = lastpage.toLatin1();
@@ -84,21 +83,23 @@ bool anilist::fgetList(){
     }
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("errors") == true){
-        sterminouDownload(false);
+        emit sterminouDownload(false);
         this->thread()->exit(0);
         return false;
     }
     else{
-        if(QFile::remove("Configurações/Temp/animeList.txt")){
-            t.rename("Configurações/Temp/animeList.txt");
+        if(QFile::exists("Configurações/Temp/animeList.txt")){
+            if(QFile::remove("Configurações/Temp/animeList.txt"))
+                t.rename("Configurações/Temp/animeList.txt");
         }
-        sterminouDownload(true);
+        else
+            t.rename("Configurações/Temp/animeList.txt");
+        emit sterminouDownload(true);
         this->thread()->exit(0);
         return true;
     }
 }
 
-///Fazer isso em thread?
 bool anilist::fmudaLista(int rid, QString rNovaLista){
     ///Preciso por o token em um arquvio de configuração criptografado
     QByteArray auth = "Bearer ";
@@ -128,6 +129,7 @@ bool anilist::fmudaLista(int rid, QString rNovaLista){
     QByteArray response_data = vreply->readAll();
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
+    qDebug() << lreplyString;
     if(lreplyString.contains("error"))
         return false;
     else
@@ -163,7 +165,11 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
     {
         qApp->processEvents();
     }
-    QByteArray response_data = vreply->readAll();
+    QByteArray response_data;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else
+        return false;
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -216,4 +222,62 @@ QString anilist::fretornaAvatar(){
 void anilist::fbaixaListaThread(QThread &cThread)
 {
     connect(&cThread, SIGNAL(started()), this, SLOT(fgetList()));
+}
+
+void anilist::frecebeAutorizacao(QString ruser, QString rauthcode)
+{
+    vusername = "\"" + ruser + "\"";
+    vtoken = rauthcode;
+}
+
+bool anilist::fexcluiAnime(int rid){
+    ///Preciso por o token em um arquvio de configuração criptografado
+    QByteArray auth = "Bearer ";
+    auth.append(vtoken);
+
+    QNetworkRequest lrequest(graphqlUrl);
+    lrequest.setRawHeader(QByteArray("Authorization"), auth);
+    lrequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    lrequest.setRawHeader(QByteArray("Accept"), "application/json; charset=utf-8");
+    QJsonObject json;
+    QNetworkAccessManager lacessManager;
+
+    //Cria string com o pedido de delete
+    QString llistaAtual =  "query{ MediaList(mediaId:" + QString::number(rid) + ", userName: " + vusername + "){ id }}";
+    //Insere item no json
+    json.insert("query", llistaAtual);
+    //Manda a solicitação de mudança
+    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+
+    //Espera solicitação voltar do servidor
+    while (!vreply->isFinished())
+    {
+        qApp->processEvents();
+    }
+    QByteArray response_data = vreply->readAll();
+    QJsonDocument jsond = QJsonDocument::fromJson(response_data);
+    QString lreplyString = jsond.toJson();
+
+    json.empty();
+    llistaAtual = lreplyString.toLatin1();
+    //id do anime na lista
+    QString lid = llistaAtual.mid(llistaAtual.lastIndexOf("id")+5);
+    llistaAtual = lid.left(lid.indexOf("\n"));
+    lid = llistaAtual;
+    llistaAtual = "mutation{     DeleteMediaListEntry (id: " + lid + ") {      deleted     } }";
+    //Insere item no json
+    json.insert("query", llistaAtual);
+    //Manda a solicitação de mudança
+    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    while (!vreply->isFinished())
+    {
+        qApp->processEvents();
+    }
+    response_data = vreply->readAll();
+    jsond = QJsonDocument::fromJson(response_data);
+    lreplyString = jsond.toJson();
+    if(lreplyString.contains("error") || lreplyString.contains("errors"))
+        return false;
+    else
+        return true;
 }

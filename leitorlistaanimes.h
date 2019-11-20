@@ -20,6 +20,7 @@ public:
     ~leitorlistaanimes();
     bool fleJson();
     bool fmudaLista(QString, QString);
+    bool fdeletedaLista(QString, QString);
     void fdeletaListaAnimes();
     QVector<anime*> retornaListaWatching();
     QVector<anime*> retornaListaCompleted();

@@ -11,6 +11,8 @@
 #include <QTimer> //Para atualizar a lista automaticamente
 #include <QDesktopServices> //Abre sites
 
+#include <QSharedPointer> ///Teste pra ver se ele consegue fechar os ponteiros de uma maneira simples
+
 #include "leitorlistaanimes.h"
 #include "confbase.h"
 #include "filedownloader.h"
@@ -20,6 +22,7 @@
 #include "anilist.h"
 
 #include "janeladeconfig.h"
+#include "janelatorrent.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -42,6 +45,8 @@ public:
     void fbloqueiaSinaisBotoes();
     void fliberaSinaisBotoes();
     void frefreshListas(bool);
+    void fmandaDiretoriosArquivos();
+    void favisoErro(QString);
 
 private slots:
     void on_botaoAnime00_clicked();
@@ -80,6 +85,9 @@ private slots:
     void on_botaoMudarPraLista_clicked();
     void on_botaoAnilist_clicked();
     void on_botaoCrunchyroll_clicked();
+    void on_botaoTorrent_clicked();
+    void on_botaoRemoverdaLista_clicked();
+    void fretryAnilist();
 
 private:
     Ui::MainWindow *ui;
@@ -109,17 +117,22 @@ private:
     QString vlistaAtual;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
+    bool vprimeiraVezThread = true;
+    bool vfalhaconexao = false;
 
     QTimer *timer;
+    QTimer *tryTimer;
     QTimer *timerRefresh;
     QTimer *timerAcao;
 
     QMap<QStringList, QString> vlistaAcoes;
 
-    //Thread que vai baixar a lista de animes. Como essa thread fica fora da classe, temos que usar QThread
+    //Thread que vai baixar a lista de anime e busca as pastas. Como essa thread fica fora da classe, temos que usar QThread
     QThread cThread;
+    QThread dThread;
 
     //Janelas
     janeladeconfig jconfig;
+    janelatorrent jtorrent;
 };
 #endif // MAINWINDOW_H

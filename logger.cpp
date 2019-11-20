@@ -22,7 +22,6 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
     if(vlogging){
         bool lcrash = false;
         QString lmensagemLog;
-        QFile lfile(logger::varquivo);
         switch (rtipo) {
             case QtInfoMsg:
                 lmensagemLog = QString("Info: %1").arg(rmensagem);
@@ -41,6 +40,7 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
                 lcrash = true;
             break;
         }
+        QFile lfile(logger::varquivo);
         if(lfile.open(QIODevice::WriteOnly | QIODevice::Append)) {
             QTextStream lstreamTexto(&lfile);
             QString larquivo = rcontexto.file;
