@@ -6,6 +6,16 @@ janeladeconfig::janeladeconfig(QWidget *parent) :
     ui(new Ui::janeladeconfig)
 {
     ui->setupUi(this);
+    ui->textoSalvaTorrents->setMaximumBlockCount(1);
+    ui->textoTempoDownloadAutomatico->setMaximumBlockCount(1);
+    ui->textoUser->setMaximumBlockCount(1);
+    ui->textoCodigoAutorizacao->setMaximumBlockCount(1);
+    ui->textoTorrentFeedEspecifico->setMaximumBlockCount(1);
+    ui->textoTorrentFeed->setMaximumBlockCount(1);
+    ui->textoSubPreferido->setMaximumBlockCount(1);
+    ui->textoCodigoAutorizacao->hide();
+    ui->labelCodigoAutenticar->hide();
+    ui->botaoSalvarCodigo->hide();
     fleArquivoConfig();
 }
 
@@ -23,16 +33,20 @@ void janeladeconfig::fleArquivoConfig(){
             QString lstreamTexto = larquivo.readLine();
             if(lstreamTexto.contains("User:")){
                 lstreamTexto.remove("User:");
-                ui->textoUser->setPlainText(lstreamTexto);
-                vuser = lstreamTexto;
+                vuser = lstreamTexto.trimmed();
+                ui->textoUser->setPlainText(vuser);
             }
-            else if(lstreamTexto.contains("Directory:")){
-                lstreamTexto.remove("Directory:");
-                vdirectory = lstreamTexto.split(";");
+            else if(lstreamTexto.contains("Directory;")){
+                lstreamTexto.remove("Directory;");
+                vdirectory = lstreamTexto.trimmed().split(";");
+                for(int i = 0; i < vdirectory.size(); i++){
+                    ui->tabelaDiretorios->addItem(vdirectory.at(i));
+                }
             }
             else if(lstreamTexto.contains("Authorization:")){
                 lstreamTexto.remove("Authorization:");
-                vauthorization = lstreamTexto;
+                vauthorization = lstreamTexto.trimmed();
+                ui->textoCodigoAutorizacao->setPlainText(vauthorization);
             }
             else if(lstreamTexto.contains("Detection:")){
                 lstreamTexto.remove("Detection:");
@@ -53,7 +67,7 @@ void janeladeconfig::fleArquivoConfig(){
             }
             else if(lstreamTexto.contains("TorrentSoftware:")){
                 lstreamTexto.remove("TorrentSoftware:");
-                vtorrentSoftware = lstreamTexto;
+                vtorrentSoftware = lstreamTexto.trimmed();
                 ui->boxTorrentEscolhido->setCurrentText(lstreamTexto);
             }
             else if(lstreamTexto.contains("AutoDownload:")){
@@ -67,8 +81,8 @@ void janeladeconfig::fleArquivoConfig(){
             }
             else if(lstreamTexto.contains("SaveFolder:")){
                 lstreamTexto.remove("SaveFolder:");
-                vsaveFolder = lstreamTexto;
-                ui->textoSalvaTorrents->setPlainText(lstreamTexto);
+                vsaveFolder = lstreamTexto.trimmed();
+                ui->textoSalvaTorrents->setPlainText(vsaveFolder);
             }
             else if(lstreamTexto.contains("DownloadListas:")){
                 lstreamTexto.remove("DownloadListas:");
@@ -84,23 +98,23 @@ void janeladeconfig::fleArquivoConfig(){
             }
             else if(lstreamTexto.contains("Sub:")){
                 lstreamTexto.remove("Sub:");
-                vsub = lstreamTexto;
-                ui->textoSubPreferido->setPlainText(lstreamTexto);
+                vsub = lstreamTexto.trimmed();
+                ui->textoSubPreferido->setPlainText(vsub);
             }
             else if(lstreamTexto.contains("Quality:")){
                 lstreamTexto.remove("Quality:");
-                vquality = lstreamTexto;
+                vquality = lstreamTexto.trimmed();
                 ui->boxQualidadeEscolhida->setCurrentText(lstreamTexto);
             }
-            else if(lstreamTexto.contains("TorrentFeed:")){
+            else if(lstreamTexto.contains("TorrentFeed")){
                 lstreamTexto.remove("TorrentFeed:");
-                vtorrentFeed = lstreamTexto;
-                ui->textoTorrentFeed->setPlainText(lstreamTexto);
+                vtorrentFeed = lstreamTexto.trimmed();
+                ui->textoTorrentFeed->setPlainText(vtorrentFeed);
             }
-            else if(lstreamTexto.contains("AnimeTorrentFeed:")){
-                lstreamTexto.remove("AnimeTorrentFeed:");
-                vanimeTorrentFeed = lstreamTexto;
-                ui->textoTorrentFeedEspecifico->setPlainText(lstreamTexto);
+            else if(lstreamTexto.contains("AnimeFeed")){
+                lstreamTexto.remove("AnimeFeed:");
+                vanimeTorrentFeed = lstreamTexto.trimmed();
+                ui->textoTorrentFeedEspecifico->setPlainText(vanimeTorrentFeed);
             }
         }
         larquivo.close();
@@ -111,21 +125,14 @@ QByteArray janeladeconfig::fretornaUsuario(){
     return ui->textoUser->toPlainText().toLocal8Bit();
 }
 
-QByteArray janeladeconfig::fretornaDiretorios()
+QStringList janeladeconfig::fretornaDiretorios()
 {
-//    QTableView
-//    QByteArray ldiretorios;
-//    for(int i = 0; i < ui->tabelaDiretorios.co; i++){
-
-//    }
-    return "oi";
+    return vdirectory;
 }
 
 QByteArray janeladeconfig::fretornaCodigoAutorizacao()
 {
-    if(vauthorization.isEmpty())
-        return ui->textoCodigoAutorizacao->toPlainText().toLocal8Bit();
-    else if(vauthorization != ui->textoCodigoAutorizacao->toPlainText())
+    if(vauthorization.isEmpty() || vauthorization != ui->textoCodigoAutorizacao->toPlainText())
         return ui->textoCodigoAutorizacao->toPlainText().toLocal8Bit();
     return vauthorization.toLocal8Bit();
 }
@@ -185,7 +192,7 @@ QByteArray janeladeconfig::fretornaDownloadListasAnimes()
 
 QByteArray janeladeconfig::fretornaSubEscolhido()
 {
-    return ui->textoSubPreferido->toPlainText().toLocal8Bit();
+    return ui->textoSubPreferido->toPlainText().toLocal8Bit().trimmed();
 }
 
 QByteArray janeladeconfig::fretornaQualidadeEscolhida()
@@ -215,7 +222,11 @@ void janeladeconfig::on_botaoSalvar_clicked()
     if(larquivo.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivo);
         lstreamTexto << "User:" << fretornaUsuario() << endl;
-        lstreamTexto << "Directory:" << fretornaDiretorios() << endl;
+        lstreamTexto << "Directory";
+        for(int i = 0; i < vdirectory.size(); i++){
+             lstreamTexto << ";" << fretornaDiretorios().at(i);
+        }
+        lstreamTexto << endl;
         lstreamTexto << "Authorization:" << fretornaCodigoAutorizacao() << endl;
         lstreamTexto << "Detection:" << fretornaDeteccao() << endl;
         lstreamTexto << "LowQuality:" << fretornaBaixaQualidade() << endl;
@@ -226,7 +237,50 @@ void janeladeconfig::on_botaoSalvar_clicked()
         lstreamTexto << "Sub:" << fretornaSubEscolhido() << endl;
         lstreamTexto << "Quality:" << fretornaQualidadeEscolhida() << endl;
         lstreamTexto << "TorrentFeed:" << fretornaFeedAnime() << endl;
-        lstreamTexto << "AnimeTorrentFeed:" << fretornaFeedAnimeEspecifico() << endl;
+        lstreamTexto << "AnimeFeed:" << fretornaFeedAnimeEspecifico() << endl;
         larquivo.close();
     }
+}
+
+void janeladeconfig::on_botaoAdicionar_clicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != ""){
+        vdirectory.append(dir);
+        ui->tabelaDiretorios->addItem(dir);
+    }
+}
+
+void janeladeconfig::on_botaoRemover_clicked()
+{
+    if(!ui->tabelaDiretorios->selectedItems().isEmpty())
+        qDeleteAll(ui->tabelaDiretorios->selectedItems());
+}
+
+void janeladeconfig::on_botaoSelecionarPastaDownload_clicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != ""){
+        ui->textoSalvaTorrents->setPlainText(dir);
+        vsaveFolder = dir;
+    }
+}
+
+void janeladeconfig::on_botaoAutorizarUser_clicked()
+{
+    vuser = ui->textoUser->toPlainText();
+    ui->textoCodigoAutorizacao->show();
+    ui->labelCodigoAutenticar->show();
+    ui->botaoSalvarCodigo->show();
+}
+
+void janeladeconfig::on_botaoSalvarCodigo_clicked()
+{
+    vauthorization = ui->textoCodigoAutorizacao->toPlainText();
+    ui->textoCodigoAutorizacao->hide();
+    ui->labelCodigoAutenticar->hide();
+    ui->botaoSalvarCodigo->hide();
+    emit sauthcodesave();
 }

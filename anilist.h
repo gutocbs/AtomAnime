@@ -23,10 +23,12 @@ public:
     bool fmudaNota(int, int);
     ///id, progresso
     bool fmudaProgresso(int, int);
+    bool fexcluiAnime(int);
 
     QString fretornaAvatar();
 
     void fbaixaListaThread(QThread &cThread);
+    void frecebeAutorizacao(QString, QString);
 
 public slots:
     bool fgetList();

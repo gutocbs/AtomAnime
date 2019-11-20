@@ -80,6 +80,44 @@ QString arquivos::fprocuraEpisodio(anime *ranimeBuscado){
     return "";
 }
 
+QString arquivos::fprocuraUltimoEpisodio(anime *ranimeBuscado, QString repisodio){
+    //Verifica se a função retorna um valor que não está vazio, ou seja
+    //Se existe uma pasta com o nome do anime
+        if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
+        //Começa a iterar a pasta em busca das pastas de animes
+        QDirIterator lit(cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()), QDirIterator::Subdirectories);
+        while(lit.hasNext()){
+            QFile lfile(lit.next());
+            QFileInfo lchecaSeArquivoOuPasta(lfile.fileName());
+            //Checa se o que foi encontrado é um arquivo ou uma pasta e, no caso de ser um arquivo, se é um arquivo de vídeo
+            if(lchecaSeArquivoOuPasta.isFile() == true && (lfile.fileName().endsWith("mkv") || lfile.fileName().endsWith("mp4"))){
+                //Compara o nome do anime e o número do episódio
+                if(fcomparaDadosAnime(lit.fileName(), ranimeBuscado->vnome, ranimeBuscado->vnomeIngles, ranimeBuscado->vnomeAlternativo,
+                                           repisodio.toInt()-1))
+                    return lfile.fileName();
+            }
+        }
+    }
+    else{
+        //Começa a iterar a pasta em busca das pastas de animes
+        for(int i = 0; i < cconfUsuario->fretornaDiretoriosAnimes().size(); i++){
+            QDirIterator lit(cconfUsuario->fretornaDiretoriosAnimes().at(i), QDir::Files);
+            while(lit.hasNext()){
+                QFile lfile(lit.next());
+                QFileInfo lchecaSeArquivoOuPasta(lfile.fileName());
+                //Checa se o que foi encontrado é um arquivo ou uma pasta e, no caso de ser um arquivo, se é um arquivo de vídeo
+                if(lchecaSeArquivoOuPasta.isFile() == true && (lfile.fileName().endsWith("mkv") || lfile.fileName().endsWith("mp4"))){
+                    //Compara o nome do anime e o número do episódio
+                    if(fcomparaDadosAnime(lit.fileName(), ranimeBuscado->vnome, ranimeBuscado->vnomeIngles, ranimeBuscado->vnomeAlternativo,
+                                               repisodio.toInt()-1))
+                        return lfile.fileName();
+                }
+            }
+        }
+    }
+    return "";
+}
+
 QString arquivos::fremoveCaracteresDiferentes(QString rnome)
 {
     rnome = rnome.toLower();

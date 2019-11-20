@@ -335,6 +335,52 @@ void leitorlistaanimes::fdeletaListaAnimes(){
     }
 }
 
+bool leitorlistaanimes::fdeletedaLista(QString rid, QString rlista)
+{
+    if(rlista == "Watching"){
+        for(int i = 0; i < vlistaWatching.size(); i++){
+            if(vlistaWatching[i]->vid == rid){
+                vlistaWatching.remove(i);
+                return true;
+            }
+        }
+    }
+    else if(rlista == "Completed"){
+        for(int i = 0; i < vlistaCompleted.size(); i++){
+            if(vlistaCompleted[i]->vid == rid){
+                vlistaCompleted.remove(i);
+                return true;
+            }
+        }
+    }
+    else if(rlista == "On Hold"){
+        for(int i = 0; i < vlistaOnHold.size(); i++){
+            if(vlistaOnHold[i]->vid == rid){
+                vlistaOnHold.remove(i);
+                return true;
+            }
+        }
+    }
+    else if(rlista == "Dropped"){
+        for(int i = 0; i < vlistaDropped.size(); i++){
+            if(vlistaDropped[i]->vid == rid){
+                vlistaDropped.remove(i);
+                return true;
+            }
+        }
+    }
+    else if(rlista == "Plan to Watch"){
+        for(int i = 0; i < vlistaPlanToWatch.size(); i++){
+            if(vlistaPlanToWatch[i]->vid == rid){
+                vlistaPlanToWatch.remove(i);
+                return true;
+            }
+        }
+    }
+    return false;
+
+}
+
 QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
     QVector<anime*> llistaTemp;
     if(rlista == "watching")
@@ -373,8 +419,8 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
                             lnumEpiTotali = 1000000;
                         if(lnumEpiTotalw == 0)
                             lnumEpiTotalw = 1000000;
-                        if((float)llistaTemp[i]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotali
-                                > (float)llistaTemp[w]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotalw){
+                        if(static_cast<float>(llistaTemp[i]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotali
+                                > static_cast<float>(llistaTemp[w]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotalw){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
@@ -412,8 +458,8 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
                             lnumEpiTotali = 1000000;
                         if(lnumEpiTotalw == 0)
                             lnumEpiTotalw = 1000000;
-                        if((float)llistaTemp[i]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotali
-                                < (float)llistaTemp[w]->vnumEpisodiosAssistidos.toInt()/lnumEpiTotalw){
+                        if(static_cast<float>(llistaTemp[i]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotali
+                                < static_cast<float>(llistaTemp[w]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotalw){
                             llistaTemp.move(i,w);
                             llistaTemp.move(w-1,i);
                         }
@@ -442,14 +488,16 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
 //    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
     vlistaBusca.clear();
     for(int i = 0; i < vlistaWatching.size(); i++){
-            if(vlistaWatching[i]->vnome.contains(rnome, Qt::CaseInsensitive) == true ||
+        if(vlistaWatching[i]->vnome.contains(rnome, Qt::CaseInsensitive) == true ||
                 vlistaWatching[i]->vnomeIngles.contains(rnome, Qt::CaseInsensitive) == true){
             vlistaBusca.append(vlistaWatching[i]);
         }
         else if(vlistaWatching[i]->vnomeAlternativo.size() != 0){
             for(int w = 0; w < vlistaWatching[i]->vnomeAlternativo.size(); w++){
-                if(vlistaWatching[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive))
+                if(vlistaWatching[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive)){
                     vlistaBusca.append(vlistaWatching[i]);
+                    break;
+                }
             }
         }
     }
@@ -459,8 +507,10 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
             vlistaBusca.append(vlistaCompleted[i]);
         else if(vlistaCompleted[i]->vnomeAlternativo.size() != 0){
             for(int w = 0; w < vlistaCompleted[i]->vnomeAlternativo.size(); w++){
-                if(vlistaCompleted[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive))
+                if(vlistaCompleted[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive)){
                     vlistaBusca.append(vlistaCompleted[i]);
+                    break;
+                }
             }
         }
     }
@@ -470,8 +520,10 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
             vlistaBusca.append(vlistaOnHold[i]);
         else if(vlistaOnHold[i]->vnomeAlternativo.size() != 0){
             for(int w = 0; w < vlistaOnHold[i]->vnomeAlternativo.size(); w++){
-                if(vlistaOnHold[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive))
+                if(vlistaOnHold[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive)){
                     vlistaBusca.append(vlistaOnHold[i]);
+                    break;
+                }
             }
         }
     }
@@ -481,8 +533,10 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
             vlistaBusca.append(vlistaDropped[i]);
         else if(vlistaDropped[i]->vnomeAlternativo.size() != 0){
             for(int w = 0; w < vlistaDropped[i]->vnomeAlternativo.size(); w++){
-                if(vlistaDropped[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive))
+                if(vlistaDropped[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive)){
                     vlistaBusca.append(vlistaDropped[i]);
+                    break;
+                }
             }
         }
     }
@@ -492,8 +546,10 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
             vlistaBusca.append(vlistaPlanToWatch[i]);
         else if(vlistaPlanToWatch[i]->vnomeAlternativo.size() != 0){
             for(int w = 0; w < vlistaPlanToWatch[i]->vnomeAlternativo.size(); w++){
-                if(vlistaPlanToWatch[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive))
+                if(vlistaPlanToWatch[i]->vnomeAlternativo.at(w).contains(rnome, Qt::CaseInsensitive)){
                     vlistaBusca.append(vlistaPlanToWatch[i]);
+                    break;
+                }
             }
         }
     }

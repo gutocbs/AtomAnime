@@ -16,17 +16,21 @@ class filedownloader : public QObject
 public:
     explicit filedownloader(QObject *parent = nullptr);
     ~filedownloader();
-    void fsetTorrent(QString, QString);
-    void fsetXMl(QString);
     void fdownloadImagensLista(QString, QString);
     void fdownloadImagensGrandesLista(QString, QString);
     void fdownloadImagensPequenasLista(QString, QString);
     void fsetLeitorListaAnimes(leitorlistaanimes*);
     void fsetConfBase(confBase*);
     void fdownloadAvatarUsuario(QString);
+    void fdownloadTorrent(QString, QString);
+    void fdownloadXMLTorrentList(QString);
+
 signals:
-    void slistaMensagem(QString);//Falta implementar alguns slots e sinais.
+    void slistaMensagem(QString);
     void savatar();
+    void sxml();
+    void storrent();
+
 public slots:
     void fsetNext();
     void fsetNextBig();

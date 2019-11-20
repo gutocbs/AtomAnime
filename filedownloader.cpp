@@ -32,13 +32,58 @@ void filedownloader::fdownloadAvatarUsuario(QString fileURL){
     lrequest.setUrl(QUrl(fileURL));
     vreply = vmanager->get(lrequest);
 
-    vfile = new QFile;
+    vfile = new QFile(this);
     vfile->setFileName(lsaveFilePath);
     vfile->open(QIODevice::WriteOnly);
 
     connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
     connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
     connect(vreply,SIGNAL(finished()),this,SIGNAL(savatar()));
+}
+
+void filedownloader::fdownloadTorrent(QString fileURL, QString torrentName)
+{
+    QString lsaveFilePath = "Configurações/Temp/Torrents/";
+    lsaveFilePath.append(torrentName);
+    lsaveFilePath.append(".torrent");
+
+    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
+
+    if(QFile(lsaveFilePath).exists())
+        emit storrent();
+
+    QNetworkRequest lrequest;
+    lrequest.setUrl(QUrl(fileURL));
+    vreply = vmanager->get(lrequest);
+
+    vfile = new QFile(this);
+    vfile->setFileName(lsaveFilePath);
+    vfile->open(QIODevice::WriteOnly);
+
+    connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+    connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+    connect(vreply,SIGNAL(finished()),this,SIGNAL(storrent()));
+}
+
+void filedownloader::fdownloadXMLTorrentList(QString fileURL)
+{
+    QString lsaveFilePath = "Configurações/Temp/torrents.xml";
+
+//    if(QFile(lsaveFilePath).size() == 0)
+        QFile(lsaveFilePath).remove();
+
+    QNetworkRequest lrequest;
+    lrequest.setUrl(QUrl(fileURL));
+    vreply = vmanager->get(lrequest);
+
+    vfile = new QFile(this);
+    vfile->setFileName(lsaveFilePath);
+    vfile->open(QIODevice::WriteOnly);
+
+    connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
+    connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
+    connect(vreply,SIGNAL(finished()),this,SIGNAL(sxml()));
 }
 
 void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
@@ -379,5 +424,6 @@ void filedownloader::onFinished(QNetworkReply * reply)
 
 void filedownloader::onReadyRead()
 {
-    vfile->write(vreply->readAll());
+    if(vreply->isReadable() && vfile->isWritable())
+        vfile->write(vreply->readAll());
 }

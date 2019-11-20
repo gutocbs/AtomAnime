@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>janelatorrent</class>
+ <widget class="QWidget" name="janelatorrent">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1920</width>
+    <height>821</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTableWidget" name="listaTorrents">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>90</y>
+     <width>1921</width>
+     <height>731</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <column>
+    <property name="text">
+     <string>checkbox</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>prioridade</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>nome</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>fansub</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>res</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>epi</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>desc</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="botaoAtualizaLista">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Atualizar lista</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoDownload">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Baixar</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

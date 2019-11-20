@@ -4,14 +4,13 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-{   //Após configurar tudo, a tela abre
-    ui->setupUi(this); ///25 segundos pra abrir. Isso é demais.
-    ///Sem o anilist é 9. O Anilist tem que rodar numa thread, é o único jeito.
-    ui->janelaRotativa->addWidget(&jconfig);
+{
+    ui->setupUi(this);
 
     logger::fattachLogger();
     qInfo() << QDateTime::currentDateTime().toString();
     canilist = new anilist();
+    canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
     cconfBase = new confBase();
     cconfBase->fcriaDiretoriosBase();
     qDebug() << "Main configuration is up";
@@ -19,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     qDebug() << "File system is up";
     cconfUsuario = new confUsuario();
     qDebug() << "User configuration is up";
+    cconfUsuario->flePastasArquivos();
+    fmandaDiretoriosArquivos();
 
     cleitorListaAnimes = new leitorlistaanimes();
 
@@ -30,6 +31,9 @@ MainWindow::MainWindow(QWidget *parent)
     canilist->moveToThread(&cThread);
     cThread.start();
     connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas);
+    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
+    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
+    //Ter dois ponteiros, e deletar o primeiro?
     //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
     vrefreshAcontecendo = true;
 
@@ -51,48 +55,44 @@ MainWindow::MainWindow(QWidget *parent)
         qDebug() << "Opening Watching List";
         vlistaAtual = "watching";
         qDebug() << "Searching for animes in the computer";
-        ////////////////////////////////////////////////////////////////////////////////////////JOGAR ESSA BUSCA EM THREADS TAMBÉM
-        ///AI CARREGA MAIS RÁPIDO EM PCS ANTIGOS
-        cconfUsuario->frecebeListaAnime(cleitorListaAnimes->sortLista(vordem, "watching"));
-        cconfUsuario->fbuscaDiretoriosAnimes();
-        cconfUsuario->frecebeListaAnime(cleitorListaAnimes->sortLista(vordem, "completed"));
-        cconfUsuario->fbuscaDiretoriosAnimes();
-        cconfUsuario->frecebeListaAnime(cleitorListaAnimes->sortLista(vordem, "onhold"));
-        cconfUsuario->fbuscaDiretoriosAnimes();
-        cconfUsuario->frecebeListaAnime(cleitorListaAnimes->sortLista(vordem, "dropped"));
-        cconfUsuario->fbuscaDiretoriosAnimes();
-        cconfUsuario->frecebeListaAnime(cleitorListaAnimes->sortLista(vordem, "plantowatch"));
-        cconfUsuario->fbuscaDiretoriosAnimes();
-        qDebug() << "All animes in the computer were found";
-        carquivos->frecebeDiretorios(cconfUsuario);
+
         //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
         //programa, para deixar o programa mais fluído
         vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
-        //E o timer para atualizar a lista automaticamente
-        timer = new QTimer(this);
-        connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
-        timer->start(600000); //10 minutos
-        //O segundo timer é uma contagem de segundo em segundo pra mostrar quanto tempo falta para o timer de cima chegar à 0
-        timerRefresh = new QTimer(this);
-        connect(timerRefresh, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaRefreshTimer));
-        timerRefresh->start(1000);
-        vtimerSegundos = 59;
-        //Timer que atualiza o anilist, pro caso de falhas ou assistir offline
-        timerAcao = new QTimer(this);
-        connect(timerAcao, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
-        timerAcao->start(60000); //1 minuto
     }
     else{
         qCritical() << "There was a problem reading the anime list";
-        //////////////////////////////////////////////////////////////////IMPLEMENTAR
         ui->labelMensagem->setText("There was a problem reading the anime list. Trying again in one minute");
+        tryTimer = new QTimer(this);
+        connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
+        tryTimer->start(60000); //1 minutos
+        vfalhaconexao = true;
     }
+    //E o timer para atualizar a lista automaticamente
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
+    timer->start(600000); //10 minutos
+    //O segundo timer é uma contagem de segundo em segundo pra mostrar quanto tempo falta para o timer de cima chegar à 0
+    timerRefresh = new QTimer(this);
+    connect(timerRefresh, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaRefreshTimer));
+    timerRefresh->start(1000);
+    vtimerSegundos = 59;
+    //Timer que atualiza o anilist, pro caso de falhas ou assistir offline
+    timerAcao = new QTimer(this);
+    connect(timerAcao, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
+    timerAcao->start(60000); //1 minuto
 
+    ui->janelaRotativa->addWidget(&jconfig);
+    ui->janelaRotativa->addWidget(&jtorrent);
+    jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
+    cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
 
     vanimeSelecionado = 0;
     vpagina = 1;
 
     ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+
+    connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
 
     finfoAnimeSelecionado();
 }
@@ -101,6 +101,8 @@ MainWindow::~MainWindow()
 {
     cThread.requestInterruption();
     cThread.wait();
+    dThread.requestInterruption();
+    dThread.wait();
     vrefreshAcontecendo = true;
     vfuture.waitForFinished();
     qDebug() << "Deleting pointers";
@@ -131,7 +133,7 @@ void MainWindow::finfoAnimeSelecionado(){
         ui->labelSinopse->setText(vlistaSelecionada[vanimeSelecionado]->vsinopse);
         ui->labelStatus->setText(vlistaSelecionada[vanimeSelecionado]->vstatus);
         ui->labelSeason->setText(vlistaSelecionada[vanimeSelecionado]->vseason);
-        ui->labelMediaSite->setText(QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaSite.toFloat()/10, 'f',2));
+        ui->labelMediaSite->setText(QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaSite.toDouble()/10, 'f',2));
         ui->labelNota->setText(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal);
         ui->labelRelease->setText(vlistaSelecionada[vanimeSelecionado]->vdataEpisodio);
         if(vlistaSelecionada[vanimeSelecionado]->vnumProximoEpisodioLancado.toInt() == 0)
@@ -157,7 +159,6 @@ void MainWindow::finfoAnimeSelecionado(){
 }
 
 void MainWindow::fcarregaImagensLista(){
-    qDebug() << "Loading anime list info";
     QPixmap pix;
     QString lstyleSheet;
     //Tenta carrgar o avatar antes de tudo
@@ -834,6 +835,7 @@ void MainWindow::fcarregaImagensLista(){
     }
 }
 
+///Aqui está bugando
 bool MainWindow::fcarregaImagensBackground(){
     ui->labelMensagem->setText("Carregando imagens");
     qDebug() << "Carregando imagens";
@@ -1211,18 +1213,18 @@ void MainWindow::on_boxOrdemLista_activated(const QString &arg1)
     }
 }
 
-///baixar a lista em thread e só ler ela depois rapidão
 void MainWindow::on_botaoRefresh_clicked()
 {
-    //Quando clicar no botão, o programa vai rodar a função de baixar as listas em uma thread e quando a lista for baixada, será
-    //atualizada na função frefreshListas();
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
-    cThread.start();
-    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas);
-    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
-    vrefreshAcontecendo = true;
-    ui->labelRefreshTimer->setText("Refreshing,,,");
+    if(vrefreshAcontecendo == false){
+        vrefreshAcontecendo = true;
+        //Quando clicar no botão, o programa vai rodar a função de baixar as listas em uma thread e quando a lista for baixada, será
+        //atualizada na função frefreshListas();
+//        canilist->fbaixaListaThread(cThread);
+//        canilist->moveToThread(&cThread);
+        cThread.start();
+        //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
+        ui->labelRefreshTimer->setText("Refreshing,,,");
+    }
 }
 
 void MainWindow::frefreshListas(bool rcheckDownload){
@@ -1231,6 +1233,10 @@ void MainWindow::frefreshListas(bool rcheckDownload){
         vrefreshAcontecendo = false;
         ui->labelMensagem->setText("Failed to connect to AniList!");
         return;
+    }
+    if(vfalhaconexao == true){
+        tryTimer->stop();
+        vfalhaconexao = false;
     }
     ui->labelMensagem->setText("Anime lists downloaded");
 
@@ -1264,6 +1270,20 @@ void MainWindow::frefreshListas(bool rcheckDownload){
         vrefreshAcontecendo = false;
         return;
     }
+    qDebug() << "Checking anime folders";
+    ui->labelMensagem->setText("Searching for animes in the computer");
+    cconfUsuario->frecebeListaAnime(cleitorListaAnimes);
+    if(vprimeiraVezThread == true){
+        vprimeiraVezThread = false;
+        cconfUsuario->fbuscaPastasThread(dThread);
+        cconfUsuario->moveToThread(&dThread);
+        dThread.start();
+    }
+    else
+        dThread.start();
+
+    connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos);
+
     cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
     cfiledownloader->fsetNext();
     qDebug() << "Images ready";
@@ -1277,19 +1297,31 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     }
     else
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
-    if(lbusca)
+    if(lbusca){
         on_botaoBusca_clicked();
-    for(int i = 0; i < lpaginaAtual-1; i++){
-        on_botaoProximaPagina_clicked();
+        for(int i = 0; i < lpaginaAtual-1; i++){
+            on_botaoProximaPagina_clicked();
+        }
     }
     if(lanimeAtual < vlistaSelecionada.size()){
         vanimeSelecionado = lanimeAtual;
     }
-    finfoAnimeSelecionado();
     ui->labelMensagem->setText("As listas foram atualizadas!");
     fliberaSinaisBotoes();
+    finfoAnimeSelecionado();
     vrefreshAcontecendo = false;
-    vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+    QFuture<void> lcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+}
+
+void MainWindow::fmandaDiretoriosArquivos()
+{
+    ui->labelMensagem->setText("All animes in the computer were found");
+    carquivos->frecebeDiretorios(cconfUsuario);
+}
+
+void MainWindow::favisoErro(QString rerro)
+{
+    ui->labelMensagem->setText(rerro);
 }
 
 
@@ -1325,6 +1357,7 @@ void MainWindow::fbloqueiaSinaisBotoes(){
     ui->botaoAnime11->blockSignals(true);
     ui->boxOrdemLista->blockSignals(true);
 //    ui->botaoMudarLista->blockSignals(true);
+    ui->botaoRefresh->blockSignals(true);
 }
 
 void MainWindow::fliberaSinaisBotoes(){
@@ -1359,6 +1392,7 @@ void MainWindow::fliberaSinaisBotoes(){
    ui->botaoAnime11->blockSignals(false);
    ui->boxOrdemLista->blockSignals(false);
    //ui->botaoMudarLista->blockSignals(false);
+   ui->botaoRefresh->blockSignals(false);
 }
 
 void MainWindow::fatualizaRefreshTimer()
@@ -1414,7 +1448,13 @@ void MainWindow::on_botaoNotaMenos_clicked()
 
 void MainWindow::on_botaoProgressoMais_clicked()
 {
-    if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() < vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosTotais.toInt()){
+    int lepisodiosTotais = 0;
+    //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
+    if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosTotais != "?")
+        lepisodiosTotais = vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosTotais.toInt();
+    else
+        lepisodiosTotais = INT_MAX;
+    if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
         vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos = QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()+1);
         finfoAnimeSelecionado();
         QString lacao = "progresso:" + vlistaSelecionada[vanimeSelecionado]->vid;
@@ -1450,21 +1490,27 @@ void MainWindow::fatualizaAnilist(){
                 vlistaAcoes.remove(key);
             }
             else
-                qDebug() << "Não foi possível mudar acessar a base de dados do anilist";
+                qDebug() << "Não foi possível acessar a base de dados do anilist";
         }
         else if(key.at(0) == "progresso"){
             if(canilist->fmudaProgresso(key.at(1).toInt(), vlistaAcoes[key].toInt())){
                 vlistaAcoes.remove(key);
             }
             else
-                qDebug() << "Não foi possível mudar acessar a base de dados do anilist";
+                qDebug() << "Não foi possível acessar a base de dados do anilist";
         }
         else if(key.at(0) == "lista"){
             if(canilist->fmudaLista(key.at(1).toInt(), vlistaAcoes[key])){
                 vlistaAcoes.remove(key);
             }
             else
-                qDebug() << "Não foi possível mudar acessar a base de dados do anilist";
+                qDebug() << "Não foi possível acessar a base de dados do anilist";
+        }
+        else if(key.at(0) == "remove"){
+            if(canilist->fexcluiAnime(key.at(1).toInt()))
+                vlistaAcoes.remove(key);
+            else
+                qDebug() << "Não foi possível acessar a base de dados do anilist";
         }
         i++;
     }
@@ -1520,4 +1566,34 @@ void MainWindow::on_botaoCrunchyroll_clicked()
 {
     if(!QDesktopServices::openUrl(QUrl(vlistaSelecionada[vanimeSelecionado]->vstreamCrunchyroll)))
         ui->labelMensagem->setText("A página do Crunchyroll não foi encontrada");
+}
+
+void MainWindow::on_botaoTorrent_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(2);
+}
+
+void MainWindow::on_botaoRemoverdaLista_clicked()
+{
+    qDebug() << "Removing anime from list";
+    vordem = "";
+    QString lacao = "remove:" + vlistaSelecionada[vanimeSelecionado]->vid;
+    QStringList lstringListAcao = lacao.split(':');
+    vlistaAcoes.insert(lstringListAcao, "null");
+    cleitorListaAnimes->fdeletedaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+    if(vlistaSelecionada.size() <= vanimeSelecionado){
+        vanimeSelecionado = 0;
+        vpagina = 1;
+    }
+    finfoAnimeSelecionado();
+    fatualizaAnilist();
+}
+
+void MainWindow::fretryAnilist()
+{
+    canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
+    canilist->fbaixaListaThread(cThread);
+    canilist->moveToThread(&cThread);
+    cThread.start();
 }
