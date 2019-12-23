@@ -5,6 +5,7 @@
 #include <QTextStream> //Para escrever o arquivo de configuração
 #include <QFileDialog> //Pra abrir as janelas de busca de pastas
 #include <QDebug>
+#include <QSettings>
 
 namespace Ui {
 class janeladeconfig;
@@ -38,6 +39,7 @@ signals:
     void sauthcodesave();
 private slots:
     void on_botaoSalvar_clicked();
+
     void on_botaoAdicionar_clicked();
     void on_botaoRemover_clicked();
     void on_botaoSelecionarPastaDownload_clicked();

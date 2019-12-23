@@ -11,6 +11,8 @@ filedownloader::filedownloader(QObject *parent) : QObject(parent)
 filedownloader::~filedownloader(){
     vmanager->deleteLater();
     cconfBase->deleteLater();
+    vfile->deleteLater();
+    vreply->deleteLater();
 }
 
 void filedownloader::fsetLeitorListaAnimes(leitorlistaanimes *lleitorlistaanimes){
@@ -88,6 +90,10 @@ void filedownloader::fdownloadXMLTorrentList(QString fileURL)
 
 void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
 {
+    if(fileURL.contains("large"))
+        fileURL.replace("large", "medium");
+    else if(fileURL.contains("small"))
+        fileURL.replace("small", "medium");
     QString lsaveFilePath = cconfBase->vdiretorioImagensMedio;
     lsaveFilePath.append(id);
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
@@ -108,7 +114,7 @@ void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
 
         connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
         connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-        connect(vreply,SIGNAL(finished()),this,SLOT(fsetNext()));
+        connect(vreply,&QNetworkReply::finished,this,&filedownloader::fsetNext, Qt::QueuedConnection);
         vfileIsOpen = true;
     }
     else{
@@ -187,8 +193,11 @@ void filedownloader::fsetNext()
     if(vfileIsOpen == true){
         if(vfile->isOpen())
         {
-            vfile->close();
-            vfile->deleteLater();
+//            //Se precisar desse wait for bytes written, está aqui o código pra usar.
+//            //Mas se não precisar, é melhor. Isso pode travar a thread.
+//            if(vfile->waitForBytesWritten(1000)){
+                vfile->close();
+//            }
         }
     }
     if(vlista == 0){
@@ -262,7 +271,6 @@ void filedownloader::fsetNextBig()
         if(vfile->isOpen())
         {
             vfile->close();
-            vfile->deleteLater();
         }
     }
     if(vlista == 0){
@@ -335,7 +343,6 @@ void filedownloader::fsetNextSmall()
         if(vfile->isOpen())
         {
             vfile->close();
-            vfile->deleteLater();
         }
     }
     if(vlista == 0){
@@ -418,12 +425,13 @@ void filedownloader::onFinished(QNetworkReply * reply)
     if(vfile->isOpen())
     {
         vfile->close();
-        vfile->deleteLater();
     }
 }
 
 void filedownloader::onReadyRead()
 {
-    if(vreply->isReadable() && vfile->isWritable())
+    if(vfile->isWritable())
         vfile->write(vreply->readAll());
+    else
+        qWarning() << vfile->errorString();
 }

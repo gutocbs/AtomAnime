@@ -10,8 +10,9 @@
 #include <QtConcurrent> //E rodar a função em uma thread separada
 #include <QTimer> //Para atualizar a lista automaticamente
 #include <QDesktopServices> //Abre sites
-
-#include <QSharedPointer> ///Teste pra ver se ele consegue fechar os ponteiros de uma maneira simples
+#include <QDesktopWidget> //Pra resolução
+#include <QScreen> //Resolução também
+#include <QtMath> //Também resolução
 
 #include "leitorlistaanimes.h"
 #include "confbase.h"
@@ -47,6 +48,7 @@ public:
     void frefreshListas(bool);
     void fmandaDiretoriosArquivos();
     void favisoErro(QString);
+    void fmudaResolucao();
 
 private slots:
     void on_botaoAnime00_clicked();
@@ -75,7 +77,6 @@ private slots:
     void on_botaoAbrePasta_clicked();
     void on_botaoBusca_clicked();
     void on_botaoRefresh_clicked();
-    void on_boxOrdemLista_activated(const QString &arg1);
     void on_botaoHome_clicked();
     void on_botaoConfiguracao_clicked();
     void on_botaoNotaMais_clicked();
@@ -88,6 +89,15 @@ private slots:
     void on_botaoTorrent_clicked();
     void on_botaoRemoverdaLista_clicked();
     void fretryAnilist();
+    void on_botaoOrdemAlfabetica_clicked();
+
+    void on_botaoOrdemProgresso_clicked();
+
+    void on_botaoOrdemScore_clicked();
+
+    void on_botaoOrdemRelease_clicked();
+
+    void on_botaoOrdemType_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -115,6 +125,9 @@ private:
     int vtimerSegundos;
     QString vordem;
     QString vlistaAtual;
+    QString dirGrande;
+    QString dirMedio;
+    QString dirPequeno;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
     bool vprimeiraVezThread = true;

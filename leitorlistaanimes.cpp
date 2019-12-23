@@ -42,6 +42,7 @@ bool leitorlistaanimes::fleJson(){
     QString lano;
     QString lmes;
     QString ldataEpisodioFinal;
+    int ltemporadaAnime = 1;
     QDateTime ldataEpisodio;
     QTime lhoraLancamentoEpisodio;
     QDate ldataEpisodioConvertida;
@@ -146,7 +147,10 @@ bool leitorlistaanimes::fleJson(){
                 llinha = llinha.trimmed();
                 llinha = llinha.toLower();
                 llinha[0] = llinha.at(0).toUpper();
-                lseason = llinha;
+                if(llinha.contains("?"))
+                    lseason = "-";
+                else
+                    lseason = llinha;
             }
             else if(llinha.contains("\"month\":")){
                 llinha.remove(",");
@@ -158,7 +162,10 @@ bool leitorlistaanimes::fleJson(){
                 llinha.remove("\",");
                 llinha.remove("\"");
                 llinha.remove("year: ");
-                lano = llinha.trimmed();
+                if(lseason == "-")
+                    lano = "";
+                else
+                    lano = llinha.trimmed();
             }
             else if(llinha.contains("\"status\":")){
                 llinha.remove("\",");
@@ -192,6 +199,15 @@ bool leitorlistaanimes::fleJson(){
                 llinha.remove("\"");
                 llinha.remove("romaji:");
                 lnome = llinha.trimmed();
+                if(lnome.endsWith("2"))
+                    ltemporadaAnime = 2;
+                else if(lnome.endsWith("3"))
+                    ltemporadaAnime = 3;
+                else if(lnome.endsWith("4"))
+                    ltemporadaAnime = 4;
+                else
+                    ltemporadaAnime = 1;
+
             }
             else if(llinha.contains("\"progress\":")){
                 llinha.remove(",");
@@ -265,6 +281,7 @@ bool leitorlistaanimes::fleJson(){
                 lnovoAnime->vdataEpisodio = ldataEpisodioFinal;
                 lnovoAnime->vsiteAnilist = lsiteAnilist;
                 lnovoAnime->vstreamCrunchyroll = lstreamCrunchyroll;
+                lnovoAnime->vtemporada = ltemporadaAnime;
                 if(lformato != "MANGA" && lformato != "NOVEL" && lformato != "ONE SHOT"){
                     if(llinha.trimmed() == "CURRENT"){
                         lnovoAnime->vlista = "Watching";
@@ -382,7 +399,6 @@ bool leitorlistaanimes::fdeletedaLista(QString rid, QString rlista)
 }
 
 QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
-    QVector<anime*> llistaTemp;
     if(rlista == "watching")
         llistaTemp = vlistaWatching;
     else if(rlista == "completed")
@@ -395,88 +411,57 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
         llistaTemp = vlistaPlanToWatch;
     else if(rlista == "busca")
         llistaTemp = vlistaBusca;
-    if(rordem != "")
+    else
+        llistaTemp.clear();
+
+    if(!rordem.isEmpty())
     {
-        for(int i = 0; i < llistaTemp.size(); i++){
-            for(int w = i+1; w < llistaTemp.size(); w++){
-                if(rordem[0] == "c"){
-                    if(rordem == "cnome"){
-                        if(llistaTemp[i]->vnome > llistaTemp[w]->vnome){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "cdata"){
-                        if(llistaTemp[i]->vdataEstreia > llistaTemp[w]->vdataEstreia){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "cprogresso"){
-                        int lnumEpiTotali = llistaTemp[i]->vnumEpisodiosTotais.toInt();
-                        int lnumEpiTotalw = llistaTemp[w]->vnumEpisodiosTotais.toInt();
-                        if(lnumEpiTotali == 0)
-                            lnumEpiTotali = 1000000;
-                        if(lnumEpiTotalw == 0)
-                            lnumEpiTotalw = 1000000;
-                        if(static_cast<float>(llistaTemp[i]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotali
-                                > static_cast<float>(llistaTemp[w]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotalw){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "cnota"){
-                        if(llistaTemp[i]->vnotaMediaPessoal.toInt() > llistaTemp[w]->vnotaMediaPessoal.toInt()){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "cformato"){
-                        if(llistaTemp[i]->vformato > llistaTemp[w]->vformato){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                }
-                else{
-                    if(rordem == "dnome"){
-                        if(llistaTemp[i]->vnome < llistaTemp[w]->vnome){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "ddata"){
-                        if(llistaTemp[i]->vdataEstreia < llistaTemp[w]->vdataEstreia){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "dprogresso"){
-                        int lnumEpiTotali = llistaTemp[i]->vnumEpisodiosTotais.toInt();
-                        int lnumEpiTotalw = llistaTemp[w]->vnumEpisodiosTotais.toInt();
-                        if(lnumEpiTotali == 0)
-                            lnumEpiTotali = 1000000;
-                        if(lnumEpiTotalw == 0)
-                            lnumEpiTotalw = 1000000;
-                        if(static_cast<float>(llistaTemp[i]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotali
-                                < static_cast<float>(llistaTemp[w]->vnumEpisodiosAssistidos.toInt())/lnumEpiTotalw){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "dnota"){
-                        if(llistaTemp[i]->vnotaMediaPessoal.toInt() < llistaTemp[w]->vnotaMediaPessoal.toInt()){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                    else if(rordem == "dformato"){
-                        if(llistaTemp[i]->vformato < llistaTemp[w]->vformato){
-                            llistaTemp.move(i,w);
-                            llistaTemp.move(w-1,i);
-                        }
-                    }
-                }
+        if(rordem.startsWith("c")){
+            if(rordem.contains("nome", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vnome < b->vnome ;});
+            }
+            else if(rordem.contains("data", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vdataEstreia < b->vdataEstreia ;});
+            }
+            else if(rordem.contains("progresso", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{return
+                            a->vnumEpisodiosAssistidos.toInt()
+                            < b->vnumEpisodiosAssistidos.toInt() ;});
+            }
+            else if(rordem.contains("nota", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vnotaMediaPessoal.toInt()
+                            < b->vnotaMediaPessoal.toInt() ;});
+            }
+            else if(rordem.contains("formato", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vformato < b->vformato ;});
+            }
+        }
+        else{
+            if(rordem.contains("nome", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vnome > b->vnome ;});
+            }
+            else if(rordem.contains("data", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vdataEstreia > b->vdataEstreia ;});
+            }
+            else if(rordem.contains("progresso", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{return
+                            static_cast<float>(a->vnumEpisodiosAssistidos.toInt())
+                            > static_cast<float>(b->vnumEpisodiosAssistidos.toInt()) ;});
+            }
+            else if(rordem.contains("nota", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vnotaMediaPessoal.toInt()
+                            > b->vnotaMediaPessoal.toInt() ;});
+            }
+            else if(rordem.contains("formato", Qt::CaseInsensitive)){
+                std::sort(llistaTemp.begin(),llistaTemp.end(),[](anime* a, anime* b)->bool{
+                    return a->vformato > b->vformato ;});
             }
         }
     }
@@ -484,8 +469,6 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
 }
 
 QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome){
-    //Essa função faz crashar. Se eu deleto os animes e tento procurar por eles, eles não existem mais no endereço certo e causam bad alloc
-//    qDeleteAll(vlistaBusca.begin(),vlistaBusca.end()); //Deletar todas as listas
     vlistaBusca.clear();
     for(int i = 0; i < vlistaWatching.size(); i++){
         if(vlistaWatching[i]->vnome.contains(rnome, Qt::CaseInsensitive) == true ||

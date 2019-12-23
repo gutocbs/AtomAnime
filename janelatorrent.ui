@@ -27,37 +27,37 @@
    </property>
    <column>
     <property name="text">
-     <string>checkbox</string>
+     <string/>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>prioridade</string>
+     <string>Anime Name</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>nome</string>
+     <string>Sub Name</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>fansub</string>
+     <string>Resolution</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>res</string>
+     <string>Episode number</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>epi</string>
+     <string>Description</string>
     </property>
    </column>
    <column>
     <property name="text">
-     <string>desc</string>
+     <string/>
     </property>
    </column>
   </widget>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1920</width>
-    <height>1002</height>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,7 +33,7 @@
      <number>0</number>
     </property>
     <widget class="QWidget" name="listaAnimes">
-     <widget class="QLabel" name="labelAnime00">
+     <widget class="QLabel" name="labelAnime00Titulo">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -68,7 +68,7 @@ color: rgb(20, 20, 20);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime09">
+     <widget class="QLabel" name="labelAnime09Titulo">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -151,7 +151,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime10">
+     <widget class="QLabel" name="labelAnime10Titulo">
       <property name="geometry">
        <rect>
         <x>392</x>
@@ -200,7 +200,7 @@ QPushButton#clickAnime1:hover:!pressed
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime02">
+     <widget class="QLabel" name="labelAnime02Titulo">
       <property name="geometry">
        <rect>
         <x>662</x>
@@ -251,7 +251,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime06">
+     <widget class="QLabel" name="labelAnime06Titulo">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -312,7 +312,12 @@ color: rgb(220, 220, 220);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background: transparent;</string>
+       <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
       </property>
       <property name="text">
        <string/>
@@ -334,7 +339,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime11">
+     <widget class="QLabel" name="labelAnime11Titulo">
       <property name="geometry">
        <rect>
         <x>662</x>
@@ -471,7 +476,7 @@ QPushButton#clickAnime1:hover:!pressed
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime08">
+     <widget class="QLabel" name="labelAnime08Titulo">
       <property name="geometry">
        <rect>
         <x>662</x>
@@ -490,7 +495,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime03">
+     <widget class="QLabel" name="labelAnime03Titulo">
       <property name="geometry">
        <rect>
         <x>120</x>
@@ -526,7 +531,7 @@ color: rgb(220, 220, 220);
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime01">
+     <widget class="QLabel" name="labelAnime01Titulo">
       <property name="geometry">
        <rect>
         <x>392</x>
@@ -577,7 +582,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime05">
+     <widget class="QLabel" name="labelAnime05Titulo">
       <property name="geometry">
        <rect>
         <x>662</x>
@@ -626,7 +631,7 @@ QPushButton#clickAnime1:hover:!pressed
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime07">
+     <widget class="QLabel" name="labelAnime07Titulo">
       <property name="geometry">
        <rect>
         <x>392</x>
@@ -645,7 +650,7 @@ color: rgb(220, 220, 220);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnime04">
+     <widget class="QLabel" name="labelAnime04Titulo">
       <property name="geometry">
        <rect>
         <x>392</x>
@@ -674,7 +679,12 @@ color: rgb(220, 220, 220);</string>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">background: transparent;</string>
+       <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
       </property>
       <property name="text">
        <string/>
@@ -745,7 +755,7 @@ color: rgb(20, 20, 20);</string>
        <string>+</string>
       </property>
      </widget>
-     <widget class="QLabel" name="labelNota">
+     <widget class="QLabel" name="labelInfoNota">
       <property name="geometry">
        <rect>
         <x>960</x>
@@ -767,7 +777,7 @@ color: rgb(20, 20, 20);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelStatus">
+     <widget class="QLabel" name="labelInfoStatus">
       <property name="geometry">
        <rect>
         <x>858</x>
@@ -795,7 +805,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelNomeAnimeIngles">
+     <widget class="QLabel" name="labelInfoNomeAnimeIngles">
       <property name="geometry">
        <rect>
         <x>858</x>
@@ -895,7 +905,7 @@ color: rgb(20, 20, 20);</string>
        <string>Próximo Episódio</string>
       </property>
      </widget>
-     <widget class="QLabel" name="labelSinopse">
+     <widget class="QLabel" name="labelInfoSinopse">
       <property name="geometry">
        <rect>
         <x>859</x>
@@ -923,7 +933,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelSeason">
+     <widget class="QLabel" name="labelInfoSeason">
       <property name="geometry">
        <rect>
         <x>1110</x>
@@ -964,13 +974,13 @@ color: rgb(20, 20, 20);</string>
        <string>Pasta</string>
       </property>
      </widget>
-     <widget class="QLabel" name="Season_10">
+     <widget class="QLabel" name="labelInfoSeasonTop">
       <property name="geometry">
        <rect>
         <x>1110</x>
         <y>100</y>
         <width>85</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -991,13 +1001,13 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelMedia_5">
+     <widget class="QLabel" name="labelInfoMediaTop">
       <property name="geometry">
        <rect>
         <x>1030</x>
         <y>100</y>
         <width>68</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1018,7 +1028,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelNota_9">
+     <widget class="QLabel" name="labelInfoNotaTop">
       <property name="geometry">
        <rect>
         <x>960</x>
@@ -1045,7 +1055,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelMediaSite">
+     <widget class="QLabel" name="labelInfoMediaSite">
       <property name="geometry">
        <rect>
         <x>1030</x>
@@ -1067,7 +1077,7 @@ color: rgb(20, 20, 20);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="Status_20">
+     <widget class="QLabel" name="labelInfoStatusTop">
       <property name="geometry">
        <rect>
         <x>858</x>
@@ -1094,7 +1104,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="Sinopse_5">
+     <widget class="QLabel" name="labelInfoSinopseTop">
       <property name="geometry">
        <rect>
         <x>858</x>
@@ -1175,7 +1185,7 @@ color: rgb(53, 68, 120);</string>
        <string/>
       </property>
      </widget>
-     <widget class="QLabel" name="labelNomeAnime">
+     <widget class="QLabel" name="labelInfoNomeAnime">
       <property name="geometry">
        <rect>
         <x>858</x>
@@ -1785,15 +1795,15 @@ color: rgb(53, 68, 120);</string>
      <widget class="QLabel" name="labelMensagem">
       <property name="geometry">
        <rect>
-        <x>858</x>
-        <y>630</y>
-        <width>881</width>
-        <height>31</height>
+        <x>880</x>
+        <y>660</y>
+        <width>531</width>
+        <height>71</height>
        </rect>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
-font: 75 10pt &quot;MS Shell Dlg 2&quot;;
+font: 75 10pt bold &quot;MS Shell Dlg 2&quot;;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1809,75 +1819,12 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QComboBox" name="boxOrdemLista">
-      <property name="geometry">
-       <rect>
-        <x>860</x>
-        <y>460</y>
-        <width>261</width>
-        <height>30</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: white</string>
-      </property>
-      <item>
-       <property name="text">
-        <string>Alphabetical Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Progress Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Score Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Release Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Type order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Reverse Alphabetical Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Reverse Progress Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Reverse Score Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Reverse Release Order</string>
-       </property>
-      </item>
-      <item>
-       <property name="text">
-        <string>Reverse Type Order</string>
-       </property>
-      </item>
-     </widget>
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>720</y>
-        <width>921</width>
+        <x>50</x>
+        <y>680</y>
+        <width>711</width>
         <height>91</height>
        </rect>
       </property>
@@ -1885,26 +1832,13 @@ color: rgb(20, 20, 20);</string>
        <string>Now playing</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_2">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>650</y>
-        <width>681</width>
-        <height>141</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>desenho</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="Season_11">
+     <widget class="QLabel" name="labelInfoAirTop">
       <property name="geometry">
        <rect>
         <x>1188</x>
         <y>100</y>
         <width>111</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1925,7 +1859,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelRelease">
+     <widget class="QLabel" name="labelInfoRelease">
       <property name="geometry">
        <rect>
         <x>1188</x>
@@ -1950,7 +1884,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista00">
+     <widget class="QLabel" name="labelFundoAnime00Lista">
       <property name="geometry">
        <rect>
         <x>117</x>
@@ -1972,7 +1906,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista01">
+     <widget class="QLabel" name="labelFundoAnime01Lista">
       <property name="geometry">
        <rect>
         <x>389</x>
@@ -1994,7 +1928,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista02">
+     <widget class="QLabel" name="labelFundoAnime02Lista">
       <property name="geometry">
        <rect>
         <x>659</x>
@@ -2016,7 +1950,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista04">
+     <widget class="QLabel" name="labelFundoAnime04Lista">
       <property name="geometry">
        <rect>
         <x>389</x>
@@ -2038,7 +1972,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista05">
+     <widget class="QLabel" name="labelFundoAnime05Lista">
       <property name="geometry">
        <rect>
         <x>659</x>
@@ -2060,7 +1994,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista03">
+     <widget class="QLabel" name="labelFundoAnime03Lista">
       <property name="geometry">
        <rect>
         <x>117</x>
@@ -2082,7 +2016,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista08">
+     <widget class="QLabel" name="labelFundoAnime08Lista">
       <property name="geometry">
        <rect>
         <x>659</x>
@@ -2104,7 +2038,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista06">
+     <widget class="QLabel" name="labelFundoAnime06Lista">
       <property name="geometry">
        <rect>
         <x>117</x>
@@ -2126,7 +2060,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista07">
+     <widget class="QLabel" name="labelFundoAnime07Lista">
       <property name="geometry">
        <rect>
         <x>389</x>
@@ -2148,7 +2082,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista10">
+     <widget class="QLabel" name="labelFundoAnime10Lista">
       <property name="geometry">
        <rect>
         <x>389</x>
@@ -2170,7 +2104,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista09">
+     <widget class="QLabel" name="labelFundoAnime09Lista">
       <property name="geometry">
        <rect>
         <x>117</x>
@@ -2192,7 +2126,7 @@ color: rgb(53, 68, 120);</string>
        <set>Qt::AlignCenter</set>
       </property>
      </widget>
-     <widget class="QLabel" name="labelAnimeLista11">
+     <widget class="QLabel" name="labelFundoAnime11Lista">
       <property name="geometry">
        <rect>
         <x>659</x>
@@ -2844,7 +2778,7 @@ color: rgb(53, 68, 120);</string>
        <string>Mudar Lista</string>
       </property>
      </widget>
-     <widget class="QLabel" name="labelEpisodiosLancados">
+     <widget class="QLabel" name="labelInfoEpisodiosLancados">
       <property name="geometry">
        <rect>
         <x>1302</x>
@@ -2869,13 +2803,13 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="Season_12">
+     <widget class="QLabel" name="labelInfoReleasedTop">
       <property name="geometry">
        <rect>
         <x>1302</x>
         <y>100</y>
         <width>100</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -2896,7 +2830,7 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="labelTipo">
+     <widget class="QLabel" name="labelInfoTipo">
       <property name="geometry">
        <rect>
         <x>1400</x>
@@ -2921,13 +2855,13 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="Season_13">
+     <widget class="QLabel" name="labelInfoTypeTop">
       <property name="geometry">
        <rect>
         <x>1390</x>
         <y>100</y>
         <width>100</width>
-        <height>41</height>
+        <height>31</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -2948,11 +2882,11 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QPushButton" name="botaoCrunchyroll_2">
+     <widget class="QPushButton" name="botaoOrdemAlfabetica">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>620</y>
+        <x>840</x>
+        <y>440</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2961,14 +2895,14 @@ color: rgb(20, 20, 20);</string>
        <string notr="true">background: white;</string>
       </property>
       <property name="text">
-       <string>Botões</string>
+       <string>Alphabetical</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="botaoCrunchyroll_3">
+     <widget class="QPushButton" name="botaoOrdemProgresso">
       <property name="geometry">
        <rect>
-        <x>80</x>
-        <y>620</y>
+        <x>900</x>
+        <y>440</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2977,14 +2911,14 @@ color: rgb(20, 20, 20);</string>
        <string notr="true">background: white;</string>
       </property>
       <property name="text">
-       <string>de</string>
+       <string>Progress</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="botaoCrunchyroll_4">
+     <widget class="QPushButton" name="botaoOrdemScore">
       <property name="geometry">
        <rect>
-        <x>150</x>
-        <y>630</y>
+        <x>960</x>
+        <y>440</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2993,14 +2927,14 @@ color: rgb(20, 20, 20);</string>
        <string notr="true">background: white;</string>
       </property>
       <property name="text">
-       <string>ordenação?</string>
+       <string>Score</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="botaoCrunchyroll_5">
+     <widget class="QPushButton" name="botaoOrdemRelease">
       <property name="geometry">
        <rect>
-        <x>210</x>
-        <y>630</y>
+        <x>1020</x>
+        <y>440</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -3009,14 +2943,14 @@ color: rgb(20, 20, 20);</string>
        <string notr="true">background: white;</string>
       </property>
       <property name="text">
-       <string>Coloridos</string>
+       <string>Release</string>
       </property>
      </widget>
-     <widget class="QPushButton" name="botaoCrunchyroll_6">
+     <widget class="QPushButton" name="botaoOrdemType">
       <property name="geometry">
        <rect>
-        <x>280</x>
-        <y>640</y>
+        <x>1080</x>
+        <y>440</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -3025,7 +2959,7 @@ color: rgb(20, 20, 20);</string>
        <string notr="true">background: white;</string>
       </property>
       <property name="text">
-       <string>E legais</string>
+       <string>Type</string>
       </property>
      </widget>
      <widget class="QPushButton" name="botaoRemoverdaLista">
@@ -3080,40 +3014,39 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelFundoAnime01Progresso</zorder>
      <zorder>labelFundoAnime06Progresso</zorder>
      <zorder>labelFundoAnime05Progresso</zorder>
-     <zorder>labelAnimeLista08</zorder>
-     <zorder>labelAnimeLista01</zorder>
-     <zorder>labelAnimeLista11</zorder>
-     <zorder>labelAnimeLista00</zorder>
-     <zorder>labelAnimeLista04</zorder>
-     <zorder>labelAnimeLista06</zorder>
-     <zorder>labelAnimeLista02</zorder>
-     <zorder>labelAnimeLista03</zorder>
-     <zorder>labelAnimeLista09</zorder>
-     <zorder>labelAnimeLista07</zorder>
-     <zorder>labelAnimeLista10</zorder>
-     <zorder>labelAnimeLista05</zorder>
+     <zorder>labelFundoAnime08Lista</zorder>
+     <zorder>labelFundoAnime01Lista</zorder>
+     <zorder>labelFundoAnime11Lista</zorder>
+     <zorder>labelFundoAnime00Lista</zorder>
+     <zorder>labelFundoAnime04Lista</zorder>
+     <zorder>labelFundoAnime06Lista</zorder>
+     <zorder>labelFundoAnime02Lista</zorder>
+     <zorder>labelFundoAnime03Lista</zorder>
+     <zorder>labelFundoAnime09Lista</zorder>
+     <zorder>labelFundoAnime07Lista</zorder>
+     <zorder>labelFundoAnime10Lista</zorder>
+     <zorder>labelFundoAnime05Lista</zorder>
      <zorder>labelProgresso_5</zorder>
      <zorder>botaoNotaMais</zorder>
-     <zorder>labelNota</zorder>
-     <zorder>labelStatus</zorder>
-     <zorder>labelNomeAnimeIngles</zorder>
+     <zorder>labelInfoNota</zorder>
+     <zorder>labelInfoStatus</zorder>
+     <zorder>labelInfoNomeAnimeIngles</zorder>
      <zorder>botaoAnilist</zorder>
      <zorder>botaoDownloadAnime</zorder>
      <zorder>labelProgresso</zorder>
      <zorder>botaoProximoEpisodio</zorder>
-     <zorder>labelSinopse</zorder>
-     <zorder>labelSeason</zorder>
+     <zorder>labelInfoSinopse</zorder>
+     <zorder>labelInfoSeason</zorder>
      <zorder>botaoAbrePasta</zorder>
-     <zorder>Season_10</zorder>
-     <zorder>labelMedia_5</zorder>
-     <zorder>labelNota_9</zorder>
-     <zorder>labelMediaSite</zorder>
-     <zorder>Status_20</zorder>
-     <zorder>Sinopse_5</zorder>
+     <zorder>labelInfoSeasonTop</zorder>
+     <zorder>labelInfoMediaTop</zorder>
+     <zorder>labelInfoNotaTop</zorder>
+     <zorder>labelInfoMediaSite</zorder>
+     <zorder>labelInfoStatusTop</zorder>
+     <zorder>labelInfoSinopseTop</zorder>
      <zorder>botaoNotaMenos</zorder>
-     <zorder>NumPagina</zorder>
      <zorder>imagemAnimeGrande</zorder>
-     <zorder>labelNomeAnime</zorder>
+     <zorder>labelInfoNomeAnime</zorder>
      <zorder>Nota_10</zorder>
      <zorder>botaoProgressoMenos</zorder>
      <zorder>botaoProgressoMais</zorder>
@@ -3132,18 +3065,18 @@ color: rgb(20, 20, 20);</string>
      <zorder>imagemAnime09</zorder>
      <zorder>imagemAnime04</zorder>
      <zorder>imagemAnime03</zorder>
-     <zorder>labelAnime02</zorder>
-     <zorder>labelAnime04</zorder>
-     <zorder>labelAnime07</zorder>
-     <zorder>labelAnime08</zorder>
-     <zorder>labelAnime11</zorder>
-     <zorder>labelAnime03</zorder>
-     <zorder>labelAnime10</zorder>
-     <zorder>labelAnime00</zorder>
-     <zorder>labelAnime05</zorder>
-     <zorder>labelAnime09</zorder>
-     <zorder>labelAnime06</zorder>
-     <zorder>labelAnime01</zorder>
+     <zorder>labelAnime02Titulo</zorder>
+     <zorder>labelAnime04Titulo</zorder>
+     <zorder>labelAnime07Titulo</zorder>
+     <zorder>labelAnime08Titulo</zorder>
+     <zorder>labelAnime11Titulo</zorder>
+     <zorder>labelAnime03Titulo</zorder>
+     <zorder>labelAnime10Titulo</zorder>
+     <zorder>labelAnime00Titulo</zorder>
+     <zorder>labelAnime05Titulo</zorder>
+     <zorder>labelAnime09Titulo</zorder>
+     <zorder>labelAnime06Titulo</zorder>
+     <zorder>labelAnime01Titulo</zorder>
      <zorder>botaoAnime07</zorder>
      <zorder>botaoAnime01</zorder>
      <zorder>botaoAnime05</zorder>
@@ -3182,23 +3115,22 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelAnime02Nota</zorder>
      <zorder>botaoCrunchyroll</zorder>
      <zorder>labelMensagem</zorder>
-     <zorder>boxOrdemLista</zorder>
      <zorder>label</zorder>
-     <zorder>label_2</zorder>
-     <zorder>Season_11</zorder>
-     <zorder>labelRelease</zorder>
+     <zorder>labelInfoAirTop</zorder>
+     <zorder>labelInfoRelease</zorder>
      <zorder>boxMudarPraLista</zorder>
      <zorder>botaoMudarPraLista</zorder>
-     <zorder>labelEpisodiosLancados</zorder>
-     <zorder>Season_12</zorder>
-     <zorder>labelTipo</zorder>
-     <zorder>Season_13</zorder>
-     <zorder>botaoCrunchyroll_2</zorder>
-     <zorder>botaoCrunchyroll_3</zorder>
-     <zorder>botaoCrunchyroll_4</zorder>
-     <zorder>botaoCrunchyroll_5</zorder>
-     <zorder>botaoCrunchyroll_6</zorder>
+     <zorder>labelInfoEpisodiosLancados</zorder>
+     <zorder>labelInfoReleasedTop</zorder>
+     <zorder>labelInfoTipo</zorder>
+     <zorder>labelInfoTypeTop</zorder>
+     <zorder>botaoOrdemAlfabetica</zorder>
+     <zorder>botaoOrdemProgresso</zorder>
+     <zorder>botaoOrdemScore</zorder>
+     <zorder>botaoOrdemRelease</zorder>
+     <zorder>botaoOrdemType</zorder>
      <zorder>botaoRemoverdaLista</zorder>
+     <zorder>NumPagina</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">

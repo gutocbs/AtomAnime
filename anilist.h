@@ -36,7 +36,7 @@ public slots:
 signals:
     void sterminouDownload(bool);
 private:
-    QNetworkReply *vreply = nullptr;
+//    QNetworkReply *vreply = nullptr;
     QString vtoken;
     QString vusername;
     QString vavatar;

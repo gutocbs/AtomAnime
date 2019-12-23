@@ -4,11 +4,12 @@ const QUrl graphqlUrl("https://graphql.anilist.co");
 
 anilist::anilist(QObject *parent) : QObject(parent)
 {
-
+//    vusername = "\"gutocbs\"";
+//    vtoken = "";
 }
 
 anilist::~anilist(){
-    vreply->deleteLater();
+//    vreply->deleteLater();
 }
 
 bool anilist::fgetList(){
@@ -31,7 +32,8 @@ bool anilist::fgetList(){
     }
 
     //Post faz o pedido ao servidor lrequest, usando os argumentos em Json
-    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    ////Memory leak?
     //Espera uma resposta
     while (!vreply->isFinished())
     {
@@ -39,7 +41,11 @@ bool anilist::fgetList(){
     }
 
     //Após isso, pegamos a resposta e convertemos em um formato que possamos ler
-    QByteArray response_data = vreply->readAll();
+    QByteArray response_data;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else
+        return false;
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
     //Verificamos se é uma mensagem de erro
@@ -119,17 +125,21 @@ bool anilist::fmudaLista(int rid, QString rNovaLista){
     //Insere item no json
     json.insert("query", llistaAtual);
     //Manda a solicitação de mudança
-    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
-
+    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
     //Espera solicitação voltar do servidor
     while (!vreply->isFinished())
     {
         qApp->processEvents();
     }
-    QByteArray response_data = vreply->readAll();
+    QByteArray response_data;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else{
+        qWarning() << vreply->errorString();
+        return false;
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
-    qDebug() << lreplyString;
     if(lreplyString.contains("error"))
         return false;
     else
@@ -158,7 +168,8 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
     //Insere item no json
     json.insert("query", llistaAtual);
     //Manda a solicitação de mudança
-    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+
 
     //Espera solicitação voltar do servidor
     while (!vreply->isFinished())
@@ -168,8 +179,10 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
     QByteArray response_data;
     if(vreply->isReadable())
         response_data = vreply->readAll();
-    else
+    else{
+        qWarning() << vreply->errorString();
         return false;
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -199,14 +212,20 @@ bool anilist::fmudaProgresso(int rid, int rnovoProgresso){
     //Insere item no json
     json.insert("query", llistaAtual);
     //Manda a solicitação de mudança
-    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
 
     //Espera solicitação voltar do servidor
     while (!vreply->isFinished())
     {
         qApp->processEvents();
     }
-    QByteArray response_data = vreply->readAll();
+    QByteArray response_data;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else{
+        qWarning() << vreply->errorString();
+        return false;
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -247,14 +266,22 @@ bool anilist::fexcluiAnime(int rid){
     //Insere item no json
     json.insert("query", llistaAtual);
     //Manda a solicitação de mudança
-    vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
-
+    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    if(!vreply->isRunning())
+        return false;
     //Espera solicitação voltar do servidor
+    //CASO NUNCA VOLTE SÓ CRASHA RESOLVER
     while (!vreply->isFinished())
     {
         qApp->processEvents();
     }
-    QByteArray response_data = vreply->readAll();
+    QByteArray response_data = nullptr;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else{
+        qWarning() << vreply->errorString();
+        return false;
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
 
