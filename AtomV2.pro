@@ -75,4 +75,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     visuais.qrc
 
-DISTFILES +=
+DISTFILES += \
+    Robot/Robot.dll \
+    Robot/Robot.lib

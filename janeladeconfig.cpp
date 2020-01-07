@@ -119,6 +119,7 @@ void janeladeconfig::fleArquivoConfig(){
         }
         larquivo.close();
     }
+    ui->textoCodigoAutorizacao->setPlainText(vauthorization);
 }
 
 QByteArray janeladeconfig::fretornaUsuario(){

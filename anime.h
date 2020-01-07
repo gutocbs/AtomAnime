@@ -11,9 +11,9 @@ class anime : public QObject
 public:
     explicit anime(QObject *parent = nullptr);
     //Eu realmente preciso disso?
-    bool operator<(const anime& other) const {
-            return vnome < other.vnome; // sort by namefile
-    }
+//    bool operator<(const anime& other) const {
+//            return vnome < other.vnome; // sort by namefile
+//    }
     QString vnome;
     QString vnomeIngles;
     QString vnomeJapones;
@@ -35,6 +35,7 @@ public:
     QString vsiteAnilist;
     QDate vdataEstreia;
     bool vfinalizado;
+    int vtemporada;
     //Adicionar mais depois
 
 signals:

@@ -7,7 +7,9 @@ janelatorrent::janelatorrent(QWidget *parent) :
 {
     ui->setupUi(this);
     ui->listaTorrents->setColumnHidden(6,true);
-    ui->listaTorrents->setColumnWidth(5, 1200);
+    ui->listaTorrents->setColumnWidth(5, 1034);
+    ui->listaTorrents->setColumnWidth(0, 50);
+    ui->listaTorrents->setColumnWidth(1, 400);
     ui->listaTorrents->setSortingEnabled(true);
 }
 
@@ -168,6 +170,7 @@ void janelatorrent::fpreencheTabela()
     //Criamos o número de linhas necessário
     ui->listaTorrents->setRowCount(torrent.size());
     for(int i = 0; i < torrent.size(); i++){
+//        ui->listaTorrents->setRowHeight(i, 100);
         for(int w = 0; w < 7; w++){
             QTableWidgetItem *litem = new QTableWidgetItem;
             switch (w) {
@@ -284,7 +287,7 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
 {
     if(!torrent.isEmpty())
         torrent.clear();
-    ui->listaTorrents->clear();
+//    ui->listaTorrents->clear();
     QPointer<filedownloader> lbaixaXML(new filedownloader);
     lbaixaXML->fdownloadXMLTorrentList(cconfig->fretornaFeedAnime());
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fleXML);

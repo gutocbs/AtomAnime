@@ -902,6 +902,19 @@ color: rgb(20, 20, 20);</string>
     <string>Remove</string>
    </property>
   </widget>
+  <widget class="QLabel" name="label_8">
+   <property name="geometry">
+    <rect>
+     <x>1490</x>
+     <y>90</y>
+     <width>311</width>
+     <height>591</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>desenho com info quando passar o mouse em cima</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

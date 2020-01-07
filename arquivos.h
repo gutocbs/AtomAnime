@@ -24,15 +24,21 @@ public:
     QString fprocuraEpisodio(anime*);
     QString fprocuraUltimoEpisodio(anime*, QString);
     QString fremoveCaracteresDiferentes(QString);
-    bool fcomparaDadosAnime(QString, QString, QString, QStringList, int);
+    bool fcomparaDadosAnime(QString, QString, QString, QStringList, int, int);
     bool fabreEpisodio(QString);
     void frecebeDiretorios(confUsuario*);
-signals:
+    void frecebeAnimes(QVector<anime*>,QVector<anime*>,QVector<anime*>,QVector<anime*>,QVector<anime*>);
+    int fcomparaSeasons(QString, int, int);
 
 public slots:
 
 private:
     confUsuario *cconfUsuario;
+    QVector<anime*> vlistaWatching;
+    QVector<anime*> vlistaCompleted;
+    QVector<anime*> vlistaOnHold;
+    QVector<anime*> vlistaDropped;
+    QVector<anime*> vlistaPlanToWatch;
 };
 
 #endif // ARQUIVOS_H

@@ -6,7 +6,6 @@
 #include <QVector> //Cria a lista de animes
 #include <QFile> //Abre arquivo do anilist/taiga para leitura
 #include <QTextStream> //Lê linhas do arquivo
-#include <QDir> ///Abre os arquivos do taiga - Remover depois
 #include <QPointer> // Crio o ponteiro pro anime
 #include <QDateTime> //Data que lança o episódio
 
@@ -39,6 +38,7 @@ private:
     QVector<anime*> vlistaDropped;
     QVector<anime*> vlistaPlanToWatch;
     QVector<anime*> vlistaBusca;
+    QVector<anime*> llistaTemp;
 };
 
 #endif // LEITORLISTAANIMES_H
