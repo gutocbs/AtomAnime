@@ -39,7 +39,7 @@ bool anilist::fgetList(){
     {
         qApp->processEvents();
     }
-
+    
     //Após isso, pegamos a resposta e convertemos em um formato que possamos ler
     QByteArray response_data;
     if(vreply->isReadable())

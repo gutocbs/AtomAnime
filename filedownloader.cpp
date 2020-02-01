@@ -98,7 +98,7 @@ void filedownloader::fdownloadImagensLista(QString fileURL, QString id)
     lsaveFilePath.append(id);
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
-    if(QFile(lsaveFilePath).size() == 0)
+    if(QFile(lsaveFilePath).exists() && QFile(lsaveFilePath).size() == 0)
         QFile(lsaveFilePath).remove();
 
     bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
@@ -130,7 +130,7 @@ void filedownloader::fdownloadImagensGrandesLista(QString fileURL, QString id)
     lsaveFilePath.append(id);
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
-    if(QFile(lsaveFilePath).size() == 0)
+    if(QFile(lsaveFilePath).exists() && QFile(lsaveFilePath).size() == 0)
         QFile(lsaveFilePath).remove();
 
     bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
@@ -163,7 +163,7 @@ void filedownloader::fdownloadImagensPequenasLista(QString fileURL, QString id)
     lsaveFilePath.append(id);
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
-    if(QFile(lsaveFilePath).size() == 0)
+    if(QFile(lsaveFilePath).exists() && QFile(lsaveFilePath).size() == 0)
         QFile(lsaveFilePath).remove();
 
     bool fileExists = QFileInfo::exists(lsaveFilePath) && QFileInfo(lsaveFilePath).isFile();
@@ -416,15 +416,23 @@ void filedownloader::onFinished(QNetworkReply * reply)
         case QNetworkReply::NoError:
         {
 //            qDebug("file is downloaded successfully.");
+            if(vfile->isOpen())
+            {
+                vfile->close();
+            }
+            if(vfile->size() < 1000){
+                qDebug() << vfile->size();
+                vfile->remove();
+            }
         }break;
         default:{
-//            qDebug(reply->errorString().toLatin1());
+        //Teste de remover a imagem se ocorrrer um erro no download
+            if(vfile->isOpen())
+            {
+            vfile->close();
+            }
+            vfile->remove();
         }
-    }
-
-    if(vfile->isOpen())
-    {
-        vfile->close();
     }
 }
 

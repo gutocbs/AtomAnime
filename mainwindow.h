@@ -49,6 +49,10 @@ public:
     void fmandaDiretoriosArquivos();
     void favisoErro(QString);
     void fmudaResolucao();
+    void finiciaPrograma();
+    void fcarregouListaSucesso();
+    void fcarregouListaFalha();
+    void fcarregouListaTeste();
 
 private slots:
     void on_botaoAnime00_clicked();
@@ -132,6 +136,7 @@ private:
     bool vlistaLidaSucesso = false;
     bool vprimeiraVezThread = true;
     bool vfalhaconexao = false;
+    bool vlistaBaixada = false;
 
     QTimer *timer;
     QTimer *tryTimer;

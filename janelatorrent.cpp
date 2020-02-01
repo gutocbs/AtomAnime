@@ -225,6 +225,7 @@ void janelatorrent::fpreencheTabela()
         }
     }
     ui->listaTorrents->sortByColumn(6);
+    ui->botaoAtualizaLista->blockSignals(false);
 }
 
 void janelatorrent::fpassaPonteiros(leitorlistaanimes *lleitor,  janeladeconfig *lconf, arquivos *lcarq)
@@ -285,6 +286,7 @@ void janelatorrent::fbaixaTorrent()
 
 void janelatorrent::on_botaoAtualizaLista_clicked()
 {
+    ui->botaoAtualizaLista->blockSignals(true);
     if(!torrent.isEmpty())
         torrent.clear();
 //    ui->listaTorrents->clear();

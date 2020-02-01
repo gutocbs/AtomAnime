@@ -2978,6 +2978,19 @@ color: rgb(20, 20, 20);</string>
        <string>Remover</string>
       </property>
      </widget>
+     <widget class="QCheckBox" name="checkBox">
+      <property name="geometry">
+       <rect>
+        <x>1080</x>
+        <y>510</y>
+        <width>41</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
      <zorder>labelFundoAnime04Titulo</zorder>
      <zorder>labelFundoAnime03Progresso</zorder>
      <zorder>labelFundoAnime11Titulo</zorder>
@@ -3131,6 +3144,7 @@ color: rgb(20, 20, 20);</string>
      <zorder>botaoOrdemType</zorder>
      <zorder>botaoRemoverdaLista</zorder>
      <zorder>NumPagina</zorder>
+     <zorder>checkBox</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">

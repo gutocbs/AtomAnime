@@ -5,10 +5,9 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    //Isso tem coisa demais. Podia modularizar tudo isso que tá no construtor.
     ui->setupUi(this);
     ///um dia ainda faço qml disso
-//    fmudaResolucao();
+    //fmudaResolucao();
     logger::fattachLogger();
     qInfo() << QDateTime::currentDateTime().toString();
     canilist = new anilist(nullptr);
@@ -25,30 +24,31 @@ MainWindow::MainWindow(QWidget *parent)
     if(dirMedio.isEmpty())
         dirMedio = "0";
     qDebug() << "Main configuration is up";
-    carquivos = new arquivos(nullptr);
+    carquivos = new arquivos(this);
     qDebug() << "File system is up";
     cconfUsuario = new confUsuario(nullptr);
     qDebug() << "User configuration is up";
+
+    //Função que passa os diretórios
+    qDebug() << jconfig.fretornaDiretorios();
+
+    ///Essa é a parte onde rola a busca das pastas
     cconfUsuario->flePastasArquivos();
     fmandaDiretoriosArquivos();
 
     cleitorListaAnimes = new leitorlistaanimes(nullptr);
 
-    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
-    ui->labelUsername->setText(jconfig.fretornaUsuario());
-    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
-    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
-    qDebug() << "Checking connection with Anilist";
-    ui->labelMensagem->setText("Baixando listas de animes");
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
-    cThread.start();
-    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
-    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
-    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
-    //Ter dois ponteiros, e deletar o primeiro?
-    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
-    vrefreshAcontecendo = true;
+    //Já iniciaram todas as variáveis, então tenta conexão com o anilist.
+    //Tenho que fazer o seguinte:
+    //Se conseguir ler o código, tentar uma conexão e baixar a lista.
+    //Se der, eu continuo o programa. Se não der, eu tento ler a lista que tem ali e ir com ela, tentando conexão
+    //de um em um minuto
+    //Sempre que apertar o botão de salvar, dar reset nas funções de procurar pastas
+    //Entao. basicamente, por um sinal na função de salvar pra fazer reler os diretórios
+    finiciaPrograma();
+
+    //Tem que ter uma função que vai chamar o if apenas. Caso o if seja falso, ele chama a função novamente
+    //Daqui 60 segundos
 
     //Nenhuma função dependente do arquivo deve rodar se o arquivo não puder ser lido
     if(cleitorListaAnimes->fleJson()){
@@ -124,6 +124,33 @@ MainWindow::MainWindow(QWidget *parent)
     }
     finfoAnimeSelecionado();
 }
+
+void MainWindow::finiciaPrograma(){
+    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
+    ui->labelUsername->setText(jconfig.fretornaUsuario());
+    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
+    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
+    qDebug() << "Checking connection with Anilist";
+    ui->labelMensagem->setText("Baixando listas de animes");
+    canilist->fbaixaListaThread(cThread);
+    canilist->moveToThread(&cThread);
+    cThread.start();
+    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
+    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
+    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
+    //Ter dois ponteiros, e deletar o primeiro?
+    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
+    vrefreshAcontecendo = true;
+    //fcarregouListaTeste();
+}
+
+//void MainWindow::fcarregouListaTeste(){
+//    if(cleitorListaAnimes->fleJson())
+//        fcarregouListaSucesso(); //Continua fazendo o que tem no construtor
+//    else
+//        fcarregouListaFalha(); //Que chama fcarregouListateste a cada 1 min outra vez em thread, até dar certo.
+//    //É importante ter certeza de que mesmo falhando, ele ainda vai tentar ler a lista offline pra mostrar os animes
+//}
 
 MainWindow::~MainWindow()
 {
@@ -213,6 +240,7 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAvatar->setPixmap(pix);
     }
     if(!vlistaSelecionada.isEmpty()){
+        ui->imagemAnime00->setScaledContents(true);
         ui->imagemAnimeGrande->setScaledContents(true);
         //Tenta carregar a imagem como jpg, se possível
         if(pix.load(cconfBase->vdiretorioImagensGrandes+vlistaSelecionada[vanimeSelecionado]->vid+".jpg", "jpg")){
@@ -229,15 +257,14 @@ void MainWindow::fcarregaImagensLista(){
         else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[vanimeSelecionado]->vid+".png", "png")){
             ui->imagemAnimeGrande->setPixmap(pix);
         }
-        ui->imagemAnime00->setScaledContents(true);
         //Checa tamanho do título pra sempre caber no frame
         lstyleSheet = ui->labelAnime00Titulo->styleSheet();
         if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelFundoAnime00Nota->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Titulo->setStyleSheet("background: rgb(185,201,250);");
@@ -296,11 +323,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime01Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime01Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime01Titulo->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vnome);
         ui->labelAnime01Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Titulo->setWordWrap(true);
@@ -350,11 +377,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime02Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime02Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime02Titulo->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vnome);
         ui->labelAnime02Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime02Titulo->setWordWrap(true);
@@ -404,11 +431,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime03Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime03Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime03Titulo->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vnome);
         ui->labelAnime03Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime03Titulo->setWordWrap(true);
@@ -458,11 +485,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime04Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime04Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime04Titulo->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vnome);
         ui->labelAnime04Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime04Titulo->setWordWrap(true);
@@ -512,11 +539,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime05Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime05Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime05Titulo->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vnome);
         ui->labelAnime05Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime05Titulo->setWordWrap(true);
@@ -566,11 +593,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime06Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime06Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime06Titulo->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vnome);
         ui->labelAnime06Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime06Titulo->setWordWrap(true);
@@ -620,11 +647,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime07Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime07Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime07Titulo->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vnome);
         ui->labelAnime07Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime07Titulo->setWordWrap(true);
@@ -674,11 +701,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime08Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime08Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime08Titulo->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vnome);
         ui->labelAnime08Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime08Titulo->setWordWrap(true);
@@ -728,11 +755,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime09Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime09Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime09Titulo->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vnome);
         ui->labelAnime09Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime09Titulo->setWordWrap(true);
@@ -782,11 +809,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime10Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime10Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime10Titulo->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vnome);
         ui->labelAnime10Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime10Titulo->setWordWrap(true);
@@ -836,11 +863,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime11Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime11Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime11Titulo->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vnome);
         ui->labelAnime11Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime11Titulo->setWordWrap(true);
@@ -887,7 +914,8 @@ void MainWindow::fcarregaImagensLista(){
 }
 
 bool MainWindow::fcarregaImagensBackground(){
-    ui->labelMensagem->setText("Carregando imagens");
+    if(vlistaBaixada == true)
+        ui->labelMensagem->setText("Carregando imagens");
     qDebug() << "Carregando imagens";
     QPixmap lpix;
     QString file;
@@ -916,7 +944,7 @@ bool MainWindow::fcarregaImagensBackground(){
             for(int i = 0; i < vcarregaListaBackground.size(); i++){
                 //Inicialmente carrega apenas as primeiras imagens grandes de cada lista, pra agilizar a mudança de
                 //lista
-                file = dirGrande+vcarregaListaBackground[0]->vid;
+                file = dirGrande+vcarregaListaBackground[i]->vid;
                 if(QFile::exists(file+".jpg")){
                     file.append(".jpg");
                     if(lpix.load(file, "jpg"))
@@ -943,7 +971,7 @@ bool MainWindow::fcarregaImagensBackground(){
         }
     }
     ui->labelImagemBackground->clear();
-    if(timer->isActive())
+    if(vlistaBaixada == true)
         ui->labelMensagem->setText("Todas as imagens foram carregadas com sucesso!");
     return true;
 }
@@ -1219,8 +1247,8 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     int lpaginaAtual = 0;
     bool lbusca = false;
     //Vamos bloquear todos os botões para evitar que o usuário tente ler um anime que saiu da lista
+    ui->labelMensagem->setText("Loading new animes. It will be working again in a few seconds");
     fbloqueiaSinaisBotoes();
-    ui->labelMensagem->setText("Refreshing list...");
 
     qDebug() << "Refreshing list...";
 
@@ -1314,6 +1342,7 @@ void MainWindow::fliberaSinaisBotoes(){
 
 void MainWindow::fatualizaRefreshTimer()
 {
+    vlistaBaixada = true;
     if(vrefreshAcontecendo == false){
         int lminutos = timer->remainingTime()/60000;
         if(vtimerSegundos == 0)
