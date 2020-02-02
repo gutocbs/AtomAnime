@@ -324,8 +324,8 @@ bool leitorlistaanimes::fleJson(){
         }
         lleJson.close();
     }
+    //Caso o arquivo não possa ser lido, retorna false
     else
-        //Caso o arquivo não possa ser lido, retorna false
         return false;
     return true;
 }
@@ -413,6 +413,7 @@ QVector<anime *> leitorlistaanimes::sortLista(QString rordem, QString rlista){
         llistaTemp = vlistaBusca;
     else
         llistaTemp.clear();
+
 
     if(!rordem.isEmpty())
     {

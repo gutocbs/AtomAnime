@@ -1,5 +1,5 @@
 #include "filedownloader.h"
-
+#include <iostream>
 filedownloader::filedownloader(QObject *parent) : QObject(parent)
 {
     vmanager = new QNetworkAccessManager;

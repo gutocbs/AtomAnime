@@ -2991,6 +2991,20 @@ color: rgb(20, 20, 20);</string>
        <string/>
       </property>
      </widget>
+     <widget class="QLabel" name="labelImagemBackground">
+      <property name="geometry">
+       <rect>
+        <x>1493</x>
+        <y>8</y>
+        <width>100</width>
+        <height>150</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <zorder>labelImagemBackground</zorder>
      <zorder>labelFundoAnime04Titulo</zorder>
      <zorder>labelFundoAnime03Progresso</zorder>
      <zorder>labelFundoAnime11Titulo</zorder>
@@ -3259,19 +3273,6 @@ color: rgb(20, 20, 20);</string>
      <string>Busca</string>
     </property>
    </widget>
-   <widget class="QLabel" name="labelImagemBackground">
-    <property name="geometry">
-     <rect>
-      <x>1607</x>
-      <y>270</y>
-      <width>201</width>
-      <height>171</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="botaoRefresh">
     <property name="geometry">
      <rect>
@@ -3448,26 +3449,6 @@ color: rgb(53, 68, 120);</string>
      <string>Ajuda</string>
     </property>
    </widget>
-   <zorder>labelImagemBackground</zorder>
-   <zorder>janelaRotativa</zorder>
-   <zorder>Dropped</zorder>
-   <zorder>Completed</zorder>
-   <zorder>PlanToWatch</zorder>
-   <zorder>OnHold</zorder>
-   <zorder>Watching</zorder>
-   <zorder>barraBusca</zorder>
-   <zorder>botaoBusca</zorder>
-   <zorder>botaoRefresh</zorder>
-   <zorder>labelRefreshTimer</zorder>
-   <zorder>botaoAnime</zorder>
-   <zorder>botaoManga</zorder>
-   <zorder>botaoLN</zorder>
-   <zorder>botaoHome</zorder>
-   <zorder>botaoConfiguracao</zorder>
-   <zorder>botaoTorrent</zorder>
-   <zorder>labelAvatar</zorder>
-   <zorder>labelUsername</zorder>
-   <zorder>botaoAjuda</zorder>
   </widget>
  </widget>
  <resources/>

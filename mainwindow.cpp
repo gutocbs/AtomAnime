@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->barraBusca->setMaximumBlockCount(1);
     ///um dia ainda faço qml disso
     //fmudaResolucao();
     logger::fattachLogger();
@@ -29,86 +30,34 @@ MainWindow::MainWindow(QWidget *parent)
     cconfUsuario = new confUsuario(nullptr);
     qDebug() << "User configuration is up";
 
-    //Função que passa os diretórios
-    qDebug() << jconfig.fretornaDiretorios();
-
-    ///Essa é a parte onde rola a busca das pastas
-    cconfUsuario->flePastasArquivos();
-    fmandaDiretoriosArquivos();
-
     cleitorListaAnimes = new leitorlistaanimes(nullptr);
+    cfiledownloader = new filedownloader(nullptr);
+    cfiledownloader->fsetConfBase(cconfBase);
+    cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
+    vtimerSegundos = 59;
+    //E o timer para atualizar a lista automaticamente
+    timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
+    //O segundo timer é uma contagem de segundo em segundo pra mostrar quanto tempo falta para o timer de cima chegar à 0
+    timerRefresh = new QTimer(this);
+    connect(timerRefresh, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaRefreshTimer));
+
+    ui->janelaRotativa->addWidget(&jconfig);
+    ui->janelaRotativa->addWidget(&jtorrent);
+    jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
+    connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
+
+    vordem = "";
 
     //Já iniciaram todas as variáveis, então tenta conexão com o anilist.
     //Tenho que fazer o seguinte:
     //Se conseguir ler o código, tentar uma conexão e baixar a lista.
     //Se der, eu continuo o programa. Se não der, eu tento ler a lista que tem ali e ir com ela, tentando conexão
     //de um em um minuto
-    //Sempre que apertar o botão de salvar, dar reset nas funções de procurar pastas
-    //Entao. basicamente, por um sinal na função de salvar pra fazer reler os diretórios
     finiciaPrograma();
 
-    //Tem que ter uma função que vai chamar o if apenas. Caso o if seja falso, ele chama a função novamente
-    //Daqui 60 segundos
-
-    //Nenhuma função dependente do arquivo deve rodar se o arquivo não puder ser lido
-    if(cleitorListaAnimes->fleJson()){
-        vlistaLidaSucesso = true;
-        qDebug() << "The anime list have been read successfully";
-        cfiledownloader = new filedownloader(nullptr);
-        qDebug() << "The download system is up";
-        cfiledownloader->fsetConfBase(cconfBase);
-        cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
-        //Baixa imagens ao abrir o programa
-        cfiledownloader->fsetNext();
-        connect(cfiledownloader,&filedownloader::slistaMensagem,this,&MainWindow::finfoAnimeSelecionado, Qt::QueuedConnection);
-        qDebug() << "Images ready";
-        // Já aciona a lista de modo ordenado
-        vordem = "";
-        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
-        qDebug() << "Opening Watching List";
-        vlistaAtual = "watching";
-        qDebug() << "Searching for animes in the computer";
-
-        //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
-        //programa, para deixar o programa mais fluído
-        vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
-    }
-    else{
-        qCritical() << "There was a problem reading the anime list";
-        ui->labelMensagem->setText("There was a problem reading the anime list. Trying again in one minute");
-        tryTimer = new QTimer(this);
-        connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
-        tryTimer->start(60000); //1 minutos
-        vfalhaconexao = true;
-    }
-    //E o timer para atualizar a lista automaticamente
-    timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
-//    timer->start(60000); //1 MINUTO PRA TESTES DE DEBUG
-    timer->start(600000); //10 minutos
-    //O segundo timer é uma contagem de segundo em segundo pra mostrar quanto tempo falta para o timer de cima chegar à 0
-    timerRefresh = new QTimer(this);
-    connect(timerRefresh, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaRefreshTimer));
-    timerRefresh->start(1000);
-    vtimerSegundos = 59;
-    //Timer que atualiza o anilist, pro caso de falhas ou assistir offline
-    timerAcao = new QTimer(this);
-    connect(timerAcao, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
-    timerAcao->start(60000); //1 minuto
-
-    ui->janelaRotativa->addWidget(&jconfig);
-    ui->janelaRotativa->addWidget(&jtorrent);
-    jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
-    cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
-    carquivos->frecebeAnimes(cleitorListaAnimes->sortLista("cnome", "watching"), cleitorListaAnimes->sortLista("cnome", "completed"),
-                             cleitorListaAnimes->sortLista("cnome", "onhold"), cleitorListaAnimes->sortLista("cnome", "dropped"),
-                             cleitorListaAnimes->sortLista("cnome", "plantowatch"));
-    vanimeSelecionado = 0;
-    vpagina = 1;
-
-    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
-
-    connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
+    //Caso haja algum erro onde não foi possível atualizar o anilist, as ações não atualizadas são salvas em um bloco de
+    //texto. Ao iniciar o programa, é verificado se existe alguma atualização que não foi completada ainda
     QFile lfile("Configurações/Temp/ListUpdates.txt");
     if(lfile.exists() && lfile.size() != 0){
         if(lfile.open(QIODevice::ReadOnly)) {
@@ -124,33 +73,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
     finfoAnimeSelecionado();
 }
-
-void MainWindow::finiciaPrograma(){
-    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
-    ui->labelUsername->setText(jconfig.fretornaUsuario());
-    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
-    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
-    qDebug() << "Checking connection with Anilist";
-    ui->labelMensagem->setText("Baixando listas de animes");
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
-    cThread.start();
-    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
-    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
-    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
-    //Ter dois ponteiros, e deletar o primeiro?
-    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
-    vrefreshAcontecendo = true;
-    //fcarregouListaTeste();
-}
-
-//void MainWindow::fcarregouListaTeste(){
-//    if(cleitorListaAnimes->fleJson())
-//        fcarregouListaSucesso(); //Continua fazendo o que tem no construtor
-//    else
-//        fcarregouListaFalha(); //Que chama fcarregouListateste a cada 1 min outra vez em thread, até dar certo.
-//    //É importante ter certeza de que mesmo falhando, ele ainda vai tentar ler a lista offline pra mostrar os animes
-//}
 
 MainWindow::~MainWindow()
 {
@@ -178,19 +100,88 @@ MainWindow::~MainWindow()
     qDebug() << "cconfUsuario deleted";
     carquivos->deleteLater();
     qDebug() << "carquivos deleted";
-    if(vlistaLidaSucesso == true){
-        timer->deleteLater();
-        timerRefresh->deleteLater();
-        timerAcao->deleteLater();
-        cfiledownloader->deleteLater();
-        qDebug() << "cfiledownloader deleted";
-    }
+    timer->deleteLater();
+    timerRefresh->deleteLater();
+    cfiledownloader->deleteLater();
+    qDebug() << "cfiledownloader deleted";
     cleitorListaAnimes->deleteLater();
     qDebug() << "cleitorListaAnimes deleted";
     canilist->deleteLater();
     qDebug() << "canilist deleted";
     qInfo() << "Software closed successfully";
     delete ui;
+}
+
+void MainWindow::finiciaPrograma(){
+    //Essa é a parte onde rola a busca das pastas
+    cconfUsuario->flePastasArquivos();
+    fmandaDiretoriosArquivos();
+
+    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
+    ui->labelUsername->setText(jconfig.fretornaUsuario());
+    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
+    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
+    qDebug() << "Checking connection with Anilist";
+    ui->labelMensagem->setText("Trying to download the anime lists");
+    canilist->fbaixaListaThread(cThread);
+    canilist->moveToThread(&cThread);
+    cThread.start();
+    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
+    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
+    connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
+
+    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
+    //Ter dois ponteiros, e deletar o primeiro?
+    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
+    vrefreshAcontecendo = true;
+    fcarregouListaTeste();
+}
+
+void MainWindow::fcarregouListaTeste(){
+    if(cleitorListaAnimes->fleJson())
+        fcarregouListaSucesso(); //Continua fazendo o que tem no construtor
+    else{
+        ui->labelMensagem->setText("Your anime list was not found in your computer, trying to download it.");
+        fcarregouListaFalha(); //Que chama fcarregouListateste a cada 1 min outra vez em thread, até dar certo.
+    }
+}
+
+void MainWindow::fcarregouListaSucesso(){
+    vlistaLidaSucesso = true;
+    qDebug() << "The anime list have been read successfully";
+    qDebug() << "The download system is up";
+    //Baixa imagens ao abrir o programa
+    cfiledownloader->fsetNext();
+    connect(cfiledownloader,&filedownloader::slistaMensagem,this,&MainWindow::finfoAnimeSelecionado, Qt::QueuedConnection);
+    qDebug() << "Images ready";
+    // Já aciona a lista de modo ordenado
+    vordem = "";
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
+    qDebug() << "Opening Watching List";
+    vlistaAtual = "watching";
+    qDebug() << "Searching for animes in the computer";
+
+    //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
+    //programa, para deixar o programa mais fluído
+    vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+
+    cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
+    carquivos->frecebeAnimes(cleitorListaAnimes->sortLista(vordem, "watching"), cleitorListaAnimes->sortLista(vordem, "completed"),
+                             cleitorListaAnimes->sortLista(vordem, "onhold"), cleitorListaAnimes->sortLista(vordem, "dropped"),
+                             cleitorListaAnimes->sortLista(vordem, "plantowatch"));
+    vanimeSelecionado = 0;
+    vpagina = 1;
+
+    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+
+}
+
+void MainWindow::fcarregouListaFalha(){
+    vlistaLidaSucesso = false;
+    qCritical() << "There was a problem reading the anime list";
+    ui->labelMensagem->setText("There was a problem reading the anime list. Trying again in 30 seconds");
+    cThread.start();
+    QTimer::singleShot(30000, this, SLOT(fcarregouListaTeste()));
 }
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
@@ -913,12 +904,14 @@ void MainWindow::fcarregaImagensLista(){
     }
 }
 
+///Reescrever isso depois
 bool MainWindow::fcarregaImagensBackground(){
     if(vlistaBaixada == true)
         ui->labelMensagem->setText("Carregando imagens");
     qDebug() << "Carregando imagens";
     QPixmap lpix;
     QString file;
+//    ui->labelImagemBackground->setScaledContents(true);
     for(int j = 0; j < 5; j++){
         if(vrefreshAcontecendo == true)
             return false;
@@ -942,32 +935,32 @@ bool MainWindow::fcarregaImagensBackground(){
         if(!vcarregaListaBackground.isEmpty()){
             //Depois carregar todas as imagens na memória
             for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                //Inicialmente carrega apenas as primeiras imagens grandes de cada lista, pra agilizar a mudança de
-                //lista
-                file = dirGrande+vcarregaListaBackground[i]->vid;
-                if(QFile::exists(file+".jpg")){
-                    file.append(".jpg");
-                    if(lpix.load(file, "jpg"))
-                        ui->labelImagemBackground->setPixmap(lpix);
-                }
-                else if(QFile::exists(file+".png")){
-                    file.append(".png");
-                    if(lpix.load(file, "png"))
-                        ui->labelImagemBackground->setPixmap(lpix);
-                }
-                file = dirMedio+vcarregaListaBackground[i]->vid;
-                if(QFile::exists(file+".jpg")){
-                    file.append(".jpg");
-                    if(lpix.load(file, "jpg"))
-                        ui->labelImagemBackground->setPixmap(lpix);
-                }
-                else if(QFile::exists(file+".png")){
-                    file.append(".png");
-                    if(lpix.load(file, "png"))
-                        ui->labelImagemBackground->setPixmap(lpix);
+                if(i < vcarregaListaBackground.size()){
+                    file = dirMedio+vcarregaListaBackground[i]->vid;
+                    if(QFile::exists(file+".jpg")){
+                        if(lpix.load(file+".jpg", "jpg"))//crasha aqui
+                            ui->labelImagemBackground->setPixmap(lpix);
+                    }
+                    else if(QFile::exists(file+".png")){
+                        if(lpix.load(file+".png", "png"))
+                            ui->labelImagemBackground->setPixmap(lpix);
+                    }
                 }
             }
-            vcarregaListaBackground.clear();
+
+            for(int i = 0; i < vcarregaListaBackground.size(); i++){
+                if(i < vcarregaListaBackground.size()){
+                    file = dirGrande+vcarregaListaBackground[i]->vid;
+                    if(QFile::exists(file+".jpg")){
+                        if(lpix.load(file+".jpg", "jpg"))//crasha aqui
+                            ui->labelImagemBackground->setPixmap(lpix);
+                    }
+                    else if(QFile::exists(file+".png")){
+                        if(lpix.load(file+".png", "png"))
+                            ui->labelImagemBackground->setPixmap(lpix);
+                    }
+                }
+            }
         }
     }
     ui->labelImagemBackground->clear();
@@ -1212,6 +1205,8 @@ void MainWindow::on_botaoBusca_clicked()
 
 void MainWindow::on_botaoRefresh_clicked()
 {
+    if(vlistaLidaSucesso == false)
+        fcarregouListaTeste();
     if(vrefreshAcontecendo == false){
         vrefreshAcontecendo = true;
         //Quando clicar no botão, o programa vai rodar a função de baixar as listas em uma thread e quando a lista for baixada, será
@@ -1228,12 +1223,23 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     //Checamos se a conexão com o anilist foi um sucesso. No caso de ter falhado, não rodamos a função de refresh
     if(rcheckDownload == false){
         vrefreshAcontecendo = false;
-        ui->labelMensagem->setText("Failed to connect to AniList!");
+        if(vlistaLidaSucesso == false)
+            ui->labelMensagem->setText("Failed read the anime list and to connect to AniList!");
+        else
+            ui->labelMensagem->setText("Failed to connect to AniList!");
+        if(timer->isActive())
+            timer->stop();
+        timer->setInterval(60000);
+        timer->start(); //1 minutos
+        timerRefresh->start(1000);
         return;
     }
-    if(vfalhaconexao == true){
-        tryTimer->stop();
-        vfalhaconexao = false;
+    else{
+        if(timer->isActive())
+            timer->stop();
+        timer->setInterval(600000);
+        timer->start(); //10 minutos
+        timerRefresh->start(1000);
     }
     ui->labelMensagem->setText("Anime lists downloaded");
 
@@ -1312,7 +1318,16 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     fliberaSinaisBotoes();
     finfoAnimeSelecionado();
     vrefreshAcontecendo = false;
-    QFuture<void> lcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+    if(vfuture.isRunning())
+        vfuture.cancel();
+    //Eu não sei por que mas precisa de duas threads pra mesma função, ou crasha
+    //Se usar uma só ela não cancela e acessa memória que já foi descartada
+    if(vcarregaImagens.isRunning()){
+        vcarregaImagens.waitForFinished();
+        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+    }
+    else
+                vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
 }
 
 void MainWindow::fmandaDiretoriosArquivos()
@@ -1539,8 +1554,8 @@ void MainWindow::on_botaoRemoverdaLista_clicked()
 void MainWindow::fretryAnilist()
 {
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
+//    canilist->fbaixaListaThread(cThread);
+//    canilist->moveToThread(&cThread);
     cThread.start();
 }
 

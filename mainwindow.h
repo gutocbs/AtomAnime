@@ -52,7 +52,6 @@ public:
     void finiciaPrograma();
     void fcarregouListaSucesso();
     void fcarregouListaFalha();
-    void fcarregouListaTeste();
 
 private slots:
     void on_botaoAnime00_clicked();
@@ -92,16 +91,14 @@ private slots:
     void on_botaoCrunchyroll_clicked();
     void on_botaoTorrent_clicked();
     void on_botaoRemoverdaLista_clicked();
-    void fretryAnilist();
     void on_botaoOrdemAlfabetica_clicked();
-
     void on_botaoOrdemProgresso_clicked();
-
     void on_botaoOrdemScore_clicked();
-
     void on_botaoOrdemRelease_clicked();
-
     void on_botaoOrdemType_clicked();
+
+    void fretryAnilist();
+    void fcarregouListaTeste();
 
 private:
     Ui::MainWindow *ui;
@@ -122,6 +119,7 @@ private:
 
     //Thread que vai carregar as imagens do anime. Como essa thread fica dentro da própria classe, temos que usar QFuture
     QFuture<void> vfuture;
+    QFuture<void> vcarregaImagens;
 
     //Variáveis globais
     int vanimeSelecionado;
@@ -135,7 +133,6 @@ private:
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
     bool vprimeiraVezThread = true;
-    bool vfalhaconexao = false;
     bool vlistaBaixada = false;
 
     QTimer *timer;
