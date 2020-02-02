@@ -307,23 +307,23 @@ void filedownloader::fsetNextBig()
         else{
             if(vlistaAtual == "watching"){
                 vlista = 1;
-                emit slistaMensagem("Watching");
+                emit slistaMensagem("BWatching");
             }
             else if(vlistaAtual == "completed"){
                 vlista = 2;
-                emit slistaMensagem("Completed");
+                emit slistaMensagem("BCompleted");
             }
             else if(vlistaAtual == "onhold"){
                 vlista = 3;
-                emit slistaMensagem("On Hold");
+                emit slistaMensagem("BOn Hold");
             }
             else if(vlistaAtual == "dropped"){
                 vlista = 4;
-                emit slistaMensagem("Dropped");
+                emit slistaMensagem("BDropped");
             }
             else if(vlistaAtual == "plantowatch"){
                 vterminouLista = true;
-                emit slistaMensagem("Plan to Watch");
+                emit slistaMensagem("BPlan to Watch");
             }
             fsetNextBig();
         }

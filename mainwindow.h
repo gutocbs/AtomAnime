@@ -37,7 +37,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool fcarregaImagensBackground();
+    bool fcarregaImagensBackground(QString);
+    bool fcarregaImagensSelecionadasBackground();
     void fcarregaImagensLista();
     void finfoAnimeSelecionado();
     void fatualizaRefreshTimer();
@@ -50,7 +51,7 @@ public:
     void favisoErro(QString);
     void fmudaResolucao();
     void finiciaPrograma();
-    void fcarregouListaSucesso();
+    void fcarregouListaSucesso(bool);
     void fcarregouListaFalha();
 
 private slots:
@@ -98,7 +99,7 @@ private slots:
     void on_botaoOrdemType_clicked();
 
     void fretryAnilist();
-    void fcarregouListaTeste();
+    void fcarregouListaTeste(bool);
 
 private:
     Ui::MainWindow *ui;
@@ -134,6 +135,22 @@ private:
     bool vlistaLidaSucesso = false;
     bool vprimeiraVezThread = true;
     bool vlistaBaixada = false;
+    bool vdownloadImagensWatching = false;
+    bool vdownloadImagensCompleted = false;
+    bool vdownloadImagensDropped = false;
+    bool vdownloadImagensOnHold = false;
+    bool vdownloadImagensPlanning = false;
+    bool vdownloadImagensWatchingPequenas = false;
+    bool vdownloadImagensCompletedPequenas = false;
+    bool vdownloadImagensDroppedPequenas = false;
+    bool vdownloadImagensOnHoldPequenas = false;
+    bool vdownloadImagensPlanningPequenas = false;
+    bool vdownloadImagensWatchingGrandes = false;
+    bool vdownloadImagensCompletedGrandes = false;
+    bool vdownloadImagensDroppedGrandes = false;
+    bool vdownloadImagensOnHoldGrandes = false;
+    bool vdownloadImagensPlanningGrandes = false;
+    bool vdownloadImagensAcabou = true;
 
     QTimer *timer;
     QTimer *tryTimer;

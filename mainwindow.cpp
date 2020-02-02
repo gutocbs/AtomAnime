@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     cfiledownloader->fsetConfBase(cconfBase);
     cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
     vtimerSegundos = 59;
+
     //E o timer para atualizar a lista automaticamente
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
@@ -49,12 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     vordem = "";
 
-    //Já iniciaram todas as variáveis, então tenta conexão com o anilist.
-    //Tenho que fazer o seguinte:
-    //Se conseguir ler o código, tentar uma conexão e baixar a lista.
-    //Se der, eu continuo o programa. Se não der, eu tento ler a lista que tem ali e ir com ela, tentando conexão
-    //de um em um minuto
-    finiciaPrograma();
 
     //Caso haja algum erro onde não foi possível atualizar o anilist, as ações não atualizadas são salvas em um bloco de
     //texto. Ao iniciar o programa, é verificado se existe alguma atualização que não foi completada ainda
@@ -71,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent)
             lfile.close();
         }
     }
-    finfoAnimeSelecionado();
+    finiciaPrograma();
 }
 
 MainWindow::~MainWindow()
@@ -113,58 +108,63 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::finiciaPrograma(){
-    //Essa é a parte onde rola a busca das pastas
-    cconfUsuario->flePastasArquivos();
-    fmandaDiretoriosArquivos();
-
-    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
-    ui->labelUsername->setText(jconfig.fretornaUsuario());
-    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
-    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
-    qDebug() << "Checking connection with Anilist";
-    ui->labelMensagem->setText("Trying to download the anime lists");
+    //Prepara as threads de download.
     canilist->fbaixaListaThread(cThread);
     canilist->moveToThread(&cThread);
-    cThread.start();
-    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
+//    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
+    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::fcarregouListaTeste, Qt::QueuedConnection);
     connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
 
-    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
-    //Ter dois ponteiros, e deletar o primeiro?
-    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
-    vrefreshAcontecendo = true;
-    fcarregouListaTeste();
+    fcarregouListaTeste(false);
 }
 
-void MainWindow::fcarregouListaTeste(){
+void MainWindow::fcarregouListaTeste(bool ldownload){
+    qDebug() << "Teste";
     if(cleitorListaAnimes->fleJson())
-        fcarregouListaSucesso(); //Continua fazendo o que tem no construtor
+        fcarregouListaSucesso(ldownload);
     else{
-        ui->labelMensagem->setText("Your anime list was not found in your computer, trying to download it.");
-        fcarregouListaFalha(); //Que chama fcarregouListateste a cada 1 min outra vez em thread, até dar certo.
+        qDebug() << "Failed to read the anime list.";
+        ui->labelMensagem->setText("Failed to read the anime list");
+        fcarregouListaFalha();
     }
 }
 
-void MainWindow::fcarregouListaSucesso(){
-    vlistaLidaSucesso = true;
+void MainWindow::fcarregouListaSucesso(bool ldownload){
+    //Se a lista foi carregada com sucesso, temos certeza de que o usuário já foi lido.
+    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
+    ui->labelUsername->setText(jconfig.fretornaUsuario());
+    //Caso tenha lido a lista com sucesso, começa a procurar pelos animes no computador.
+    cconfUsuario->flePastasArquivos();
+    fmandaDiretoriosArquivos();
+
+    //Ele sempre vai tentar baixar a lista. Caso tenha baixado, isso vira true e não é necessário baixar de novo
+    //Caso não tenha baixado a lista ainda ou deu algum erro no download, tenta baixar a lista de novo.
+    if(ldownload == false)
+        fcarregouListaFalha();
+    else{
+        ui->labelMensagem->setText("Downloaded successfully");
+        vlistaBaixada = true;
+    }
     qDebug() << "The anime list have been read successfully";
+
     qDebug() << "The download system is up";
     //Baixa imagens ao abrir o programa
     cfiledownloader->fsetNext();
+    //Quando baixa todas as imagens, carrega as imagens na página
     connect(cfiledownloader,&filedownloader::slistaMensagem,this,&MainWindow::finfoAnimeSelecionado, Qt::QueuedConnection);
     qDebug() << "Images ready";
+    connect(cfiledownloader,&filedownloader::slistaMensagem,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
+    //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
+    //programa, para deixar o programa mais fluído
+//    vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+
     // Já aciona a lista de modo ordenado
     vordem = "";
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
     qDebug() << "Opening Watching List";
     vlistaAtual = "watching";
     qDebug() << "Searching for animes in the computer";
-
-    //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
-    //programa, para deixar o programa mais fluído
-    vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
-
     cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
     carquivos->frecebeAnimes(cleitorListaAnimes->sortLista(vordem, "watching"), cleitorListaAnimes->sortLista(vordem, "completed"),
                              cleitorListaAnimes->sortLista(vordem, "onhold"), cleitorListaAnimes->sortLista(vordem, "dropped"),
@@ -174,14 +174,20 @@ void MainWindow::fcarregouListaSucesso(){
 
     ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
 
+    if(ldownload == true){
+        vrefreshAcontecendo = true;
+        frefreshListas(ldownload);
+    }
+    finfoAnimeSelecionado();
 }
 
 void MainWindow::fcarregouListaFalha(){
-    vlistaLidaSucesso = false;
-    qCritical() << "There was a problem reading the anime list";
-    ui->labelMensagem->setText("There was a problem reading the anime list. Trying again in 30 seconds");
+    vlistaBaixada = false;
+    qDebug() << "Checking connection with Anilist";
     cThread.start();
-    QTimer::singleShot(30000, this, SLOT(fcarregouListaTeste()));
+    qCritical() << "Trying to download lists";
+    ui->labelMensagem->setText("Trying to download the anime lists. The application may freeze "
+                               "for a few seconds while updating.");
 }
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
@@ -904,59 +910,223 @@ void MainWindow::fcarregaImagensLista(){
     }
 }
 
-///Reescrever isso depois
-bool MainWindow::fcarregaImagensBackground(){
-    if(vlistaBaixada == true)
-        ui->labelMensagem->setText("Carregando imagens");
-    qDebug() << "Carregando imagens";
+bool MainWindow::fcarregaImagensBackground(QString lista){
+    if(lista.compare("Watching", Qt::CaseInsensitive) == 0)
+        vdownloadImagensWatching = true;
+    else if(lista.compare("Completed", Qt::CaseInsensitive) == 0)
+        vdownloadImagensCompleted = true;
+    else if(lista.compare("On Hold", Qt::CaseInsensitive) == 0)
+        vdownloadImagensOnHold = true;
+    else if(lista.compare("Dropped", Qt::CaseInsensitive) == 0)
+        vdownloadImagensDropped = true;
+    else if(lista.compare("Plan to Watch", Qt::CaseInsensitive) == 0)
+        vdownloadImagensPlanning = true;
+    else if(lista.compare("BWatching", Qt::CaseInsensitive) == 0)
+        vdownloadImagensWatchingGrandes = true;
+    else if(lista.compare("BCompleted", Qt::CaseInsensitive) == 0)
+        vdownloadImagensCompletedGrandes = true;
+    else if(lista.compare("BOn Hold", Qt::CaseInsensitive) == 0)
+        vdownloadImagensOnHoldGrandes = true;
+    else if(lista.compare("BDropped", Qt::CaseInsensitive) == 0)
+        vdownloadImagensDroppedGrandes = true;
+    else if(lista.compare("BPlan to Watch", Qt::CaseInsensitive) == 0)
+        vdownloadImagensPlanningGrandes = true;
+    else if(lista.compare("SWatching", Qt::CaseInsensitive) == 0)
+        vdownloadImagensWatchingPequenas = true;
+    else if(lista.compare("SCompleted", Qt::CaseInsensitive) == 0)
+        vdownloadImagensCompletedPequenas = true;
+    else if(lista.compare("SOn Hold", Qt::CaseInsensitive) == 0)
+        vdownloadImagensOnHoldPequenas = true;
+    else if(lista.compare("SDropped", Qt::CaseInsensitive) == 0)
+        vdownloadImagensDroppedPequenas = true;
+    else if(lista.compare("SPlan to Watch", Qt::CaseInsensitive) == 0)
+        vdownloadImagensPlanningPequenas = true;
+    if(vcarregaImagens.isFinished() && vdownloadImagensAcabou == true)
+        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensSelecionadasBackground);
+//
+//    if(vlistaBaixada == true)
+//        ui->labelMensagem->setText("Todas as imagens foram carregadas com sucesso!");
+    return true;
+}
+
+bool MainWindow::fcarregaImagensSelecionadasBackground(){
     QPixmap lpix;
     QString file;
-//    ui->labelImagemBackground->setScaledContents(true);
-    for(int j = 0; j < 5; j++){
+    for(int j = 0; j < 15; j++){
         if(vrefreshAcontecendo == true)
             return false;
         switch(j){
         case 0:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+            if(vdownloadImagensWatching == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensWatching = false;
+                file = dirMedio;
+                qDebug() << "Finished loading watching list medium images";
+            }
             break;
         case 1:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+            if(vdownloadImagensCompleted == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensCompleted = false;
+                file = dirMedio;
+                qDebug() << "Finished loading completed list medium images";
+            }
+            else
+                vdownloadImagensAcabou = true;
             break;
         case 2:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+            if(vdownloadImagensOnHold == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensOnHold = false;
+                file = dirMedio;
+                qDebug() << "Finished loading on hold list medium images";
+            }
+            else
+                vdownloadImagensAcabou = true;
             break;
         case 3:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+            if(vdownloadImagensDropped == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensDropped = false;
+                file = dirMedio;
+                qDebug() << "Finished loading dropped list medium images";
+            }
+            else
+                vdownloadImagensAcabou = true;
             break;
         case 4:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+            if(vdownloadImagensPlanning == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensPlanning = false;
+                file = dirMedio;
+                qDebug() << "Finished loading plan to watch list medium images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 5:
+            if(vdownloadImagensWatchingGrandes == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensWatchingGrandes = false;
+                file = dirGrande;
+                qDebug() << "Finished loading watching list big images";
+            }
+            break;
+        case 6:
+            if(vdownloadImagensCompletedGrandes == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensCompletedGrandes = false;
+                file = dirGrande;
+                qDebug() << "Finished loading completed list big images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 7:
+            if(vdownloadImagensOnHoldGrandes == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensOnHoldGrandes = false;
+                file = dirGrande;
+                qDebug() << "Finished loading on hold list big images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 8:
+            if(vdownloadImagensDroppedGrandes == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensDroppedGrandes = false;
+                file = dirGrande;
+                qDebug() << "Finished loading dropped list big images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 9:
+            if(vdownloadImagensPlanningGrandes == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensPlanningGrandes = false;
+                file = dirGrande;
+                qDebug() << "Finished loading plan to watch list big images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 10:
+            if(vdownloadImagensWatchingPequenas == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensWatchingPequenas = false;
+                file = dirPequeno;
+                qDebug() << "Finished loading watching list small images";
+            }
+            break;
+        case 11:
+            if(vdownloadImagensCompletedPequenas == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensCompletedPequenas = false;
+                file = dirPequeno;
+                qDebug() << "Finished loading completed list small images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 12:
+            if(vdownloadImagensOnHoldPequenas == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensOnHoldPequenas = false;
+                file = dirPequeno;
+                qDebug() << "Finished loading on hold list small images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 13:
+            if(vdownloadImagensDroppedPequenas == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensDroppedPequenas = false;
+                file = dirPequeno;
+                qDebug() << "Finished loading dropped list small images";
+            }
+            else
+                vdownloadImagensAcabou = true;
+            break;
+        case 14:
+            if(vdownloadImagensPlanningPequenas == true){
+                vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                vdownloadImagensAcabou = false;
+                vdownloadImagensPlanningPequenas = false;
+                file = dirPequeno;
+                qDebug() << "Finished loading plan to watch list small images";
+            }
+            else
+                vdownloadImagensAcabou = true;
             break;
         }
-        if(!vcarregaListaBackground.isEmpty()){
-            //Depois carregar todas as imagens na memória
+        if(!vdownloadImagensAcabou){
             for(int i = 0; i < vcarregaListaBackground.size(); i++){
+                if(vrefreshAcontecendo == true)
+                    return false;
                 if(i < vcarregaListaBackground.size()){
-                    file = dirMedio+vcarregaListaBackground[i]->vid;
-                    if(QFile::exists(file+".jpg")){
-                        if(lpix.load(file+".jpg", "jpg"))//crasha aqui
+                    if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
+                        if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg"))
                             ui->labelImagemBackground->setPixmap(lpix);
                     }
-                    else if(QFile::exists(file+".png")){
-                        if(lpix.load(file+".png", "png"))
-                            ui->labelImagemBackground->setPixmap(lpix);
-                    }
-                }
-            }
-
-            for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                if(i < vcarregaListaBackground.size()){
-                    file = dirGrande+vcarregaListaBackground[i]->vid;
-                    if(QFile::exists(file+".jpg")){
-                        if(lpix.load(file+".jpg", "jpg"))//crasha aqui
-                            ui->labelImagemBackground->setPixmap(lpix);
-                    }
-                    else if(QFile::exists(file+".png")){
-                        if(lpix.load(file+".png", "png"))
+                    else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
+                        if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png"))
                             ui->labelImagemBackground->setPixmap(lpix);
                     }
                 }
@@ -964,8 +1134,7 @@ bool MainWindow::fcarregaImagensBackground(){
         }
     }
     ui->labelImagemBackground->clear();
-    if(vlistaBaixada == true)
-        ui->labelMensagem->setText("Todas as imagens foram carregadas com sucesso!");
+    qDebug() << "Finished loading all pictures";
     return true;
 }
 
@@ -1205,17 +1374,15 @@ void MainWindow::on_botaoBusca_clicked()
 
 void MainWindow::on_botaoRefresh_clicked()
 {
-    if(vlistaLidaSucesso == false)
-        fcarregouListaTeste();
+    if(vcarregaImagens.isRunning()){
+        vcarregaImagens.pause();
+        vcarregaImagens.cancel();
+    }
+    fcarregouListaTeste(false);
     if(vrefreshAcontecendo == false){
-        vrefreshAcontecendo = true;
-        //Quando clicar no botão, o programa vai rodar a função de baixar as listas em uma thread e quando a lista for baixada, será
-        //atualizada na função frefreshListas();
-//        canilist->fbaixaListaThread(cThread);
-//        canilist->moveToThread(&cThread);
-        cThread.start();
-        //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
+        ui->labelMensagem->setText("Trying to update list. The program may freeze for a few seconds while reading the new list");
         ui->labelRefreshTimer->setText("Refreshing,,,");
+        vrefreshAcontecendo = true;
     }
 }
 
@@ -1223,10 +1390,6 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     //Checamos se a conexão com o anilist foi um sucesso. No caso de ter falhado, não rodamos a função de refresh
     if(rcheckDownload == false){
         vrefreshAcontecendo = false;
-        if(vlistaLidaSucesso == false)
-            ui->labelMensagem->setText("Failed read the anime list and to connect to AniList!");
-        else
-            ui->labelMensagem->setText("Failed to connect to AniList!");
         if(timer->isActive())
             timer->stop();
         timer->setInterval(60000);
@@ -1324,10 +1487,10 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     //Se usar uma só ela não cancela e acessa memória que já foi descartada
     if(vcarregaImagens.isRunning()){
         vcarregaImagens.waitForFinished();
-        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+//        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
     }
-    else
-                vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
+//    else
+//        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
 }
 
 void MainWindow::fmandaDiretoriosArquivos()
@@ -1357,7 +1520,7 @@ void MainWindow::fliberaSinaisBotoes(){
 
 void MainWindow::fatualizaRefreshTimer()
 {
-    vlistaBaixada = true;
+//    vlistaBaixada = true;
     if(vrefreshAcontecendo == false){
         int lminutos = timer->remainingTime()/60000;
         if(vtimerSegundos == 0)
@@ -1556,7 +1719,7 @@ void MainWindow::fretryAnilist()
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
 //    canilist->fbaixaListaThread(cThread);
 //    canilist->moveToThread(&cThread);
-    cThread.start();
+    fcarregouListaTeste(false);
 }
 
 void MainWindow::on_botaoOrdemAlfabetica_clicked()
