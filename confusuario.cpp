@@ -43,6 +43,7 @@ QString confUsuario::fsimplificaNomeArquivo(QString rnomeArquivo){
     rnomeArquivo.remove("season 2");
     rnomeArquivo.remove("season 3");
     rnomeArquivo.remove("season 4");
+    rnomeArquivo.remove("/");
     rnomeArquivo = rnomeArquivo.simplified();
     return rnomeArquivo;
 }
@@ -120,6 +121,7 @@ void confUsuario::fsalvaPastasArquivos()
     if(t.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&t);
         foreach(QString key, vdiretorioEspecificoAnime.keys()){
+//            qDebug() << vdiretorioEspecificoAnime[key];
             lstreamTexto << key << ";" << vdiretorioEspecificoAnime[key] << endl;
         }
         t.close();
@@ -146,8 +148,10 @@ void confUsuario::flePastasArquivos()
     }
 }
 
+//Aparentemente nunca entra aqui
 void confUsuario::fsetupListasPraBusca()
 {
+    qDebug() << "Setup Pastas";
     if(vlista == 0){
         if(this->thread()->isInterruptionRequested()){
             this->thread()->exit(0);

@@ -32,8 +32,8 @@ bool anilist::fgetList(){
     }
 
     //Post faz o pedido ao servidor lrequest, usando os argumentos em Json
-    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
-    ////Memory leak?
+//    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    QNetworkReply* vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
     //Espera uma resposta
     while (!vreply->isFinished())
     {
@@ -44,14 +44,17 @@ bool anilist::fgetList(){
     QByteArray response_data;
     if(vreply->isReadable())
         response_data = vreply->readAll();
-    else
+    else{
+        vreply->deleteLater();
         return false;
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
     //Verificamos se é uma mensagem de erro
     if(lastpage.contains("errors") == true){
         this->thread()->exit(0);
         emit sterminouDownload(false);
+        vreply->deleteLater();
         return false;
     }
     lastpage = lastpage.toLatin1();
@@ -64,6 +67,7 @@ bool anilist::fgetList(){
 
     if(this->thread()->isInterruptionRequested()){
         this->thread()->exit(0);
+        vreply->deleteLater();
         return false;
     }
 
@@ -72,9 +76,10 @@ bool anilist::fgetList(){
         for(int i = 1; i < lastpage.toInt()+1; i++){
             if(this->thread()->isInterruptionRequested()){
                 this->thread()->exit(0);
+                vreply->deleteLater();
                 return false;
             }
-            QString query = "query ($id: Int, $perPage: Int) { Page (page:" + QString::number(i) + ", perPage: $perPage) {  		mediaList(userName: " + vusername + ", id: $id, sort: MEDIA_ID) {  			status  			score  			progress  			media{ 				format 				averageScore 				id 				title{ 					romaji 					english 				} 				synonyms 				description 				status 				coverImage{ 					large 				} 				season 				startDate { 					year 					month 				} 				episodes 				nextAiringEpisode{ 					 					airingAt 					episode 				} 				siteUrl 				streamingEpisodes{ 					site 					url 				}  			} 		  		} 	  	}  }";
+            QString query = "query ($id: Int, $perPage: Int) { Page (page:" + QString::number(i) + ", perPage: $perPage) {  		mediaList(userName: " + vusername + ", id: $id, sort: MEDIA_ID) {  			status  			score  			progress  			media{ 				format 				averageScore 				id 				title{ 					romaji 					english 				} 				synonyms 				description 				status 				coverImage{ 					large 				} 				season 				startDate { 					year 					month 				} 				chapters 				volumes 				episodes 				nextAiringEpisode{ 					 					airingAt 					episode 				} 				siteUrl 				streamingEpisodes{ 					site 					url 				}  			} 		  		} 	  	}  }";
             json.insert("query", query.trimmed());
             vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
             while (!vreply->isFinished())
@@ -91,6 +96,7 @@ bool anilist::fgetList(){
     if(lreplyString.contains("errors") == true){
         emit sterminouDownload(false);
         this->thread()->exit(0);
+        vreply->deleteLater();
         return false;
     }
     else{
@@ -102,6 +108,7 @@ bool anilist::fgetList(){
             t.rename("Configurações/Temp/animeList.txt");
         emit sterminouDownload(true);
         this->thread()->exit(0);
+        vreply->deleteLater();
         return true;
     }
 }

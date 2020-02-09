@@ -2996,7 +2996,7 @@ color: rgb(20, 20, 20);</string>
        <rect>
         <x>1493</x>
         <y>8</y>
-        <width>100</width>
+        <width>110</width>
         <height>150</height>
        </rect>
       </property>
@@ -3004,6 +3004,20 @@ color: rgb(20, 20, 20);</string>
        <string/>
       </property>
      </widget>
+     <widget class="QLabel" name="labelImagemBackgroundGrande">
+      <property name="geometry">
+       <rect>
+        <x>1493</x>
+        <y>8</y>
+        <width>300</width>
+        <height>500</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <zorder>labelImagemBackgroundGrande</zorder>
      <zorder>labelImagemBackground</zorder>
      <zorder>labelFundoAnime04Titulo</zorder>
      <zorder>labelFundoAnime03Progresso</zorder>
