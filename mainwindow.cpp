@@ -5,10 +5,10 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-    //Isso tem coisa demais. Podia modularizar tudo isso que tá no construtor.
     ui->setupUi(this);
+    ui->barraBusca->setMaximumBlockCount(1);
     ///um dia ainda faço qml disso
-//    fmudaResolucao();
+    //fmudaResolucao();
     logger::fattachLogger();
     qInfo() << QDateTime::currentDateTime().toString();
     canilist = new anilist(nullptr);
@@ -25,90 +25,65 @@ MainWindow::MainWindow(QWidget *parent)
     if(dirMedio.isEmpty())
         dirMedio = "0";
     qDebug() << "Main configuration is up";
-    carquivos = new arquivos(nullptr);
+    carquivos = new arquivos(this);
     qDebug() << "File system is up";
     cconfUsuario = new confUsuario(nullptr);
     qDebug() << "User configuration is up";
-    cconfUsuario->flePastasArquivos();
-    fmandaDiretoriosArquivos();
 
     cleitorListaAnimes = new leitorlistaanimes(nullptr);
+    cfiledownloader = new filedownloader(nullptr);
+    vtimerSegundos = 59;
 
-    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
-    ui->labelUsername->setText(jconfig.fretornaUsuario());
-    //O programa tenta fazer a conexão logo de cara sem uma thread pelo simples fato de que ainda não carregou e, portanto, não vai ficar
-    //travado. Caso ele esteja carregado, ele irá travar ao baixar a lista
-    qDebug() << "Checking connection with Anilist";
-    ui->labelMensagem->setText("Baixando listas de animes");
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
-    cThread.start();
-    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::frefreshListas, Qt::QueuedConnection);
-    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
-    //Basicamente, sempre que terminar um download ele chama a função duas vezes. Ter dois sinais diferentes?
-    //Ter dois ponteiros, e deletar o primeiro?
-    //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
-    vrefreshAcontecendo = true;
-
-    //Nenhuma função dependente do arquivo deve rodar se o arquivo não puder ser lido
-    if(cleitorListaAnimes->fleJson()){
-        vlistaLidaSucesso = true;
-        qDebug() << "The anime list have been read successfully";
-        cfiledownloader = new filedownloader(nullptr);
-        qDebug() << "The download system is up";
-        cfiledownloader->fsetConfBase(cconfBase);
-        cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
-        //Baixa imagens ao abrir o programa
-        cfiledownloader->fsetNext();
-        connect(cfiledownloader,&filedownloader::slistaMensagem,this,&MainWindow::finfoAnimeSelecionado, Qt::QueuedConnection);
-        qDebug() << "Images ready";
-        // Já aciona a lista de modo ordenado
-        vordem = "";
-        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
-        qDebug() << "Opening Watching List";
-        vlistaAtual = "watching";
-        qDebug() << "Searching for animes in the computer";
-
-        //QFuture vai rodar a função fcarregaImagensBackground em uma thread separada, para carregar todas as imagens enquanto o usuário mexe no
-        //programa, para deixar o programa mais fluído
-        vfuture = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
-    }
-    else{
-        qCritical() << "There was a problem reading the anime list";
-        ui->labelMensagem->setText("There was a problem reading the anime list. Trying again in one minute");
-        tryTimer = new QTimer(this);
-        connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
-        tryTimer->start(60000); //1 minutos
-        vfalhaconexao = true;
-    }
     //E o timer para atualizar a lista automaticamente
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::on_botaoRefresh_clicked));
-//    timer->start(60000); //1 MINUTO PRA TESTES DE DEBUG
-    timer->start(600000); //10 minutos
     //O segundo timer é uma contagem de segundo em segundo pra mostrar quanto tempo falta para o timer de cima chegar à 0
     timerRefresh = new QTimer(this);
     connect(timerRefresh, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaRefreshTimer));
-    timerRefresh->start(1000);
-    vtimerSegundos = 59;
-    //Timer que atualiza o anilist, pro caso de falhas ou assistir offline
-    timerAcao = new QTimer(this);
-    connect(timerAcao, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
-    timerAcao->start(60000); //1 minuto
+    tryTimer = new QTimer(this);
+    tryTimer->start(30000);
+    connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
 
     ui->janelaRotativa->addWidget(&jconfig);
     ui->janelaRotativa->addWidget(&jtorrent);
     jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
-    cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
-    carquivos->frecebeAnimes(cleitorListaAnimes->sortLista("cnome", "watching"), cleitorListaAnimes->sortLista("cnome", "completed"),
-                             cleitorListaAnimes->sortLista("cnome", "onhold"), cleitorListaAnimes->sortLista("cnome", "dropped"),
-                             cleitorListaAnimes->sortLista("cnome", "plantowatch"));
-    vanimeSelecionado = 0;
-    vpagina = 1;
-
-    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
-
     connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
+
+    vordem = "";
+    vdownloadImagensAcabou = true;
+    //Prepara as threads de download.
+    canilist->fbaixaListaThread(cThread);
+    canilist->moveToThread(&cThread);
+    cconfUsuario->fbuscaPastasThread(dThread);
+    cconfUsuario->moveToThread(&dThread);
+
+    connect(canilist, &anilist::sterminouDownload, this, &MainWindow::fcarregouListaTeste, Qt::QueuedConnection);
+    connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
+    connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
+    //Quando baixa todas as imagens, carrega as imagens na página
+    connect(cfiledownloader,&filedownloader::sterminouLista,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
+    connect(cfiledownloader,&filedownloader::sid,this,&MainWindow::fsetIdBaixado, Qt::QueuedConnection);
+//    connect(cfiledownloader,&filedownloader::sidGrande,this,&MainWindow::fsetIdBaixadoGrande, Qt::QueuedConnection);
+    connect(cleitorListaAnimes, &leitorlistaanimes::sAnimeAdicionadoNaLista, this, &MainWindow::fsetIdAdicionado, Qt::QueuedConnection);
+    connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos, Qt::QueuedConnection);
+    connect(this, &MainWindow::sterminouCarregarImagens, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
+    //Se a lista foi carregada com sucesso, temos certeza de que o usuário já foi lido.
+    this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
+    ui->labelUsername->setText(jconfig.fretornaUsuario());
+    //Caso tenha lido a lista com sucesso, começa a procurar pelos animes no computador.
+    vlistaAtual = "watching";
+    vtipoAtual = "anime";
+    // Já aciona a lista de modo ordenado
+    vordem = "";
+    cconfUsuario->flePastasArquivos();
+    fmandaDiretoriosArquivos();
+    cfiledownloader->fsetConfBase(cconfBase);
+    cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
+//    connect(cfiledownloader, &filedownloader::savatar, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
+    fcarregouListaTeste(false);
+
+    //Caso haja algum erro onde não foi possível atualizar o anilist, as ações não atualizadas são salvas em um bloco de
+    //texto. Ao iniciar o programa, é verificado se existe alguma atualização que não foi completada ainda
     QFile lfile("Configurações/Temp/ListUpdates.txt");
     if(lfile.exists() && lfile.size() != 0){
         if(lfile.open(QIODevice::ReadOnly)) {
@@ -122,7 +97,6 @@ MainWindow::MainWindow(QWidget *parent)
             lfile.close();
         }
     }
-    finfoAnimeSelecionado();
 }
 
 MainWindow::~MainWindow()
@@ -140,30 +114,107 @@ MainWindow::~MainWindow()
         }
     }
     vrefreshAcontecendo = true;
-    vfuture.waitForFinished();
     cThread.requestInterruption();
     cThread.wait();
     dThread.requestInterruption();
     dThread.wait();
-    vfuture.waitForFinished();
     qDebug() << "Deleting pointers";
     cconfUsuario->deleteLater();
     qDebug() << "cconfUsuario deleted";
     carquivos->deleteLater();
     qDebug() << "carquivos deleted";
-    if(vlistaLidaSucesso == true){
-        timer->deleteLater();
-        timerRefresh->deleteLater();
-        timerAcao->deleteLater();
-        cfiledownloader->deleteLater();
-        qDebug() << "cfiledownloader deleted";
-    }
+    timer->deleteLater();
+    timerRefresh->deleteLater();
+    tryTimer->deleteLater();
+    cfiledownloader->deleteLater();
+    qDebug() << "cfiledownloader deleted";
     cleitorListaAnimes->deleteLater();
     qDebug() << "cleitorListaAnimes deleted";
     canilist->deleteLater();
     qDebug() << "canilist deleted";
     qInfo() << "Software closed successfully";
     delete ui;
+}
+
+void MainWindow::fcarregouListaTeste(bool ldownload){
+    cleitorListaAnimes->fdeletaListaAnimes();
+    vlistaLidaSucesso = cleitorListaAnimes->fleJson();
+    if(vlistaLidaSucesso)
+        fcarregouListaSucesso(ldownload);
+    else{
+        qDebug() << "Failed to read the anime list.";
+        ui->labelMensagem->setText("Failed to read the anime list");
+        fcarregouListaFalha();
+    }
+}
+
+
+void MainWindow::fcarregouListaSucesso(bool ldownload){
+
+    //Ele sempre vai tentar baixar a lista. Caso tenha baixado, isso vira true e não é necessário baixar de novo
+    //Caso não tenha baixado a lista ainda ou deu algum erro no download, tenta baixar a lista de novo.
+    cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
+    if(ldownload == false)
+        fcarregouListaFalha();
+    else{
+        ui->labelMensagem->setText("Downloaded successfully");
+        vlistaBaixada = true;
+    }
+    qDebug() << "The anime list have been read successfully";
+
+    //Atualiza o avatar do usuário também.
+    qDebug() << "The download system is up";
+    cfiledownloader->fresetCounters();
+    cfiledownloader->fdownloadMedio();
+    //Até aqui, tem 54 de memória no primeiro refresh
+    //Começa a crescer depois desse ponto. E passa aqui uma segunda vez com um único refresh?
+    //Descobrir por que passa a segunda vez
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+
+    qDebug() << "Searching for animes in the computer";
+    //Posso por o recebe configs em uma função própria com sinal de qunado salvar as configs
+    cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
+    carquivos->frecebeAnimes(cleitorListaAnimes);
+    vanimeSelecionado = 0;
+    vpagina = 1;
+
+    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+
+    if(ldownload == true){
+        vrefreshAcontecendo = true;
+        frefreshListas(ldownload);
+    }
+    finfoAnimeSelecionado();
+}
+
+void MainWindow::fcarregouListaFalha(){
+    vlistaBaixada = false;
+    qDebug() << "Checking connection with Anilist";
+    cThread.start();
+//    canilist->fgetList();
+    qDebug() << "Trying to download lists";
+    ui->labelMensagem->setText("Trying to download the anime lists. The application may freeze "
+                               "for a few seconds while updating.");
+}
+
+void MainWindow::fsetIdAdicionado(int lid)
+{
+    if(!vimagemBaixada.contains(lid)){
+        vimagemBaixada.insert(lid, false);
+        vimagemCarregada.insert(lid, false);
+        vimagemBaixadaGrande.insert(lid, false);
+        vimagemCarregadaGrande.insert(lid, false);
+    }
+}
+
+void MainWindow::fsetIdBaixado(int lid)
+{
+    vimagemBaixada[lid] = true;
+}
+
+void MainWindow::fsetIdBaixadoGrande(int lid)
+{
+    vimagemBaixadaGrande[lid] = true;
 }
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
@@ -213,6 +264,7 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAvatar->setPixmap(pix);
     }
     if(!vlistaSelecionada.isEmpty()){
+        ui->imagemAnime00->setScaledContents(true);
         ui->imagemAnimeGrande->setScaledContents(true);
         //Tenta carregar a imagem como jpg, se possível
         if(pix.load(cconfBase->vdiretorioImagensGrandes+vlistaSelecionada[vanimeSelecionado]->vid+".jpg", "jpg")){
@@ -229,15 +281,14 @@ void MainWindow::fcarregaImagensLista(){
         else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[vanimeSelecionado]->vid+".png", "png")){
             ui->imagemAnimeGrande->setPixmap(pix);
         }
-        ui->imagemAnime00->setScaledContents(true);
         //Checa tamanho do título pra sempre caber no frame
         lstyleSheet = ui->labelAnime00Titulo->styleSheet();
         if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelFundoAnime00Nota->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Titulo->setStyleSheet("background: rgb(185,201,250);");
@@ -261,18 +312,25 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime00Lista->clear();
             ui->labelFundoAnime00Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[0+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime00->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[0+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime00->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[0+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[0+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime00->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[0+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime00->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime00->clear();
+                ui->imagemAnime00->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime00->clear();
-            ui->imagemAnime00->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime00->setPixmap(pix);
         }
     }
     else{
+
         //PRO LOOP
         //remove imagemAnime remove labelAnime remove labelFundoAnime remove nota remove progresso remove titulo
         //Ai pega o valor que sobrar e joga na condição
@@ -296,11 +354,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime01Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime01Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime01Titulo->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vnome);
         ui->labelAnime01Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Titulo->setWordWrap(true);
@@ -321,15 +379,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime01Lista->clear();
             ui->labelFundoAnime01Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[1+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime01->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[1+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime01->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[1+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[1+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime01->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[1+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime01->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime01->clear();//Trocar isso por imagem coringa pro caso de não ter imagem do anime
+                ui->imagemAnime01->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime01->clear();//Trocar isso por imagem coringa pro caso de não ter imagem do anime
-            ui->imagemAnime01->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime01->setPixmap(pix);
         }
     }
     else{
@@ -350,11 +414,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime02Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime02Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime02Titulo->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vnome);
         ui->labelAnime02Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime02Titulo->setWordWrap(true);
@@ -375,15 +439,22 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime02Lista->clear();
             ui->labelFundoAnime02Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[2+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime02->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[2+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime02->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[2+(12*(vpagina-1))]->vid.toInt()] == true &&
+                vimagemBaixada[vlistaSelecionada[2+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[2+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime02->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[2+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime02->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime02->clear();
+                ui->imagemAnime02->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime02->clear();
-            ui->imagemAnime02->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime02->setPixmap(pix);
         }
     }
     else{
@@ -404,11 +475,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime03Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime03Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime03Titulo->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vnome);
         ui->labelAnime03Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime03Titulo->setWordWrap(true);
@@ -429,15 +500,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime03Lista->clear();
             ui->labelFundoAnime03Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[3+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime03->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[3+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime03->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[3+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[3+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime03->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[3+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime03->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime03->clear();
+                ui->imagemAnime03->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime03->clear();
-            ui->imagemAnime03->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime03->setPixmap(pix);
         }
     }
     else{
@@ -458,11 +535,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime04Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime04Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime04Titulo->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vnome);
         ui->labelAnime04Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime04Titulo->setWordWrap(true);
@@ -483,15 +560,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime04Lista->clear();
             ui->labelFundoAnime04Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[4+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime04->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[4+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime04->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[4+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[4+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime04->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[4+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime04->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime04->clear();
+                ui->imagemAnime04->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime04->clear();
-            ui->imagemAnime04->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime04->setPixmap(pix);
         }
     }
     else{
@@ -512,11 +595,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime05Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime05Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime05Titulo->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vnome);
         ui->labelAnime05Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime05Titulo->setWordWrap(true);
@@ -537,15 +620,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime05Lista->clear();
             ui->labelFundoAnime05Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[5+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime05->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[5+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime05->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[5+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[5+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime05->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[5+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime05->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime05->clear();
+                ui->imagemAnime05->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime05->clear();
-            ui->imagemAnime05->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime05->setPixmap(pix);
         }
     }
     else{
@@ -566,11 +655,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime06Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime06Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime06Titulo->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vnome);
         ui->labelAnime06Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime06Titulo->setWordWrap(true);
@@ -591,15 +680,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime06Lista->clear();
             ui->labelFundoAnime06Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[6+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime06->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[6+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime06->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[6+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[6+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime06->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[6+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime06->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime06->clear();
+                ui->imagemAnime06->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime06->clear();
-            ui->imagemAnime06->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime06->setPixmap(pix);
         }
     }
     else{
@@ -620,11 +715,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime07Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime07Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime07Titulo->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vnome);
         ui->labelAnime07Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime07Titulo->setWordWrap(true);
@@ -645,15 +740,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime07Lista->clear();
             ui->labelFundoAnime07Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[7+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime07->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[7+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime07->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[7+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[7+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime07->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[7+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime07->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime07->clear();
+                ui->imagemAnime07->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime07->clear();
-            ui->imagemAnime07->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime07->setPixmap(pix);
         }
     }
     else{
@@ -674,11 +775,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime08Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime08Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime08Titulo->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vnome);
         ui->labelAnime08Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime08Titulo->setWordWrap(true);
@@ -699,15 +800,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime08Lista->clear();
             ui->labelFundoAnime08Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[8+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime08->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[8+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime08->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[8+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[8+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime08->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[8+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime08->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime08->clear();
+                ui->imagemAnime08->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime08->clear();
-            ui->imagemAnime08->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime08->setPixmap(pix);
         }
     }
     else{
@@ -728,11 +835,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime09Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime09Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime09Titulo->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vnome);
         ui->labelAnime09Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime09Titulo->setWordWrap(true);
@@ -753,15 +860,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime09Lista->clear();
             ui->labelFundoAnime09Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[9+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime09->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[9+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime09->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[9+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[9+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime09->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[9+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime09->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime09->clear();
+                ui->imagemAnime09->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime09->clear();
-            ui->imagemAnime09->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime09->setPixmap(pix);
         }
     }
     else{
@@ -782,11 +895,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime10Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime10Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime10Titulo->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vnome);
         ui->labelAnime10Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime10Titulo->setWordWrap(true);
@@ -807,15 +920,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime10Lista->clear();
             ui->labelFundoAnime10Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[10+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime10->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[10+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime10->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[10+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[10+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime10->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[10+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime10->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime10->clear();
+                ui->imagemAnime10->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime10->clear();
-            ui->imagemAnime10->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime10->setPixmap(pix);
         }
     }
     else{
@@ -836,11 +955,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime11Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime11Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 8pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 7pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         else
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 6pt \"MS Shell Dlg 2\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime11Titulo->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vnome);
         ui->labelAnime11Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime11Titulo->setWordWrap(true);
@@ -861,15 +980,21 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime11Lista->clear();
             ui->labelFundoAnime11Lista->setStyleSheet("background: transparent");
         }
-        if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[11+(12*(vpagina-1))]->vid+".jpg", "jpg")){
-            ui->imagemAnime11->setPixmap(pix);
-        }
-        else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[11+(12*(vpagina-1))]->vid+".png", "png")){
-            ui->imagemAnime11->setPixmap(pix);
+        if(vimagemCarregada[vlistaSelecionada[11+(12*(vpagina-1))]->vid.toInt()] == true){
+            if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[11+(12*(vpagina-1))]->vid+".jpg", "jpg")){
+                ui->imagemAnime11->setPixmap(pix);
+            }
+            else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[11+(12*(vpagina-1))]->vid+".png", "png")){
+                ui->imagemAnime11->setPixmap(pix);
+            }
+            else{
+                ui->imagemAnime11->clear();
+                ui->imagemAnime11->setStyleSheet("background: black;");
+            }
         }
         else{
-            ui->imagemAnime11->clear();
-            ui->imagemAnime11->setStyleSheet("background: black;");
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnime11->setPixmap(pix);
         }
     }
     else{
@@ -886,65 +1011,274 @@ void MainWindow::fcarregaImagensLista(){
     }
 }
 
-bool MainWindow::fcarregaImagensBackground(){
-    ui->labelMensagem->setText("Carregando imagens");
-    qDebug() << "Carregando imagens";
+bool MainWindow::fcarregaImagensBackground(QString lista){
+    if(lista.compare("small", Qt::CaseInsensitive) == 0)
+        vdownloadImagensPequenas = true;
+    else if(lista.compare("medium", Qt::CaseInsensitive) == 0){
+        vdownloadImagensMedias = true;
+        //if(imagenspequenas == false)
+        cfiledownloader->fresetCounters();
+        cfiledownloader->fdownloadGrande();
+    }
+    else if(lista.compare("big", Qt::CaseInsensitive) == 0){
+        vdownloadImagensGrandes = true;
+    }
+    if(!vcarregaImagens.isRunning() && vdownloadImagensAcabou == true)
+        vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensSelecionadasBackground);
+    return true;
+}
+
+
+//Eu sei, tá bem feio, mas é como funcionou. Provavelmente eu poderia fazer uma função pro que tem dentro do for. Provavelmente eu deveria.
+bool MainWindow::fcarregaImagensSelecionadasBackground(){
     QPixmap lpix;
+    QPixmap lpixGrande;
     QString file;
-    for(int j = 0; j < 5; j++){
-        if(vrefreshAcontecendo == true)
-            return false;
-        switch(j){
-        case 0:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
-            break;
-        case 1:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
-            break;
-        case 2:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
-            break;
-        case 3:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
-            break;
-        case 4:
-            vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-            break;
-        }
-        if(!vcarregaListaBackground.isEmpty()){
-            //Depois carregar todas as imagens na memória
-            for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                //Inicialmente carrega apenas as primeiras imagens grandes de cada lista, pra agilizar a mudança de
-                //lista
-                file = dirGrande+vcarregaListaBackground[0]->vid;
-                if(QFile::exists(file+".jpg")){
-                    file.append(".jpg");
-                    if(lpix.load(file, "jpg"))
-                        ui->labelImagemBackground->setPixmap(lpix);
+    vdownloadImagensAcabou = false;
+    for(int i = 0; i < 3; i++){
+        if(vdownloadImagensPequenas){
+            file = dirPequeno;
+            for(int j = 0; j < 15; j++){
+                if(vrefreshAcontecendo == true)
+                    return false;
+                switch(j){
+                case 0:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                    break;
+                case 1:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                    break;
+                case 2:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                    break;
+                case 3:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                    break;
+                case 4:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                    break;
+                case 5:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
+                    break;
+                case 6:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
+                    break;
+                case 7:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
+                    break;
+                case 8:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
+                    break;
+                case 9:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
+                    break;
+                case 10:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
+                    break;
+                case 11:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
+                    break;
+                case 12:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
+                    break;
+                case 13:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
+                    break;
+                case 14:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
+                    break;
                 }
-                else if(QFile::exists(file+".png")){
-                    file.append(".png");
-                    if(lpix.load(file, "png"))
-                        ui->labelImagemBackground->setPixmap(lpix);
-                }
-                file = dirMedio+vcarregaListaBackground[i]->vid;
-                if(QFile::exists(file+".jpg")){
-                    file.append(".jpg");
-                    if(lpix.load(file, "jpg"))
-                        ui->labelImagemBackground->setPixmap(lpix);
-                }
-                else if(QFile::exists(file+".png")){
-                    file.append(".png");
-                    if(lpix.load(file, "png"))
-                        ui->labelImagemBackground->setPixmap(lpix);
+                if(!vcarregaListaBackground.isEmpty()){
+                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
+                        if(vrefreshAcontecendo == true)
+                            return false;
+                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
+    //                    qDebug() << "Carregou pequeno " << vcarregaListaBackground[i]->vlista << i;
+                        if(vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] == false &&
+                                vimagemBaixada[vcarregaListaBackground[i]->vid.toInt()] == true){
+                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
+                                    ui->labelImagemBackground->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
+                                    ui->labelImagemBackground->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            vcarregaListaBackground.clear();
+            vdownloadImagensPequenas = false;
         }
+        else if(vdownloadImagensMedias){
+            ui->labelImagemBackground->setScaledContents(true);
+            file = dirMedio;
+            for(int j = 0; j < 15; j++){
+                if(vrefreshAcontecendo == true)
+                    return false;
+                switch(j){
+                case 0:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                    break;
+                case 1:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                    break;
+                case 2:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                    break;
+                case 3:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                    break;
+                case 4:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                    break;
+                case 5:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
+                    break;
+                case 6:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
+                    break;
+                case 7:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
+                    break;
+                case 8:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
+                    break;
+                case 9:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
+                    break;
+                case 10:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
+                    break;
+                case 11:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
+                    break;
+                case 12:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
+                    break;
+                case 13:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
+                    break;
+                case 14:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
+                    break;
+                }
+                if(!vcarregaListaBackground.isEmpty()){
+                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
+                        if(vrefreshAcontecendo == true)
+                            return false;
+                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
+    //                    qDebug() << "Carregou média " << vcarregaListaBackground[i]->vlista << i;
+                        if(vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] == false &&
+                                vimagemBaixada[vcarregaListaBackground[i]->vid.toInt()] == true){
+                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
+                                    ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
+                                    ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            vdownloadImagensMedias = false;
+        }
+        else if(vdownloadImagensGrandes){
+            ui->labelImagemBackgroundGrande->setScaledContents(true);
+            file = dirGrande;
+            for(int j = 0; j < 15; j++){
+                if(vrefreshAcontecendo == true)
+                    return false;
+                switch(j){
+                case 0:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
+                    break;
+                case 1:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
+                    break;
+                case 2:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
+                    break;
+                case 3:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
+                    break;
+                case 4:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+                    break;
+                case 5:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
+                    break;
+                case 6:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
+                    break;
+                case 7:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
+                    break;
+                case 8:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
+                    break;
+                case 9:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
+                    break;
+                case 10:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
+                    break;
+                case 11:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
+                    break;
+                case 12:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
+                    break;
+                case 13:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
+                    break;
+                case 14:
+                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
+                    break;
+                }
+                if(!vcarregaListaBackground.isEmpty()){
+                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
+                        if(vrefreshAcontecendo == true)
+                            return false;
+                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
+    //                    qDebug() << "Carregou grande " << vcarregaListaBackground[i]->vlista << i;
+                        if(vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] == false &&
+                                vimagemBaixadaGrande[vcarregaListaBackground[i]->vid.toInt()] == true){
+                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
+                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
+                                    ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
+                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
+                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
+                                    ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
+                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            vdownloadImagensGrandes = false;
+        }
+        ui->labelImagemBackgroundGrande->clear();
+        ui->labelImagemBackground->clear();
     }
-    ui->labelImagemBackground->clear();
-    if(timer->isActive())
-        ui->labelMensagem->setText("Todas as imagens foram carregadas com sucesso!");
+    vdownloadImagensAcabou = true;
+    qDebug() << "Finished loading all pictures";
+    vcarregaListaBackground.clear();
+    emit sterminouCarregarImagens();
     return true;
 }
 
@@ -1052,15 +1386,17 @@ void MainWindow::on_botaoProximaPagina_clicked()
         QString llistaAtual;
         if(vlistaAtual == "watching")
             llistaAtual = "Watching";
-        else if(vlistaAtual == "completed")
+        else if(vlistaAtual.contains("reading"))
+            llistaAtual = "Reading";
+        else if(vlistaAtual.contains("completed"))
             llistaAtual = "Completed";
-        else if(vlistaAtual == "onhold")
+        else if(vlistaAtual.contains("onhold"))
             llistaAtual = "On Hold";
-        else if(vlistaAtual == "dropped")
+        else if(vlistaAtual.contains("dropped"))
             llistaAtual = "Dropped";
-        else if(vlistaAtual == "plantowatch")
+        else if(vlistaAtual.contains("plantowatch"))
             llistaAtual = "Plan to Watch";
-        else if(vlistaAtual == "busca")
+        else if(vlistaAtual.contains("busca"))
             llistaAtual = "Busca";
         ui->NumPagina->setText(llistaAtual + " - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         fcarregaImagensLista();
@@ -1075,15 +1411,17 @@ void MainWindow::on_botaoPaginaAnterior_clicked()
         QString llistaAtual;
         if(vlistaAtual == "watching")
             llistaAtual = "Watching";
-        else if(vlistaAtual == "completed")
+        else if(vlistaAtual.contains("reading"))
+            llistaAtual = "Reading";
+        else if(vlistaAtual.contains("completed"))
             llistaAtual = "Completed";
-        else if(vlistaAtual == "onhold")
+        else if(vlistaAtual.contains("onhold"))
             llistaAtual = "On Hold";
-        else if(vlistaAtual == "dropped")
+        else if(vlistaAtual.contains("dropped"))
             llistaAtual = "Dropped";
-        else if(vlistaAtual == "plantowatch")
+        else if(vlistaAtual.contains("plantowatch"))
             llistaAtual = "Plan to Watch";
-        else if(vlistaAtual == "busca")
+        else if(vlistaAtual.contains("busca"))
             llistaAtual = "Busca";
         ui->NumPagina->setText(llistaAtual + " - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         fcarregaImagensLista();
@@ -1092,56 +1430,118 @@ void MainWindow::on_botaoPaginaAnterior_clicked()
 
 void MainWindow::on_Watching_clicked()
 {
-    qDebug() << "Selected list: Watching";
-    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
-    vlistaAtual = "watching";
     vanimeSelecionado = 0;
     vpagina = 1;
-    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    if(vJanelaManga){
+        qDebug() << "Selected list: Reading (Manga)";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangareading");
+        vlistaAtual = "mangareading";
+        ui->NumPagina->setText("Reading - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vJanelaNovel){
+        qDebug() << "Selected list: Reading (Novel)";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelreading");
+        vlistaAtual = "novelreading";
+        ui->NumPagina->setText("Reading - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else{
+        qDebug() << "Selected list: Watching";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
+        vlistaAtual = "watching";
+        ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
     finfoAnimeSelecionado();
 }
 
 void MainWindow::on_Completed_clicked()
 {
-    qDebug() << "Selected list: Completed";
-    vlistaAtual = "completed";
-    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "completed");
     vanimeSelecionado = 0;
     vpagina = 1;
-    ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    qDebug() << "Selected list: Completed";
+    if(vJanelaManga){
+        vlistaAtual = "mangacompleted";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
+        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vJanelaNovel){
+        vlistaAtual = "novelcompleted";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
+        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else{
+        vlistaAtual = "completed";
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "completed");
+        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
     finfoAnimeSelecionado();
 }
 
 void MainWindow::on_OnHold_clicked()
 {
     qDebug() << "Selected list: On Hold";
-    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
-    vlistaAtual = "onhold";
     vanimeSelecionado = 0;
     vpagina = 1;
-    ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    if(vJanelaManga){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
+        vlistaAtual = "mangaonhold";
+        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vJanelaNovel){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelonhold");
+        vlistaAtual = "novelonhold";
+        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else{
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
+        vlistaAtual = "onhold";
+        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
     finfoAnimeSelecionado();
 }
 
 void MainWindow::on_Dropped_clicked()
 {
     qDebug() << "Selected list: Dropped";
-    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
-    vlistaAtual = "dropped";
     vanimeSelecionado = 0;
     vpagina = 1;
-    ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    if(vJanelaManga){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangadropped");
+        vlistaAtual = "mangadropped";
+        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vJanelaNovel){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "noveldropped");
+        vlistaAtual = "noveldropped";
+        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else{
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
+        vlistaAtual = "dropped";
+        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
     finfoAnimeSelecionado();
 }
 
 void MainWindow::on_PlanToWatch_clicked()
 {
     qDebug() << "Selected list: Plan to Watch";
-    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-    vlistaAtual = "plantowatch";
     vanimeSelecionado = 0;
     vpagina = 1;
-    ui->NumPagina->setText("Plan to Watch - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    if(vJanelaManga){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
+        vlistaAtual = "mangaplantoread";
+        ui->NumPagina->setText("Plan to Read - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vJanelaNovel){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
+        vlistaAtual = "novelplantoread";
+        ui->NumPagina->setText("Plan to Read - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else{
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+        vlistaAtual = "plantowatch";
+        ui->NumPagina->setText("Plan to Watch - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
     finfoAnimeSelecionado();
 }
 
@@ -1149,7 +1549,7 @@ void MainWindow::on_botaoProximoEpisodio_clicked()
 {
     ui->labelMensagem->setText("Buscando episódio...");
     if(!carquivos->fprocuraEpisodio(vlistaSelecionada[vanimeSelecionado]).isEmpty()){
-        if(carquivos->fabreEpisodio(carquivos->fprocuraEpisodio(vlistaSelecionada[vanimeSelecionado])))
+        if(carquivos->fabreEpisodio(carquivos->fprocuraEpisodio(vlistaSelecionada[vanimeSelecionado]).toUtf8()))
             ui->labelMensagem->setText("Abrindo episódio!");
     }
     else
@@ -1160,7 +1560,7 @@ void MainWindow::on_botaoAbrePasta_clicked()
 {
     qDebug() << "Trying to open anime folder";
     //Pega o caminho da pasta onde o episódio está e converte para o caminho nativo do OS (só pra evitar erros com o nome)
-    QString lcaminhoPasta = cconfUsuario->fretornaDiretorioEspecifico(vlistaSelecionada[vanimeSelecionado]->vid.toInt(  ));
+    QByteArray lcaminhoPasta = cconfUsuario->fretornaDiretorioEspecifico(vlistaSelecionada[vanimeSelecionado]->vid.toInt()).toUtf8();
     if(!lcaminhoPasta.isEmpty())
         carquivos->fabreEpisodio(lcaminhoPasta);
     else
@@ -1170,8 +1570,8 @@ void MainWindow::on_botaoAbrePasta_clicked()
 void MainWindow::on_botaoBusca_clicked()
 {
     if(!ui->barraBusca->toPlainText().isEmpty()){
-        qDebug() << "Trying to search anime " << ui->barraBusca->toPlainText();
-        vlistaSelecionada = cleitorListaAnimes->fbuscaLista(ui->barraBusca->toPlainText());
+        qDebug() << "Searching " << ui->barraBusca->toPlainText();
+        vlistaSelecionada = cleitorListaAnimes->fbuscaLista(ui->barraBusca->toPlainText(), vtipoAtual);
         if(!vlistaSelecionada.isEmpty()){
             vlistaAtual = "busca";
             vanimeSelecionado = 0;
@@ -1179,55 +1579,59 @@ void MainWindow::on_botaoBusca_clicked()
             ui->NumPagina->setText("Busca - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
             finfoAnimeSelecionado();
         }
+        else{
+            qDebug() << ui->barraBusca->toPlainText() << " not found!";
+            ui->labelMensagem->setText(ui->barraBusca->toPlainText()+" not found!");
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+        }
     }
 }
 
 void MainWindow::on_botaoRefresh_clicked()
 {
     if(vrefreshAcontecendo == false){
-        vrefreshAcontecendo = true;
-        //Quando clicar no botão, o programa vai rodar a função de baixar as listas em uma thread e quando a lista for baixada, será
-        //atualizada na função frefreshListas();
-//        canilist->fbaixaListaThread(cThread);
-//        canilist->moveToThread(&cThread);
-        cThread.start();
-        //Com esse bool, podemos controlar outras funções que rodam ao mesmo tempo, como a de carregar imagens no background
+        ui->labelMensagem->setText("Trying to update list. The program may freeze for a few seconds while reading the new list");
         ui->labelRefreshTimer->setText("Refreshing,,,");
+        vrefreshAcontecendo = true;
     }
+//    fcarregouListaTeste(false);
+    fcarregouListaFalha();
 }
 
 void MainWindow::frefreshListas(bool rcheckDownload){
     //Checamos se a conexão com o anilist foi um sucesso. No caso de ter falhado, não rodamos a função de refresh
     if(rcheckDownload == false){
         vrefreshAcontecendo = false;
-        ui->labelMensagem->setText("Failed to connect to AniList!");
+        if(timer->isActive())
+            timer->stop();
+        timer->setInterval(60000);
+        timer->start(); //1 minutos
+        timerRefresh->start(1000);
         return;
     }
-    if(vfalhaconexao == true){
-        tryTimer->stop();
-        vfalhaconexao = false;
+    else{
+        if(timer->isActive())
+            timer->stop();
+        timer->setInterval(600000);
+        timer->start(); //10 minutos
+        timerRefresh->start(1000);
     }
     ui->labelMensagem->setText("Anime lists downloaded");
-
-    //Atualiza o avatar do usuário também.
-    cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
-    connect(cfiledownloader, &filedownloader::savatar, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
 
     //Quando rolar a busca, a lista vai resetar. Esse index será usado pra voltar na info do anime que a pessoa estava vendo quando
     //rolou o refresh
     int lanimeAtual = 0;
     int lpaginaAtual = 0;
     bool lbusca = false;
+    rcheckDownload = false;
     //Vamos bloquear todos os botões para evitar que o usuário tente ler um anime que saiu da lista
+    ui->labelMensagem->setText("Loading new animes. It will be working again in a few seconds");
     fbloqueiaSinaisBotoes();
-    ui->labelMensagem->setText("Refreshing list...");
 
     qDebug() << "Refreshing list...";
 
-    //Apagamos a lista antiga para poder reescrevela
-    cleitorListaAnimes->fdeletaListaAnimes();
     //Se não houver nenhum problema no download ou no caso do usuário deletar o arquivo das listas, elas vão estar sempre prontas
-    if(cleitorListaAnimes->fleJson()){
+    if(vlistaLidaSucesso){
 //        timer->start(60000); //1 MINUTO PRA TESTES
         timer->start(600000);
         vtimerSegundos = 59;
@@ -1243,27 +1647,18 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     qDebug() << "Checking anime folders";
     ui->labelMensagem->setText("Searching for animes in the computer");
     cconfUsuario->frecebeListaAnime(cleitorListaAnimes);
-    if(vprimeiraVezThread == true){
-        vprimeiraVezThread = false;
-        cconfUsuario->fbuscaPastasThread(dThread);
-        cconfUsuario->moveToThread(&dThread);
+    if(dThread.isRunning()){
+        dThread.requestInterruption();
         dThread.start();
     }
     else
         dThread.start();
 
-    connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos, Qt::QueuedConnection);
-
-    cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
-    cfiledownloader->fsetNext();
-    qDebug() << "Images ready";
-    //Crashando daqui pra frente
 
     //Caso o usuário esteja no meio de uma busca quando atualiza a lista, precisamos salvar o index do anime que ele estava vendo.
     lpaginaAtual = vpagina;
     lanimeAtual = vanimeSelecionado;
     if(vlistaAtual.compare("busca", Qt::CaseInsensitive) == 0){
-        //Possivel que seja na ordenação
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
         lbusca = true;
     }
@@ -1276,15 +1671,12 @@ void MainWindow::frefreshListas(bool rcheckDownload){
         }
     }
     if(lanimeAtual < vlistaSelecionada.size() && lanimeAtual > 0){
-        ///Possivelmente aqui. Se lanimeAtual for -1 por algum motivo, poderia bugar
         vanimeSelecionado = lanimeAtual;
     }
     qDebug() << "The lists were updated";
     ui->labelMensagem->setText("As listas foram atualizadas!");
     fliberaSinaisBotoes();
-    finfoAnimeSelecionado();
     vrefreshAcontecendo = false;
-    QFuture<void> lcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensBackground);
 }
 
 void MainWindow::fmandaDiretoriosArquivos()
@@ -1314,6 +1706,7 @@ void MainWindow::fliberaSinaisBotoes(){
 
 void MainWindow::fatualizaRefreshTimer()
 {
+//    vlistaBaixada = true;
     if(vrefreshAcontecendo == false){
         int lminutos = timer->remainingTime()/60000;
         if(vtimerSegundos == 0)
@@ -1443,27 +1836,77 @@ void MainWindow::on_botaoMudarPraLista_clicked()
         vlistaSelecionada[vanimeSelecionado]->vlista = "Watching";
         //Atualiza o anilist e a lista local de animes
         canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "CURRENT");
-        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
     }
-    else if(ui->boxMudarPraLista->currentText().compare("Completed") == 0){
+    else if(ui->boxMudarPraLista->currentText().compare("Reading") == 0 && vtipoAtual.compare("manga") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Reading(Manga)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "CURRENT");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Reading") == 0 && vtipoAtual.compare("novel") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Reading(Novel)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "CURRENT");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Completed") == 0 && vtipoAtual.compare("anime") == 0){
         vlistaSelecionada[vanimeSelecionado]->vlista = "Completed";
         canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "COMPLETED");
-        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
     }
-    else if(ui->boxMudarPraLista->currentText().compare("On Hold") == 0){
+    else if(ui->boxMudarPraLista->currentText().compare("Completed") == 0 && vtipoAtual.compare("manga") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Completed(Manga)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "COMPLETED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Completed") == 0 && vtipoAtual.compare("novel") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Completed(Novel)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "COMPLETED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("On Hold") == 0 && vtipoAtual.compare("anime") == 0){
         vlistaSelecionada[vanimeSelecionado]->vlista = "On Hold";
         canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PAUSED");
-        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
     }
-    else if(ui->boxMudarPraLista->currentText().compare("Dropped") == 0){
+    else if(ui->boxMudarPraLista->currentText().compare("On Hold") == 0 && vtipoAtual.compare("manga") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "On Hold(Manga)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PAUSED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("On Hold") == 0 && vtipoAtual.compare("novel") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "On Hold(Novel)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PAUSED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Dropped") == 0 && vtipoAtual.compare("anime") == 0){
         vlistaSelecionada[vanimeSelecionado]->vlista = "Dropped";
         canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "DROPPED");
-        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Dropped") == 0 && vtipoAtual.compare("manga") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Dropped(Manga)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "DROPPED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Dropped") == 0 && vtipoAtual.compare("novel") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Dropped(Novel)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "DROPPED");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
     }
     else if(ui->boxMudarPraLista->currentText().compare("Plan to Watch") == 0){
         vlistaSelecionada[vanimeSelecionado]->vlista = "Plan to Watch";
         canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PLANNING");
-        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista);
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Plan to Read") == 0 && vtipoAtual.compare("manga") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Plan to Read(Manga)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PLANNING");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+    }
+    else if(ui->boxMudarPraLista->currentText().compare("Plan to Read") == 0 && vtipoAtual.compare("novel") == 0){
+        vlistaSelecionada[vanimeSelecionado]->vlista = "Plan to Read(Novel)";
+        canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "PLANNING");
+        cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid, vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
     }
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
     if(vlistaSelecionada.size() <= vanimeSelecionado){
@@ -1510,9 +1953,10 @@ void MainWindow::on_botaoRemoverdaLista_clicked()
 void MainWindow::fretryAnilist()
 {
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
-    canilist->fbaixaListaThread(cThread);
-    canilist->moveToThread(&cThread);
-    cThread.start();
+//    canilist->fbaixaListaThread(cThread);
+//    canilist->moveToThread(&cThread);
+    fcarregouListaTeste(false);
+//    fcarregouListaFalha();
 }
 
 void MainWindow::on_botaoOrdemAlfabetica_clicked()
@@ -1852,4 +2296,46 @@ void MainWindow::fmudaResolucao(){
 //                                           (vposicaoGrade.toInt()/3))));
         }
     }
+}
+
+void MainWindow::on_botaoAnime_clicked()
+{
+    vJanelaManga = false;
+    vJanelaNovel = false;
+    vlistaAtual = "watching";
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+    ui->Watching->setText("Watching");
+    ui->PlanToWatch->setText("Plan to Watch");
+    vtipoAtual = "anime";
+    ui->boxMudarPraLista->setItemText(0, "Watching");
+    ui->boxMudarPraLista->setItemText(4, "Plan to Watch");
+    on_Watching_clicked();
+}
+
+void MainWindow::on_botaoManga_clicked()
+{
+    vJanelaManga = true;
+    vJanelaNovel = false;
+    vlistaAtual = "mangareading";
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+    ui->Watching->setText("Reading");
+    ui->PlanToWatch->setText("Plan to Read");
+    vtipoAtual = "manga";
+    ui->boxMudarPraLista->setItemText(0, "Reading");
+    ui->boxMudarPraLista->setItemText(4, "Plan to Read");
+    on_Watching_clicked();
+}
+
+void MainWindow::on_botaoLN_clicked()
+{
+    vJanelaManga = false;
+    vJanelaNovel = true;
+    vlistaAtual = "novelreading";
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+    ui->Watching->setText("Reading");
+    ui->PlanToWatch->setText("Plan to Read");
+    vtipoAtual = "novel";
+    ui->boxMudarPraLista->setItemText(0, "Reading");
+    ui->boxMudarPraLista->setItemText(4, "Plan to Read");
+    on_Watching_clicked();
 }

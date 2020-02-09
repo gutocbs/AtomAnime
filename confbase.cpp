@@ -8,6 +8,7 @@ confBase::confBase(QObject *parent) : QObject(parent)
 ///Terminar de escrever os QDebugs do jeito certo
 void confBase::fcriaDiretoriosBase()
 {
+    //falta o c:/
     QString lconfPath = "Configurações";
     QString limagePath = lconfPath + QDir::separator() + "Imagens";
     QString ltempPath = lconfPath + QDir::separator() + "Temp";
@@ -46,5 +47,6 @@ void confBase::fcriaDiretoriosBase()
     vdiretorioImagensPequenas = limagePath + QDir::separator() + "Pequeno" + QDir::separator();
     vdiretorioImagensMedio = limagePath + QDir::separator() + "Medio" + QDir::separator();
     vdiretorioImagensGrandes = limagePath + QDir::separator() + "Grande" + QDir::separator();
+    vimagemStaple = lconfPath + QDir::separator() + "Temp" + QDir::separator() + "imagemStaple.jpg";
 }
 

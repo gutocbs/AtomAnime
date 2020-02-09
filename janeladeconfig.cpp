@@ -241,6 +241,7 @@ void janeladeconfig::on_botaoSalvar_clicked()
         lstreamTexto << "AnimeFeed:" << fretornaFeedAnimeEspecifico() << endl;
         larquivo.close();
     }
+    emit ssavebutton();
 }
 
 void janeladeconfig::on_botaoAdicionar_clicked()

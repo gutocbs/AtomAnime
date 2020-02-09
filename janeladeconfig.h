@@ -37,6 +37,7 @@ public:
     void fleArquivoConfig();
 signals:
     void sauthcodesave();
+    void ssavebutton();
 private slots:
     void on_botaoSalvar_clicked();
 

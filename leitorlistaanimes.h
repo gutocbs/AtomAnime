@@ -18,7 +18,7 @@ public:
     explicit leitorlistaanimes(QObject *parent = nullptr);
     ~leitorlistaanimes();
     bool fleJson();
-    bool fmudaLista(QString, QString);
+    bool fmudaLista(QString, QString, QString);
     bool fdeletedaLista(QString, QString);
     void fdeletaListaAnimes();
     QVector<anime*> retornaListaWatching();
@@ -26,10 +26,23 @@ public:
     QVector<anime*> retornaListaOnHold();
     QVector<anime*> retornaListaDropped();
     QVector<anime*> retornaListaPlanToWatch();
+    QVector<anime*> retornaListaMangaReading();
+    QVector<anime*> retornaListaMangaCompleted();
+    QVector<anime*> retornaListaMangaOnHold();
+    QVector<anime*> retornaListaMangaDropped();
+    QVector<anime*> retornaListaMangaPlanToRead();
+    QVector<anime*> retornaListaNovelReading();
+    QVector<anime*> retornaListaNovelCompleted();
+    QVector<anime*> retornaListaNovelOnHold();
+    QVector<anime*> retornaListaNovelDropped();
+    QVector<anime*> retornaListaNovelPlanToRead();
     QVector<anime*> sortLista(QString, QString);
-    QVector<anime*> fbuscaLista(QString);
+    QVector<anime*> fbuscaLista(QString, QString);
 
 signals:
+    void sAnimeAdicionadoNaLista(int);
+    void sMangaAdicionadoNaLista(int);
+    void sNovelAdicionadoNaLista(int);
 
 private:
     QVector<anime*> vlistaWatching;
@@ -39,6 +52,16 @@ private:
     QVector<anime*> vlistaPlanToWatch;
     QVector<anime*> vlistaBusca;
     QVector<anime*> llistaTemp;
+    QVector<anime*> vlistaMangaReading;
+    QVector<anime*> vlistaMangaCompleted;
+    QVector<anime*> vlistaMangaOnHold;
+    QVector<anime*> vlistaMangaDropped;
+    QVector<anime*> vlistaMangaPlanToRead;
+    QVector<anime*> vlistaNovelReading;
+    QVector<anime*> vlistaNovelCompleted;
+    QVector<anime*> vlistaNovelOnHold;
+    QVector<anime*> vlistaNovelDropped;
+    QVector<anime*> vlistaNovelPlanToRead;
 };
 
 #endif // LEITORLISTAANIMES_H

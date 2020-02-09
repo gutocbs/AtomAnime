@@ -37,7 +37,8 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool fcarregaImagensBackground();
+    bool fcarregaImagensBackground(QString);
+    bool fcarregaImagensSelecionadasBackground();
     void fcarregaImagensLista();
     void finfoAnimeSelecionado();
     void fatualizaRefreshTimer();
@@ -49,7 +50,11 @@ public:
     void fmandaDiretoriosArquivos();
     void favisoErro(QString);
     void fmudaResolucao();
+    void fcarregouListaSucesso(bool);
+    void fcarregouListaFalha();
 
+signals:
+    void sterminouCarregarImagens();
 private slots:
     void on_botaoAnime00_clicked();
     void on_botaoAnime01_clicked();
@@ -88,16 +93,23 @@ private slots:
     void on_botaoCrunchyroll_clicked();
     void on_botaoTorrent_clicked();
     void on_botaoRemoverdaLista_clicked();
-    void fretryAnilist();
     void on_botaoOrdemAlfabetica_clicked();
-
     void on_botaoOrdemProgresso_clicked();
-
     void on_botaoOrdemScore_clicked();
-
     void on_botaoOrdemRelease_clicked();
-
     void on_botaoOrdemType_clicked();
+
+    void fretryAnilist();
+    void fcarregouListaTeste(bool);
+    void fsetIdAdicionado(int);
+    void fsetIdBaixado(int);
+    void fsetIdBaixadoGrande(int);
+
+    void on_botaoAnime_clicked();
+
+    void on_botaoManga_clicked();
+
+    void on_botaoLN_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -112,12 +124,16 @@ private:
     //Crashar o programa
     QVector<anime*> vlistaSelecionada;
     QVector<anime*> vcarregaListaBackground;
+    QMap<int,bool> vimagemBaixada;
+    QMap<int,bool> vimagemCarregada;
+    QMap<int,bool> vimagemBaixadaGrande;
+    QMap<int,bool> vimagemCarregadaGrande;
 
     QPointer<confBase> cconfBase;
     QPointer<confUsuario> cconfUsuario;
 
     //Thread que vai carregar as imagens do anime. Como essa thread fica dentro da própria classe, temos que usar QFuture
-    QFuture<void> vfuture;
+    QFuture<void> vcarregaImagens;
 
     //Variáveis globais
     int vanimeSelecionado;
@@ -125,18 +141,23 @@ private:
     int vtimerSegundos;
     QString vordem;
     QString vlistaAtual;
+    QString vtipoAtual;
     QString dirGrande;
     QString dirMedio;
     QString dirPequeno;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
-    bool vprimeiraVezThread = true;
-    bool vfalhaconexao = false;
+    bool vlistaBaixada = false;
+    bool vdownloadImagensMedias = false;
+    bool vdownloadImagensGrandes = false;
+    bool vdownloadImagensPequenas = false;
+    bool vdownloadImagensAcabou = true;
+    bool vJanelaManga = false;
+    bool vJanelaNovel = false;
 
     QTimer *timer;
     QTimer *tryTimer;
     QTimer *timerRefresh;
-    QTimer *timerAcao;
 
     QMap<QStringList, QString> vlistaAcoes;
 

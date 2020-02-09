@@ -14,6 +14,7 @@ public:
     QString vdiretorioImagensMedio;
     QString vdiretorioImagensGrandes;
     QString vdiretorioImagensPequenas;
+    QString vimagemStaple;
     void fcriaDiretoriosBase();
 //    void fcriaArquivoLog();
 

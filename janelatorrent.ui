@@ -93,6 +93,70 @@
     <string>Baixar</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="botaoDownload_2">
+   <property name="geometry">
+    <rect>
+     <x>330</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Info do anime</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoDownload_3">
+   <property name="geometry">
+    <rect>
+     <x>430</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Abrir link </string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoDownload_4">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Selecionar esse sub para este anime</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoDownload_5">
+   <property name="geometry">
+    <rect>
+     <x>530</x>
+     <y>30</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <property name="text">
+    <string>Procurar mais desse anime</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
