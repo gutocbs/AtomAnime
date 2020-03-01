@@ -6,7 +6,7 @@ janelatorrent::janelatorrent(QWidget *parent) :
     ui(new Ui::janelatorrent)
 {
     ui->setupUi(this);
-   ui->listaTorrents->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->listaTorrents->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->listaTorrents->setColumnHidden(7,true);
     ui->listaTorrents->setColumnHidden(8,true);
     ui->listaTorrents->setColumnWidth(6, 1034);
@@ -78,39 +78,39 @@ void janelatorrent::fleXML()
                 lnomeTorrent = name;
                 lnomeAnime = QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle));
                 QString lnomeAnimeSimplificado = carquivos->fremoveCaracteresDiferentes(
-                            QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle)));
+                                                     QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle)));
                 lepisodioAnime = QString::fromStdWString(elements.get(anitomy::kElementEpisodeNumber));
-                for(int w = 0; w < cconfig->fretornaDownloadListasAnimes().size(); w++){
+                for(int w = 0; w < cconfig->fretornaDownloadListasAnimes().size(); w++) {
                     switch (cconfig->fretornaDownloadListasAnimes()[w]) {
                     case 'w':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('w')){
+                        if(cconfig->fretornaDownloadListasAnimes().contains('w')) {
                             vlistaAtual = cleitor->retornaListaWatching();
                         }
-                    break;
+                        break;
                     case 'd':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('d')){
+                        if(cconfig->fretornaDownloadListasAnimes().contains('d')) {
                             vlistaAtual = cleitor->retornaListaDropped();
                         }
-                    break;
+                        break;
                     case 'o':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('o')){
+                        if(cconfig->fretornaDownloadListasAnimes().contains('o')) {
                             vlistaAtual = cleitor->retornaListaOnHold();
                         }
-                    break;
+                        break;
                     case 'p':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('p')){
+                        if(cconfig->fretornaDownloadListasAnimes().contains('p')) {
                             vlistaAtual = cleitor->retornaListaPlanToWatch();
                         }
                     }
-                    for(int i = 0; i < vlistaAtual.size(); i++){
+                    for(int i = 0; i < vlistaAtual.size(); i++) {
                         lnomeAnimeListaSimplicado = carquivos->fremoveCaracteresDiferentes(vlistaAtual[i]->vnome);
-                        if(lnomeAnimeSimplificado.compare(lnomeAnimeListaSimplicado, Qt::CaseInsensitive) == 0){
+                        if(lnomeAnimeSimplificado.compare(lnomeAnimeListaSimplicado, Qt::CaseInsensitive) == 0) {
                             lprioridade++;
-                            if(lepisodioAnime.toInt() > vlistaAtual[i]->vnumEpisodiosAssistidos.toInt()){
+                            if(lepisodioAnime.toInt() > vlistaAtual[i]->vnumEpisodiosAssistidos.toInt()) {
                                 //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
                                 //Se não estiver, o episódio já existe no computador.
                                 QString lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico(vlistaAtual[i],
-                                                                                                       lepisodioAnime.toInt());
+                                                                 lepisodioAnime.toInt());
                                 lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
                                 if(lultimoEpisodioBaixado.isEmpty())
                                     lprioridade++;
@@ -124,7 +124,7 @@ void janelatorrent::fleXML()
                     }
                 }
                 lfansub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
-                if(lfansub.compare(cconfig->fretornaSubEscolhido(), Qt::CaseInsensitive) == 0){
+                if(lfansub.compare(cconfig->fretornaSubEscolhido(), Qt::CaseInsensitive) == 0) {
                     lprioridade++;
                 }
                 lresolucao = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
@@ -139,12 +139,12 @@ void janelatorrent::fleXML()
                 link.remove("]]>");
                 llinkTorrent = link;
             }
-            if(stream.name() == "description"){
+            if(stream.name() == "description") {
                 QString description = stream.readElementText();
                 if(description.contains("Torrent Listing"))
                     break;
                 QStringList comment = description.split("/>");
-                if(comment.size() > 2){
+                if(comment.size() > 2) {
                     llinkInfoTorrent = comment.at(2);
                     llinkInfoTorrent.remove(0,1);
                     llinkInfoTorrent.remove("<a href=\"");
@@ -154,7 +154,7 @@ void janelatorrent::fleXML()
                     description.remove(0,10);
                     ldescricaoTorrent = description;
                 }
-                else{
+                else {
                     comment = description.split(" | ");
                     llinkInfoTorrent = comment.at(0);
                     llinkInfoTorrent = llinkInfoTorrent.split("\"").at(1);
@@ -173,13 +173,13 @@ void janelatorrent::fleXML()
                 ltorrentAux->vresolucao = lresolucao;
                 ltorrentAux->vepisodioAnime = lepisodioAnime;
                 ltorrentAux->vtorrentInfoLink = llinkInfoTorrent;
-                if(vbaixar.contains(lnomeAnime+lepisodioAnime)){
-                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 4 && lprioridade == 4){
+                if(vbaixar.contains(lnomeAnime+lepisodioAnime)) {
+                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 4 && lprioridade == 4) {
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                         vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                     }
                 }
-                else if(lprioridade >= 3){
+                else if(lprioridade >= 3) {
                     QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                     vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                 }
@@ -197,14 +197,14 @@ void janelatorrent::fpreencheTabela()
 {
     //Criamos o número de linhas necessário
     ui->listaTorrents->setRowCount(torrent.size());
-    for(int i = 0; i < torrent.size(); i++){
+    for(int i = 0; i < torrent.size(); i++) {
 //        ui->listaTorrents->setRowHeight(i, 100);
-        for(int w = 0; w < ui->listaTorrents->columnCount(); w++){
+        for(int w = 0; w < ui->listaTorrents->columnCount(); w++) {
             QTableWidgetItem *litem = new QTableWidgetItem;
             switch (w) {
             case 0: {
                 foreach (QString key, vbaixar.keys()) {
-                    if(vbaixar[key].at(1).toInt() == i){
+                    if(vbaixar[key].at(1).toInt() == i) {
                         torrent[i]->vbox.setCheckState(Qt::Checked);
                         vbaixar.remove(key);
                     }
@@ -225,38 +225,38 @@ void janelatorrent::fpreencheTabela()
             case 1:
                 litem->setText(torrent[i]->vnomeAnime);
                 ui->listaTorrents->setItem(i,w,litem);
-            break;
+                break;
             case 2:
                 litem->setText(torrent[i]->vfansub);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 3:
                 litem->setText(torrent[i]->vresolucao);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 4:
                 litem->setText(torrent[i]->vepisodioAnime);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 5:
                 litem->setText(torrent[i]->vnomeTorrent);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 6:
                 litem->setText(torrent[i]->vdescricaoTorrent);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 7:
                 litem->setText(torrent[i]->vtorrentInfoLink);
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 8:
                 if(torrent[i]->vbox.isChecked())
                     litem->setText("2");
                 else
                     litem->setText("1");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             }
         }
     }
@@ -272,14 +272,14 @@ void janelatorrent::fpassaPonteiros(leitorlistaanimes *lleitor,  janeladeconfig 
 }
 
 void janelatorrent::on_botaoDownload_clicked()
-{////CHECAR SE É WINDOWS OU LINUX NESSA PARTE
+{   ////CHECAR SE É WINDOWS OU LINUX NESSA PARTE
     if(cconfig->fretornaTorrentEscolhido() == "uTorrent")
         QDesktopServices::openUrl(QUrl("file:///"+ QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",QUrl::TolerantMode));
-    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent"){
+    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent") {
         QDesktopServices::openUrl(QUrl("file:///C:/Program Files/qBittorrent/qbittorrent.exe",QUrl::TolerantMode));
     }
-    for(int i = 0; i < torrent.size(); i++){
-        if(torrent[i]->vbox.isChecked() == true){
+    for(int i = 0; i < torrent.size(); i++) {
+        if(torrent[i]->vbox.isChecked() == true) {
             vlistaDownload.append(i);
             QPointer<filedownloader> qdown(new filedownloader);
             qdown->fdownloadTorrent(torrent[i]->vlinkTorrent, torrent[i]->vnomeTorrent);
@@ -290,30 +290,30 @@ void janelatorrent::on_botaoDownload_clicked()
     fpreencheTabela();
 }
 
-void janelatorrent::fesperaTorrent(){
+void janelatorrent::fesperaTorrent() {
     QTimer lespera5Segundos;
     lespera5Segundos.singleShot(5000, this, &janelatorrent::fbaixaTorrent);
 }
 
 void janelatorrent::fbaixaTorrent()
 {
-    if(cconfig->fretornaPastaSalvarAnimes().isEmpty()){
+    if(cconfig->fretornaPastaSalvarAnimes().isEmpty()) {
         qWarning() << "Error: Trying to download without setting a download folder";
         emit error("No download folder");
         return;
     }
     QProcess lprocesso;
-    if(cconfig->fretornaTorrentEscolhido() == "uTorrent"){
+    if(cconfig->fretornaTorrentEscolhido() == "uTorrent") {
         lprocesso.execute(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe",
-                                QStringList() << "/DIRECTORY" << cconfig->fretornaPastaSalvarAnimes() + "/" +
+                          QStringList() << "/DIRECTORY" << cconfig->fretornaPastaSalvarAnimes() + "/" +
                           torrent[vlistaDownload[0]]->vnomeAnime << QDir::currentPath() + "/Configurações/Temp/Torrents/"
-                                                                    + torrent[vlistaDownload[0]]->vnomeTorrent + ".torrent");
+                          + torrent[vlistaDownload[0]]->vnomeTorrent + ".torrent");
     }
-    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent"){
+    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent") {
         lprocesso.execute("\"C:/Program Files/qBittorrent/qbittorrent.exe\" --add-paused=false --skip-dialog=true --save-path=" +
-                        cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime,
-                QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent
-                + ".torrent");
+                          cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime,
+                          QStringList() <<  QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent
+                          + ".torrent");
     }
     torrent[vlistaDownload[0]]->vbox.setCheckState(Qt::Unchecked);
     vlistaDownload.remove(0);
@@ -331,7 +331,7 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fleXML);
 }
 
-void janelatorrent::fprocuraAnimeEspecifico(QString rnomeAnimeBuscado){
+void janelatorrent::fprocuraAnimeEspecifico(QString rnomeAnimeBuscado) {
     ui->botaoAtualizaLista->blockSignals(true);
     if(!torrent.isEmpty())
         torrent.clear();
