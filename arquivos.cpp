@@ -4,6 +4,9 @@ arquivos::arquivos(QObject *parent) : QObject(parent)
 {
 }
 
+///fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString rnomeAnimeIngles, QStringList rnomesAlternativosAnime,int repisodioAnime, int rtemporada)
+///Compara o arquivo com o anime a ser assistido. Caso for o episódio seguinte ao último assistido, retorna true.
+///Caso seja um episódio inferior ou além do próximo que deve ser visto, retorna false.
 bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString rnomeAnimeIngles, QStringList rnomesAlternativosAnime,
                                   int repisodioAnime, int rtemporada){
     //Anitomy é uma classe linda que separa os elementos de uma string
@@ -31,8 +34,6 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
         lepisodioAnime++;
     //Episódios totais é a variável que conta todos os episódios do anime, em todas as seasons. Caso algum sub coloque, por exemplo
     //One Piece episódio 201, ele ainda vai ser lido e saberemos qual o episódio/temporada certa.
-//    if(rfileName.compare("Hachimitsu to Clover", Qt::CaseInsensitive) == 0)
-//     qDebug() << rfileName;// << rnomeAnime;
     if(rfileName.compare(rnomeAnime, Qt::CaseInsensitive) == 0 && (lepisodioAnime == repisodioAnime+1 ||
                                                                    lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
@@ -92,11 +93,53 @@ QString arquivos::fprocuraEpisodio(anime *ranimeBuscado){
     return "";
 }
 
+QString arquivos::fprocuraEpisodioEspecifico(anime *ranimeBuscado, int rEpisodioBuscado){
+    //Verifica se a função retorna um valor que não está vazio, ou seja
+    //Se existe uma pasta com o nome do anime
+    if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
+        //Começa a iterar a pasta em busca das pastas de animes
+        QDirIterator lit(cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()), QDirIterator::Subdirectories);
+        while(lit.hasNext()){
+            QFile lfile(lit.next());
+            QFileInfo lchecaSeArquivoOuPasta(lfile.fileName());
+            //Checa se o que foi encontrado é um arquivo ou uma pasta e, no caso de ser um arquivo, se é um arquivo de vídeo
+            if(lchecaSeArquivoOuPasta.isFile() == true && (lfile.fileName().endsWith("mkv", Qt::CaseInsensitive) ||
+                                                           lfile.fileName().endsWith("mp4", Qt::CaseInsensitive))){
+                //Compara o nome do anime e o número do episódio
+                if(fcomparaDadosAnime(lit.fileName(), ranimeBuscado->vnome, ranimeBuscado->vnomeIngles, ranimeBuscado->vnomeAlternativo,
+                                           rEpisodioBuscado-1, ranimeBuscado->vtemporada))
+                    return lfile.fileName();
+            }
+        }
+    }
+    else{
+        //Começa a iterar a pasta em busca das pastas de animes
+        for(int i = 0; i < cconfUsuario->fretornaDiretoriosAnimes().size(); i++){
+            QDirIterator lit(cconfUsuario->fretornaDiretoriosAnimes().at(i), QDir::Files);
+            while(lit.hasNext()){
+                QFile lfile(lit.next());
+                QFileInfo lchecaSeArquivoOuPasta(lfile.fileName());
+                //Checa se o que foi encontrado é um arquivo ou uma pasta e, no caso de ser um arquivo, se é um arquivo de vídeo
+                if(lchecaSeArquivoOuPasta.isFile() == true && (lfile.fileName().endsWith("mkv", Qt::CaseInsensitive) ||
+                                                               lfile.fileName().endsWith("mp4", Qt::CaseInsensitive))){
+                    //Compara o nome do anime e o número do episódio
+                    if(fcomparaDadosAnime(lit.fileName(), ranimeBuscado->vnome, ranimeBuscado->vnomeIngles, ranimeBuscado->vnomeAlternativo,
+                                               rEpisodioBuscado-1, ranimeBuscado->vtemporada))
+                        return lfile.fileName();
+                }
+            }
+        }
+    }
+    return "";
+}
+
+
 QString arquivos::fprocuraUltimoEpisodio(anime *ranimeBuscado, QString repisodio){
     //Verifica se a função retorna um valor que não está vazio, ou seja
     //Se existe uma pasta com o nome do anime
-        if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
+    if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
         //Começa a iterar a pasta em busca das pastas de animes
+        qDebug() << "ok1";
         QDirIterator lit(cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()), QDirIterator::Subdirectories);
         while(lit.hasNext()){
             QFile lfile(lit.next());
@@ -104,8 +147,10 @@ QString arquivos::fprocuraUltimoEpisodio(anime *ranimeBuscado, QString repisodio
             //Checa se o que foi encontrado é um arquivo ou uma pasta e, no caso de ser um arquivo, se é um arquivo de vídeo
             if(lchecaSeArquivoOuPasta.isFile() == true && (lfile.fileName().endsWith("mkv") || lfile.fileName().endsWith("mp4"))){
                 //Compara o nome do anime e o número do episódio
+                qDebug() << "ok2";
                 if(fcomparaDadosAnime(lit.fileName(), ranimeBuscado->vnome, ranimeBuscado->vnomeIngles, ranimeBuscado->vnomeAlternativo,
                                            repisodio.toInt()-1, ranimeBuscado->vtemporada))
+                    qDebug() << "ok3";
                     return lfile.fileName();
             }
         }
@@ -157,9 +202,9 @@ QString arquivos::fremoveCaracteresDiferentes(QString rnome)
     rnome.remove("3");
     rnome.remove("4");
     rnome.remove("/");
-    rnome.remove("☆");
-    rnome.remove("△");
-    rnome.remove("♥");
+    rnome.replace("☆", " ");
+    rnome.replace("△", " ");
+    rnome.replace("♥", " ");
     rnome = rnome.simplified();
     return rnome;
 }
