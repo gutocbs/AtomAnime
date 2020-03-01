@@ -31,6 +31,8 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
         lepisodioAnime++;
     //Episódios totais é a variável que conta todos os episódios do anime, em todas as seasons. Caso algum sub coloque, por exemplo
     //One Piece episódio 201, ele ainda vai ser lido e saberemos qual o episódio/temporada certa.
+//    if(rfileName.compare("Hachimitsu to Clover", Qt::CaseInsensitive) == 0)
+//     qDebug() << rfileName;// << rnomeAnime;
     if(rfileName.compare(rnomeAnime, Qt::CaseInsensitive) == 0 && (lepisodioAnime == repisodioAnime+1 ||
                                                                    lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
@@ -136,6 +138,8 @@ QString arquivos::fremoveCaracteresDiferentes(QString rnome)
     rnome.remove("!");
     rnome.remove(":");
     rnome.remove("-");
+    rnome.remove("ii");
+    rnome.remove("iii");
     rnome.remove("s1");
     rnome.remove("s2");
     rnome.remove("s3");
@@ -155,6 +159,7 @@ QString arquivos::fremoveCaracteresDiferentes(QString rnome)
     rnome.remove("/");
     rnome.remove("☆");
     rnome.remove("△");
+    rnome.remove("♥");
     rnome = rnome.simplified();
     return rnome;
 }

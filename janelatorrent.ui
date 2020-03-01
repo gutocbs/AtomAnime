@@ -52,7 +52,17 @@
    </column>
    <column>
     <property name="text">
+     <string>File name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
      <string>Description</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>torrentLink</string>
     </property>
    </column>
    <column>
@@ -93,7 +103,7 @@
     <string>Baixar</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="botaoDownload_2">
+  <widget class="QPushButton" name="botaoInfoAnime">
    <property name="geometry">
     <rect>
      <x>330</x>
@@ -109,7 +119,7 @@
     <string>Info do anime</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="botaoDownload_3">
+  <widget class="QPushButton" name="botaoLinkTorrent">
    <property name="geometry">
     <rect>
      <x>430</x>

@@ -30,8 +30,8 @@ signals:
     void savatar();
     void sxml();
     void storrent();
-    void sid(int);
-    void sidGrande(int);
+    void sid(QString);
+    void sidGrande(QString);
     void sterminouLista(QString);
 
 public slots:

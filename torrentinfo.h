@@ -17,6 +17,7 @@ public:
     QString vfansub;
     QString vresolucao;
     QString vsize;
+    QString vtorrentInfoLink;
     QCheckBox vbox;
 signals:
 

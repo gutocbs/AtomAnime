@@ -44,6 +44,7 @@ QString confUsuario::fsimplificaNomeArquivo(QString rnomeArquivo){
     rnomeArquivo.remove("season 3");
     rnomeArquivo.remove("season 4");
     rnomeArquivo.remove("/");
+    rnomeArquivo.remove("♥");
     rnomeArquivo = rnomeArquivo.simplified();
     return rnomeArquivo;
 }

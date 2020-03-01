@@ -272,6 +272,7 @@ void janeladeconfig::on_botaoSelecionarPastaDownload_clicked()
 
 void janeladeconfig::on_botaoAutorizarUser_clicked()
 {
+    QDesktopServices::openUrl(QUrl("https://anilist.co/api/v2/oauth/authorize?client_id=2620&response_type=token",QUrl::TolerantMode));
     vuser = ui->textoUser->toPlainText();
     ui->textoCodigoAutorizacao->show();
     ui->labelCodigoAutenticar->show();

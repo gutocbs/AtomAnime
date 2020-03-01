@@ -319,7 +319,7 @@ bool leitorlistaanimes::fleJson(){
                         lnovoAnime->vlista = "On Hold";
                         vlistaOnHold.append(lnovoAnime);
                     }
-                    sAnimeAdicionadoNaLista(lnovoAnime->vid.toInt());
+                    sAnimeAdicionadoNaLista(lnovoAnime->vid);
                 }
                 else if(lformato == "MANGA" || lformato == "ONE SHOT"){
                     if(lnovoAnime->vstatus.contains("Air", Qt::CaseInsensitive))
@@ -345,7 +345,7 @@ bool leitorlistaanimes::fleJson(){
                         lnovoAnime->vlista = "On Hold(Manga)";
                         vlistaMangaOnHold.append(lnovoAnime);
                     }
-                    sMangaAdicionadoNaLista(lnovoAnime->vid.toInt());
+                    sMangaAdicionadoNaLista(lnovoAnime->vid);
                 }
                 else if(lformato == "NOVEL"){
                     lnovoAnime->vnumEpisodiosTotais = lvolumes;
@@ -369,7 +369,7 @@ bool leitorlistaanimes::fleJson(){
                         lnovoAnime->vlista = "On Hold(Novel)";
                         vlistaNovelOnHold.append(lnovoAnime);
                     }
-                    sNovelAdicionadoNaLista(lnovoAnime->vid.toInt());
+                    sNovelAdicionadoNaLista(lnovoAnime->vid);
                 }
                 lnome.clear();
                 lnomeIngles.clear();
