@@ -24,31 +24,31 @@ janeladeconfig::~janeladeconfig()
     delete ui;
 }
 
-void janeladeconfig::fleArquivoConfig(){
+void janeladeconfig::fleArquivoConfig() {
     QFile larquivo("Configurações/userConfig.txt");
     if(larquivo.size() == 0)
         return;
-    if(larquivo.open(QIODevice::ReadOnly)){
-        while(!larquivo.atEnd()){
+    if(larquivo.open(QIODevice::ReadOnly)) {
+        while(!larquivo.atEnd()) {
             QString lstreamTexto = larquivo.readLine();
-            if(lstreamTexto.contains("User:")){
+            if(lstreamTexto.contains("User:")) {
                 lstreamTexto.remove("User:");
                 vuser = lstreamTexto.trimmed();
                 ui->textoUser->setPlainText(vuser);
             }
-            else if(lstreamTexto.contains("Directory;")){
+            else if(lstreamTexto.contains("Directory;")) {
                 lstreamTexto.remove("Directory;");
                 vdirectory = lstreamTexto.trimmed().split(";");
-                for(int i = 0; i < vdirectory.size(); i++){
+                for(int i = 0; i < vdirectory.size(); i++) {
                     ui->tabelaDiretorios->addItem(vdirectory.at(i));
                 }
             }
-            else if(lstreamTexto.contains("Authorization:")){
+            else if(lstreamTexto.contains("Authorization:")) {
                 lstreamTexto.remove("Authorization:");
                 vauthorization = lstreamTexto.trimmed();
                 ui->textoCodigoAutorizacao->setPlainText(vauthorization);
             }
-            else if(lstreamTexto.contains("Detection:")){
+            else if(lstreamTexto.contains("Detection:")) {
                 lstreamTexto.remove("Detection:");
                 vdetection = lstreamTexto;
                 if(lstreamTexto.contains("m"))
@@ -56,35 +56,35 @@ void janeladeconfig::fleArquivoConfig(){
                 if(lstreamTexto.contains("s"))
                     ui->checkStream->setCheckState(Qt::Checked);
             }
-            else if(lstreamTexto.contains("LowQuality:")){
+            else if(lstreamTexto.contains("LowQuality:")) {
                 lstreamTexto.remove("LowQuality:");
-                if(lstreamTexto.contains("yes")){
+                if(lstreamTexto.contains("yes")) {
                     vlowQuality = true;
                     ui->radioYesQualidade->setChecked(true);
                 }
                 else
                     vlowQuality = false;
             }
-            else if(lstreamTexto.contains("TorrentSoftware:")){
+            else if(lstreamTexto.contains("TorrentSoftware:")) {
                 lstreamTexto.remove("TorrentSoftware:");
                 vtorrentSoftware = lstreamTexto.trimmed();
                 ui->boxTorrentEscolhido->setCurrentText(lstreamTexto);
             }
-            else if(lstreamTexto.contains("AutoDownload:")){
+            else if(lstreamTexto.contains("AutoDownload:")) {
                 lstreamTexto.remove("AutoDownload:");
-                if(lstreamTexto.contains("yes")){
+                if(lstreamTexto.contains("yes")) {
                     ui->radioYesDownload->setChecked(true);
                     vautoDownload = true;
                 }
                 else
                     vautoDownload = false;
             }
-            else if(lstreamTexto.contains("SaveFolder:")){
+            else if(lstreamTexto.contains("SaveFolder:")) {
                 lstreamTexto.remove("SaveFolder:");
                 vsaveFolder = lstreamTexto.trimmed();
                 ui->textoSalvaTorrents->setPlainText(vsaveFolder);
             }
-            else if(lstreamTexto.contains("DownloadListas:")){
+            else if(lstreamTexto.contains("DownloadListas:")) {
                 lstreamTexto.remove("DownloadListas:");
                 vdownloadListas = lstreamTexto;
                 if(lstreamTexto.contains("w"))
@@ -96,22 +96,22 @@ void janeladeconfig::fleArquivoConfig(){
                 if(lstreamTexto.contains("o"))
                     ui->checkOnHold->setCheckState(Qt::Checked);
             }
-            else if(lstreamTexto.contains("Sub:")){
+            else if(lstreamTexto.contains("Sub:")) {
                 lstreamTexto.remove("Sub:");
                 vsub = lstreamTexto.trimmed();
                 ui->textoSubPreferido->setPlainText(vsub);
             }
-            else if(lstreamTexto.contains("Quality:")){
+            else if(lstreamTexto.contains("Quality:")) {
                 lstreamTexto.remove("Quality:");
                 vquality = lstreamTexto.trimmed();
                 ui->boxQualidadeEscolhida->setCurrentText(lstreamTexto);
             }
-            else if(lstreamTexto.contains("TorrentFeed")){
+            else if(lstreamTexto.contains("TorrentFeed")) {
                 lstreamTexto.remove("TorrentFeed:");
                 vtorrentFeed = lstreamTexto.trimmed();
                 ui->textoTorrentFeed->setPlainText(vtorrentFeed);
             }
-            else if(lstreamTexto.contains("AnimeFeed")){
+            else if(lstreamTexto.contains("AnimeFeed")) {
                 lstreamTexto.remove("AnimeFeed:");
                 vanimeTorrentFeed = lstreamTexto.trimmed();
                 ui->textoTorrentFeedEspecifico->setPlainText(vanimeTorrentFeed);
@@ -122,7 +122,7 @@ void janeladeconfig::fleArquivoConfig(){
     ui->textoCodigoAutorizacao->setPlainText(vauthorization);
 }
 
-QByteArray janeladeconfig::fretornaUsuario(){
+QByteArray janeladeconfig::fretornaUsuario() {
     return ui->textoUser->toPlainText().toLocal8Bit();
 }
 
@@ -220,12 +220,12 @@ void janeladeconfig::on_botaoSalvar_clicked()
 {
 //        qEncode(fretornaUsuario());///Encode de alguma maneira
     QFile larquivo("Configurações/userConfig.txt");
-    if(larquivo.open(QIODevice::WriteOnly)){
+    if(larquivo.open(QIODevice::WriteOnly)) {
         QTextStream lstreamTexto(&larquivo);
         lstreamTexto << "User:" << fretornaUsuario() << endl;
         lstreamTexto << "Directory";
-        for(int i = 0; i < vdirectory.size(); i++){
-             lstreamTexto << ";" << fretornaDiretorios().at(i);
+        for(int i = 0; i < vdirectory.size(); i++) {
+            lstreamTexto << ";" << fretornaDiretorios().at(i);
         }
         lstreamTexto << endl;
         lstreamTexto << "Authorization:" << fretornaCodigoAutorizacao() << endl;
@@ -247,8 +247,8 @@ void janeladeconfig::on_botaoSalvar_clicked()
 void janeladeconfig::on_botaoAdicionar_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if(dir != ""){
+                  "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != "") {
         vdirectory.append(dir);
         ui->tabelaDiretorios->addItem(dir);
     }
@@ -263,8 +263,8 @@ void janeladeconfig::on_botaoRemover_clicked()
 void janeladeconfig::on_botaoSelecionarPastaDownload_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
-                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if(dir != ""){
+                  "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != "") {
         ui->textoSalvaTorrents->setPlainText(dir);
         vsaveFolder = dir;
     }

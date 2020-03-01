@@ -10,18 +10,18 @@ filedownloader::filedownloader(QObject *parent) : QObject(parent)
 //    vindexListaPequeno = 0;
 }
 
-filedownloader::~filedownloader(){
+filedownloader::~filedownloader() {
     vmanager->deleteLater();
     cconfBase->deleteLater();
     vfile->deleteLater();
     vreply->deleteLater();
 }
 
-void filedownloader::fsetLeitorListaAnimes(leitorlistaanimes *lleitorlistaanimes){
+void filedownloader::fsetLeitorListaAnimes(leitorlistaanimes *lleitorlistaanimes) {
     cleitorlistaanimes = lleitorlistaanimes;
 }
 
-void filedownloader::fsetConfBase(confBase *rconfbase){
+void filedownloader::fsetConfBase(confBase *rconfbase) {
     cconfBase = rconfbase;
 }
 
@@ -29,43 +29,44 @@ void filedownloader::onFinished(QNetworkReply * reply)
 {
     switch(reply->error())
     {
-        case QNetworkReply::NoError:
-        {
+    case QNetworkReply::NoError:
+    {
 //            qDebug("file is downloaded successfully.");
-            if(vfile->isOpen())
-            {
-                vfile->close();
-            }
+        if(vfile->isOpen())
+        {
+            vfile->close();
+        }
 //            if(vfile->size() < 1000){
 ////                qDebug() << vfile->size();
 //                vfile->remove();
 //            }
-        }break;
-        default:{
+    }
+    break;
+    default: {
         //Teste de remover a imagem se ocorrrer um erro no download
-            if(vfile->isOpen())
-            {
-                vfile->close();
-            }
+        if(vfile->isOpen())
+        {
+            vfile->close();
         }
+    }
     }
 }
 
 void filedownloader::onReadyRead()
 {
-    if(vfile->isWritable()){
+    if(vfile->isWritable()) {
         QByteArray data = vreply->readAll();
         vfile->write(data);
         vfile->waitForBytesWritten(30000);
     }
-    else{
+    else {
         //qWarning() << vfile->errorString();// << "- Id:" << vlistaSelecionada[vindexLista]->vid << "- Medium image download failed";
         vfile->remove();
     }
 }
 
 
-void filedownloader::fdownloadAvatarUsuario(QString fileURL){
+void filedownloader::fdownloadAvatarUsuario(QString fileURL) {
     QString lsaveFilePath = "Configurações/Temp/Imagens/avatar";
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
@@ -115,7 +116,7 @@ void filedownloader::fdownloadXMLTorrentList(QString fileURL)
     QString lsaveFilePath = "Configurações/Temp/torrents.xml";
 
 //    if(QFile(lsaveFilePath).size() == 0)
-        QFile(lsaveFilePath).remove();
+    QFile(lsaveFilePath).remove();
 
     QNetworkRequest lrequest;
     lrequest.setUrl(QUrl(fileURL));
@@ -133,14 +134,14 @@ void filedownloader::fdownloadXMLTorrentList(QString fileURL)
 void filedownloader::fsetNext()
 {
     emit sid(vlistaSelecionada[vindexLista]->vid);
-    if(vfileIsOpen){
+    if(vfileIsOpen) {
         if(vfile->isOpen())
             vfile->close();
     }
     vfileIsOpen = false;
     vreply->close();
     vindexLista++;
-    if(vindexLista >= vlistaSelecionada.size()){
+    if(vindexLista >= vlistaSelecionada.size()) {
         vindexLista = 0;
         vlista++;
     }
@@ -149,14 +150,14 @@ void filedownloader::fsetNext()
 
 void filedownloader::fsetNextBig()
 {
-    if(vfileIsOpen){
+    if(vfileIsOpen) {
         if(vfile->isOpen())
             vfile->close();
     }
     vfileIsOpen = false;
 //    emit sidGrande(vlistaSelecionada[vindexLista]->vid.toInt());
     vindexLista++;
-    if(vindexLista >= vlistaSelecionada.size()){
+    if(vindexLista >= vlistaSelecionada.size()) {
         vindexLista = 0;
         vlista++;
     }
@@ -165,13 +166,13 @@ void filedownloader::fsetNextBig()
 
 void filedownloader::fsetNextSmall()
 {
-    if(vfileIsOpen){
+    if(vfileIsOpen) {
         if(vfile->isOpen())
             vfile->close();
     }
     emit sid(vlistaSelecionada[vindexLista]->vid);
     vindexLista++;
-    if(vindexLista >= vlistaSelecionada.size()){
+    if(vindexLista >= vlistaSelecionada.size()) {
         vindexLista = 0;
         vlista++;
     }
@@ -185,7 +186,7 @@ void filedownloader::fresetCounters()
 //    vindexListaPequeno = 0;
 }
 
-void filedownloader::fdownloadMedio(){
+void filedownloader::fdownloadMedio() {
     if(vlista == 0)
         vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
     else if(vlista == 1)
@@ -216,13 +217,13 @@ void filedownloader::fdownloadMedio(){
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelDropped();
     else if(vlista == 14)
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelPlanToRead();
-    else{
+    else {
         emit sterminouLista("medium");
         vindexLista = 0;
         vlista = 0;
         return;
     }
-    if(!vlistaSelecionada.isEmpty()){
+    if(!vlistaSelecionada.isEmpty()) {
         vlink = vlistaSelecionada[vindexLista]->vLinkImagemMedia;
         if(vlink.contains("large"))
             vlink.replace("large", "medium");
@@ -234,7 +235,7 @@ void filedownloader::fdownloadMedio(){
         if(QFile(vsaveFilePath).exists() && QFile(vsaveFilePath).size() == 0)
             QFile(vsaveFilePath).remove();
 
-        if(!(QFileInfo::exists(vsaveFilePath) && QFileInfo(vsaveFilePath).isFile())){
+        if(!(QFileInfo::exists(vsaveFilePath) && QFileInfo(vsaveFilePath).isFile())) {
             QNetworkRequest lrequest;
             lrequest.setUrl(QUrl(vlink));
             vreply = vmanager->get(lrequest);
@@ -247,18 +248,18 @@ void filedownloader::fdownloadMedio(){
             connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
             connect(vreply,SIGNAL(finished()),this,SLOT(fsetNext()));
         }
-        else{
+        else {
             vfileIsOpen = false;
             fsetNext();
         }
     }
-    else{
+    else {
         vlista++;
         fdownloadMedio();
     }
 }
 
-void filedownloader::fdownloadGrande(){
+void filedownloader::fdownloadGrande() {
     if(vlista == 0)
         vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
     else if(vlista == 1)
@@ -289,13 +290,13 @@ void filedownloader::fdownloadGrande(){
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelDropped();
     else if(vlista == 14)
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelPlanToRead();
-    else{
+    else {
         emit sterminouLista("big");
         vindexLista = 0;
         vlista = 0;
         return;
     }
-    if(!vlistaSelecionada.isEmpty()){
+    if(!vlistaSelecionada.isEmpty()) {
         vlink = vlistaSelecionada[vindexLista]->vLinkImagemMedia;
         if(vlink.contains("medium"))
             vlink.replace("medium", "large");
@@ -307,10 +308,10 @@ void filedownloader::fdownloadGrande(){
 
         if(QFile(vsaveFilePath).exists() && QFile(vsaveFilePath).size() == 0)
             QFile(vsaveFilePath).remove();
-    //    qDebug() << vsaveFilePath << vlistaSelecionada[vindexLista]->vid << vlistaSelecionada[vindexLista]->vLinkImagemMedia.mid(
-    //                    vlistaSelecionada[vindexLista]->vLinkImagemMedia.lastIndexOf(QChar('.')));
-        if(!(QFileInfo::exists(vsaveFilePath) && QFileInfo(vsaveFilePath).isFile())){
-    //        qDebug() << vlistaSelecionada[vindexLista]->vid;
+        //    qDebug() << vsaveFilePath << vlistaSelecionada[vindexLista]->vid << vlistaSelecionada[vindexLista]->vLinkImagemMedia.mid(
+        //                    vlistaSelecionada[vindexLista]->vLinkImagemMedia.lastIndexOf(QChar('.')));
+        if(!(QFileInfo::exists(vsaveFilePath) && QFileInfo(vsaveFilePath).isFile())) {
+            //        qDebug() << vlistaSelecionada[vindexLista]->vid;
             QNetworkRequest lrequest;
             lrequest.setUrl(QUrl(vlink));
             vreply = vmanager->get(lrequest);
@@ -323,38 +324,38 @@ void filedownloader::fdownloadGrande(){
             connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
             connect(vreply,SIGNAL(finished()),this,SLOT(fsetNextBig()));
         }
-        else{
+        else {
             vfileIsOpen = false;
             fsetNextBig();
         }
     }
-    else{
+    else {
         vlista++;
         fdownloadGrande();
     }
 }
 
-void filedownloader::fdownloadPequeno(){
-    if(vlista == 0){
+void filedownloader::fdownloadPequeno() {
+    if(vlista == 0) {
         vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
     }
-    else if(vlista == 1){
+    else if(vlista == 1) {
         emit slistaMensagem("SWatching");
         vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
     }
-    else if(vlista == 2){
+    else if(vlista == 2) {
         emit slistaMensagem("SCompleted");
         vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
     }
-    else if(vlista == 3){
+    else if(vlista == 3) {
         emit slistaMensagem("SOn Hold");
         vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
     }
-    else if(vlista == 4){
+    else if(vlista == 4) {
         emit slistaMensagem("SDropped");
         vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
     }
-    else{
+    else {
         emit slistaMensagem("SPlan to Watch");
         vindexLista = 0;
         vlista = 0;
@@ -370,7 +371,7 @@ void filedownloader::fdownloadPequeno(){
 
     bool fileExists = QFileInfo::exists(vsaveFilePath) && QFileInfo(vsaveFilePath).isFile();
 
-    if(!fileExists){
+    if(!fileExists) {
         QNetworkRequest lrequest;
         lrequest.setUrl(QUrl(vlistaSelecionada[vindexLista]->vLinkImagemMedia));
         vreply = vmanager->get(lrequest);
