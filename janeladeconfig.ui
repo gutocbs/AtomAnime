@@ -928,6 +928,19 @@ color: rgb(20, 20, 20);</string>
     <string>Redownload images</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="botaoRedownload">
+   <property name="geometry">
+    <rect>
+     <x>980</x>
+     <y>570</y>
+     <width>141</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Re-Downlaod Images</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>

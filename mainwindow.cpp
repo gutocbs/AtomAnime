@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(canilist, &anilist::sterminouDownload, this, &MainWindow::fcarregouListaTeste, Qt::QueuedConnection);
     connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
+    connect(&jtorrent, &janelatorrent::infoAnime, this, &MainWindow::fInfoAnimeTorrent, Qt::QueuedConnection);
     //Quando baixa todas as imagens, carrega as imagens na página
     connect(cfiledownloader,&filedownloader::sterminouLista,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
     connect(cfiledownloader,&filedownloader::sid,this,&MainWindow::fsetIdBaixado, Qt::QueuedConnection);
@@ -178,7 +179,7 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
     vanimeSelecionado = 0;
     vpagina = 1;
 
-    ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    ui->NumPagina->setText("Watching - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
 
     if(ldownload == true){
         vrefreshAcontecendo = true;
@@ -197,7 +198,7 @@ void MainWindow::fcarregouListaFalha(){
                                "for a few seconds while updating.");
 }
 
-void MainWindow::fsetIdAdicionado(int lid)
+void MainWindow::fsetIdAdicionado(QString lid)
 {
     if(!vimagemBaixada.contains(lid)){
         vimagemBaixada.insert(lid, false);
@@ -207,14 +208,21 @@ void MainWindow::fsetIdAdicionado(int lid)
     }
 }
 
-void MainWindow::fsetIdBaixado(int lid)
+void MainWindow::fsetIdBaixado(QString lid)
 {
     vimagemBaixada[lid] = true;
 }
 
-void MainWindow::fsetIdBaixadoGrande(int lid)
+void MainWindow::fsetIdBaixadoGrande(QString lid)
 {
     vimagemBaixadaGrande[lid] = true;
+}
+
+void MainWindow::fInfoAnimeTorrent(QString lnomeAnime)
+{
+    ui->janelaRotativa->setCurrentIndex(0);
+    ui->barraBusca->setPlainText(lnomeAnime);
+    on_botaoBusca_clicked();
 }
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
@@ -281,6 +289,10 @@ void MainWindow::fcarregaImagensLista(){
         else if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[vanimeSelecionado]->vid+".png", "png")){
             ui->imagemAnimeGrande->setPixmap(pix);
         }
+        else{
+            if(pix.load(cconfBase->vimagemStaple, "jpg"))
+                ui->imagemAnimeGrande->setPixmap(pix);
+        }
         //Checa tamanho do título pra sempre caber no frame
         lstyleSheet = ui->labelAnime00Titulo->styleSheet();
         if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 47)
@@ -312,7 +324,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime00Lista->clear();
             ui->labelFundoAnime00Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[0+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[0+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[0+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime00->setPixmap(pix);
             }
@@ -379,7 +391,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime01Lista->clear();
             ui->labelFundoAnime01Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[1+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[1+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[1+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime01->setPixmap(pix);
             }
@@ -439,8 +451,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime02Lista->clear();
             ui->labelFundoAnime02Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[2+(12*(vpagina-1))]->vid.toInt()] == true &&
-                vimagemBaixada[vlistaSelecionada[2+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[2+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[2+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime02->setPixmap(pix);
             }
@@ -500,7 +511,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime03Lista->clear();
             ui->labelFundoAnime03Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[3+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[3+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[3+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime03->setPixmap(pix);
             }
@@ -560,7 +571,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime04Lista->clear();
             ui->labelFundoAnime04Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[4+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[4+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[4+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime04->setPixmap(pix);
             }
@@ -620,7 +631,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime05Lista->clear();
             ui->labelFundoAnime05Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[5+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[5+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[5+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime05->setPixmap(pix);
             }
@@ -680,7 +691,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime06Lista->clear();
             ui->labelFundoAnime06Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[6+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[6+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[6+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime06->setPixmap(pix);
             }
@@ -740,7 +751,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime07Lista->clear();
             ui->labelFundoAnime07Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[7+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[7+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[7+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime07->setPixmap(pix);
             }
@@ -800,7 +811,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime08Lista->clear();
             ui->labelFundoAnime08Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[8+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[8+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[8+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime08->setPixmap(pix);
             }
@@ -860,7 +871,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime09Lista->clear();
             ui->labelFundoAnime09Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[9+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[9+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[9+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime09->setPixmap(pix);
             }
@@ -920,7 +931,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime10Lista->clear();
             ui->labelFundoAnime10Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[10+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[10+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[10+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime10->setPixmap(pix);
             }
@@ -980,7 +991,7 @@ void MainWindow::fcarregaImagensLista(){
             ui->labelFundoAnime11Lista->clear();
             ui->labelFundoAnime11Lista->setStyleSheet("background: transparent");
         }
-        if(vimagemCarregada[vlistaSelecionada[11+(12*(vpagina-1))]->vid.toInt()] == true){
+        if(vimagemCarregada[vlistaSelecionada[11+(12*(vpagina-1))]->vid] == true){
             if(pix.load(cconfBase->vdiretorioImagensMedio+vlistaSelecionada[11+(12*(vpagina-1))]->vid+".jpg", "jpg")){
                 ui->imagemAnime11->setPixmap(pix);
             }
@@ -1094,18 +1105,18 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                             return false;
                         //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
     //                    qDebug() << "Carregou pequeno " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] == false &&
-                                vimagemBaixada[vcarregaListaBackground[i]->vid.toInt()] == true){
+                        if(vimagemCarregada[vcarregaListaBackground[i]->vid] == false &&
+                                vimagemBaixada[vcarregaListaBackground[i]->vid] == true){
                             if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
                                     ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
                                 }
                             }
                             else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
                                     ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
                                 }
                             }
                         }
@@ -1115,7 +1126,7 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
             vdownloadImagensPequenas = false;
         }
         else if(vdownloadImagensMedias){
-            ui->labelImagemBackground->setScaledContents(true);
+//            ui->labelImagemBackground->setScaledContents(true);
             file = dirMedio;
             for(int j = 0; j < 15; j++){
                 if(vrefreshAcontecendo == true)
@@ -1173,18 +1184,18 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                             return false;
                         //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
     //                    qDebug() << "Carregou média " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] == false &&
-                                vimagemBaixada[vcarregaListaBackground[i]->vid.toInt()] == true){
+                        if(vimagemCarregada[vcarregaListaBackground[i]->vid] == false &&
+                                vimagemBaixada[vcarregaListaBackground[i]->vid] == true){
                             if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
-                                    ui->labelImagemBackgroundGrande->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
+                                    ui->labelImagemBackground->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true; //Erro no qmap
                                 }
                             }
                             else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
-                                    ui->labelImagemBackgroundGrande->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
+                                    ui->labelImagemBackground->setPixmap(lpix);
+                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
                                 }
                             }
                         }
@@ -1252,18 +1263,18 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                             return false;
                         //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
     //                    qDebug() << "Carregou grande " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] == false &&
-                                vimagemBaixadaGrande[vcarregaListaBackground[i]->vid.toInt()] == true){
+                        if(vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] == false &&
+                                vimagemBaixadaGrande[vcarregaListaBackground[i]->vid] == true){
                             if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg")){
+                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
                                     ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
-                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] = true;
                                 }
                             }
                             else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".png", "png")){
+                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
                                     ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
-                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid.toInt()] = true;
+                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] = true;
                                 }
                             }
                         }
@@ -1398,7 +1409,7 @@ void MainWindow::on_botaoProximaPagina_clicked()
             llistaAtual = "Plan to Watch";
         else if(vlistaAtual.contains("busca"))
             llistaAtual = "Busca";
-        ui->NumPagina->setText(llistaAtual + " - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(llistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         fcarregaImagensLista();
     }
 }
@@ -1423,7 +1434,7 @@ void MainWindow::on_botaoPaginaAnterior_clicked()
             llistaAtual = "Plan to Watch";
         else if(vlistaAtual.contains("busca"))
             llistaAtual = "Busca";
-        ui->NumPagina->setText(llistaAtual + " - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(llistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         fcarregaImagensLista();
     }
 }
@@ -1436,19 +1447,19 @@ void MainWindow::on_Watching_clicked()
         qDebug() << "Selected list: Reading (Manga)";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangareading");
         vlistaAtual = "mangareading";
-        ui->NumPagina->setText("Reading - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Reading - " + QString::number(vlistaSelecionada.size()) + " mangas in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else if(vJanelaNovel){
         qDebug() << "Selected list: Reading (Novel)";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelreading");
         vlistaAtual = "novelreading";
-        ui->NumPagina->setText("Reading - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Reading - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else{
         qDebug() << "Selected list: Watching";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
         vlistaAtual = "watching";
-        ui->NumPagina->setText("Watching - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Watching - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     finfoAnimeSelecionado();
 }
@@ -1461,17 +1472,17 @@ void MainWindow::on_Completed_clicked()
     if(vJanelaManga){
         vlistaAtual = "mangacompleted";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
-        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Completed - " + QString::number(vlistaSelecionada.size()) + " mangas in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else if(vJanelaNovel){
         vlistaAtual = "novelcompleted";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
-        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Completed - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else{
         vlistaAtual = "completed";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "completed");
-        ui->NumPagina->setText("Completed - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Completed - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     finfoAnimeSelecionado();
 }
@@ -1484,17 +1495,17 @@ void MainWindow::on_OnHold_clicked()
     if(vJanelaManga){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
         vlistaAtual = "mangaonhold";
-        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("On Hold - " + QString::number(vlistaSelecionada.size()) + " mangas in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else if(vJanelaNovel){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelonhold");
         vlistaAtual = "novelonhold";
-        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("On Hold - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else{
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
         vlistaAtual = "onhold";
-        ui->NumPagina->setText("On Hold - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("On Hold - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     finfoAnimeSelecionado();
 }
@@ -1507,17 +1518,17 @@ void MainWindow::on_Dropped_clicked()
     if(vJanelaManga){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangadropped");
         vlistaAtual = "mangadropped";
-        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Dropped - " + QString::number(vlistaSelecionada.size()) + " mangas in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else if(vJanelaNovel){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "noveldropped");
         vlistaAtual = "noveldropped";
-        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Dropped - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else{
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
         vlistaAtual = "dropped";
-        ui->NumPagina->setText("Dropped - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Dropped - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     finfoAnimeSelecionado();
 }
@@ -1530,30 +1541,30 @@ void MainWindow::on_PlanToWatch_clicked()
     if(vJanelaManga){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
         vlistaAtual = "mangaplantoread";
-        ui->NumPagina->setText("Plan to Read - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Plan to Read - " + QString::number(vlistaSelecionada.size()) + " mangas in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else if(vJanelaNovel){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
         vlistaAtual = "novelplantoread";
-        ui->NumPagina->setText("Plan to Read - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Plan to Read - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     else{
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
         vlistaAtual = "plantowatch";
-        ui->NumPagina->setText("Plan to Watch - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText("Plan to Watch - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
     finfoAnimeSelecionado();
 }
 
 void MainWindow::on_botaoProximoEpisodio_clicked()
 {
-    ui->labelMensagem->setText("Buscando episódio...");
+    ui->labelMensagem->setText("Searching for episode...");
     if(!carquivos->fprocuraEpisodio(vlistaSelecionada[vanimeSelecionado]).isEmpty()){
         if(carquivos->fabreEpisodio(carquivos->fprocuraEpisodio(vlistaSelecionada[vanimeSelecionado]).toUtf8()))
-            ui->labelMensagem->setText("Abrindo episódio!");
+            ui->labelMensagem->setText("Opening!");
     }
     else
-        ui->labelMensagem->setText("O episódio não foi encontrado no computador");
+        ui->labelMensagem->setText("The episode was not found in the computer");
 }
 
 void MainWindow::on_botaoAbrePasta_clicked()
@@ -1564,27 +1575,31 @@ void MainWindow::on_botaoAbrePasta_clicked()
     if(!lcaminhoPasta.isEmpty())
         carquivos->fabreEpisodio(lcaminhoPasta);
     else
-        ui->labelMensagem->setText("A pasta com este anime não foi encontrada");
+        ui->labelMensagem->setText("The anime folder was not found");
 }
 
 void MainWindow::on_botaoBusca_clicked()
 {
-    if(!ui->barraBusca->toPlainText().isEmpty()){
-        qDebug() << "Searching " << ui->barraBusca->toPlainText();
-        vlistaSelecionada = cleitorListaAnimes->fbuscaLista(ui->barraBusca->toPlainText(), vtipoAtual);
-        if(!vlistaSelecionada.isEmpty()){
-            vlistaAtual = "busca";
-            vanimeSelecionado = 0;
-            vpagina = 1;
-            ui->NumPagina->setText("Busca - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
-            finfoAnimeSelecionado();
-        }
-        else{
-            qDebug() << ui->barraBusca->toPlainText() << " not found!";
-            ui->labelMensagem->setText(ui->barraBusca->toPlainText()+" not found!");
-            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+    if(ui->janelaRotativa->currentIndex() == 0){
+        if(!ui->barraBusca->toPlainText().isEmpty()){
+            qDebug() << "Searching " << ui->barraBusca->toPlainText();
+            vlistaSelecionada = cleitorListaAnimes->fbuscaLista(ui->barraBusca->toPlainText(), vtipoAtual);
+            if(!vlistaSelecionada.isEmpty()){
+                vlistaAtual = "busca";
+                vanimeSelecionado = 0;
+                vpagina = 1;
+                ui->NumPagina->setText("Busca  - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+                finfoAnimeSelecionado();
+            }
+            else{
+                qDebug() << ui->barraBusca->toPlainText() << " not found!";
+                ui->labelMensagem->setText(ui->barraBusca->toPlainText()+" not found!");
+                vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+            }
         }
     }
+    else if(ui->janelaRotativa->currentIndex() == 2)
+        jtorrent.fprocuraAnimeEspecifico(ui->barraBusca->toPlainText());
 }
 
 void MainWindow::on_botaoRefresh_clicked()
@@ -1970,7 +1985,7 @@ void MainWindow::on_botaoOrdemAlfabetica_clicked()
     if(!vlistaSelecionada.isEmpty()){
         vanimeSelecionado = 0;
         vpagina = 1;
-        ui->NumPagina->setText("Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(vlistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         finfoAnimeSelecionado();
     }
 }
@@ -1986,7 +2001,7 @@ void MainWindow::on_botaoOrdemProgresso_clicked()
     if(!vlistaSelecionada.isEmpty()){
         vanimeSelecionado = 0;
         vpagina = 1;
-        ui->NumPagina->setText("Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(vlistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         finfoAnimeSelecionado();
     }
 }
@@ -2002,7 +2017,7 @@ void MainWindow::on_botaoOrdemScore_clicked()
     if(!vlistaSelecionada.isEmpty()){
         vanimeSelecionado = 0;
         vpagina = 1;
-        ui->NumPagina->setText("Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(vlistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         finfoAnimeSelecionado();
     }
 }
@@ -2018,7 +2033,7 @@ void MainWindow::on_botaoOrdemRelease_clicked()
     if(!vlistaSelecionada.isEmpty()){
         vanimeSelecionado = 0;
         vpagina = 1;
-        ui->NumPagina->setText("Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(vlistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         finfoAnimeSelecionado();
     }
 }
@@ -2034,7 +2049,7 @@ void MainWindow::on_botaoOrdemType_clicked()
     if(!vlistaSelecionada.isEmpty()){
         vanimeSelecionado = 0;
         vpagina = 1;
-        ui->NumPagina->setText("Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+        ui->NumPagina->setText(vlistaAtual + " - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
         finfoAnimeSelecionado();
     }
 }
@@ -2338,4 +2353,10 @@ void MainWindow::on_botaoLN_clicked()
     ui->boxMudarPraLista->setItemText(0, "Reading");
     ui->boxMudarPraLista->setItemText(4, "Plan to Read");
     on_Watching_clicked();
+}
+
+void MainWindow::on_botaoDownloadAnime_clicked()
+{
+    jtorrent.fprocuraAnimeEspecifico(vlistaSelecionada[vanimeSelecionado]->vnome);
+    ui->janelaRotativa->setCurrentIndex(2);
 }

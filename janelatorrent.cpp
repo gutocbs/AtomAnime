@@ -6,10 +6,13 @@ janelatorrent::janelatorrent(QWidget *parent) :
     ui(new Ui::janelatorrent)
 {
     ui->setupUi(this);
-    ui->listaTorrents->setColumnHidden(6,true);
-    ui->listaTorrents->setColumnWidth(5, 1034);
+   ui->listaTorrents->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->listaTorrents->setColumnHidden(7,true);
+    ui->listaTorrents->setColumnHidden(8,true);
+    ui->listaTorrents->setColumnWidth(6, 1034);
     ui->listaTorrents->setColumnWidth(0, 50);
     ui->listaTorrents->setColumnWidth(1, 400);
+    ui->listaTorrents->setColumnWidth(5, 400);
     ui->listaTorrents->setSortingEnabled(true);
 }
 
@@ -39,6 +42,7 @@ void janelatorrent::fleXML()
     QString lepisodioAnime;
     QString llinkTorrent;
     QString ldescricaoTorrent;
+    QString llinkInfoTorrent;
     int lprioridade = 0;
     QXmlStreamReader stream(ldata);
     while (!stream.atEnd()) {
@@ -133,10 +137,26 @@ void janelatorrent::fleXML()
                 if(description.contains("Torrent Listing"))
                     break;
                 QStringList comment = description.split("/>");
-                description = comment.at(comment.size()-1);
-                description.remove("]]>");
-                description.remove(0,1);
-                ldescricaoTorrent = description;
+                if(comment.size() > 2){
+                    llinkInfoTorrent = comment.at(2);
+                    llinkInfoTorrent.remove(0,1);
+                    llinkInfoTorrent.remove("<a href=\"");
+                    llinkInfoTorrent.remove("\">Tokyo Tosho</a><br ");
+                    description = comment.at(comment.size()-1);
+                    description.remove("]]>");
+                    description.remove(0,10);
+                    ldescricaoTorrent = description;
+                }
+                else{
+                    comment = description.split(" | ");
+                    llinkInfoTorrent = comment.at(0);
+                    llinkInfoTorrent = llinkInfoTorrent.split("\"").at(1);
+                    comment.removeAt(0);
+                    description = comment.join(" | ");
+                    description.remove("]]>");
+                    description.remove("</a>");
+                    ldescricaoTorrent = description;
+                }
                 QPointer<torrentinfo> ltorrentAux(new torrentinfo);
                 ltorrentAux->vnomeTorrent = lnomeTorrent;
                 ltorrentAux->vdescricaoTorrent = ldescricaoTorrent;
@@ -145,6 +165,7 @@ void janelatorrent::fleXML()
                 ltorrentAux->vfansub = lfansub;
                 ltorrentAux->vresolucao = lresolucao;
                 ltorrentAux->vepisodioAnime = lepisodioAnime;
+                ltorrentAux->vtorrentInfoLink = llinkInfoTorrent;
                 if(vbaixar.contains(lnomeAnime)){
                     if(vbaixar.value(lnomeAnime).at(0).toInt() < 4 && lprioridade == 4){
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
@@ -171,7 +192,7 @@ void janelatorrent::fpreencheTabela()
     ui->listaTorrents->setRowCount(torrent.size());
     for(int i = 0; i < torrent.size(); i++){
 //        ui->listaTorrents->setRowHeight(i, 100);
-        for(int w = 0; w < 7; w++){
+        for(int w = 0; w < ui->listaTorrents->columnCount(); w++){
             QTableWidgetItem *litem = new QTableWidgetItem;
             switch (w) {
             case 0: {
@@ -211,10 +232,18 @@ void janelatorrent::fpreencheTabela()
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 5:
-                litem->setText(torrent[i]->vdescricaoTorrent);
+                litem->setText(torrent[i]->vnomeTorrent);
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 6:
+                litem->setText(torrent[i]->vdescricaoTorrent);
+                ui->listaTorrents->setItem(i,w, litem);
+            break;
+            case 7:
+                litem->setText(torrent[i]->vtorrentInfoLink);
+                ui->listaTorrents->setItem(i,w, litem);
+            break;
+            case 8:
                 if(torrent[i]->vbox.isChecked())
                     litem->setText("2");
                 else
@@ -293,4 +322,30 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
     QPointer<filedownloader> lbaixaXML(new filedownloader);
     lbaixaXML->fdownloadXMLTorrentList(cconfig->fretornaFeedAnime());
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fleXML);
+}
+
+void janelatorrent::fprocuraAnimeEspecifico(QString rnomeAnimeBuscado){
+    ui->botaoAtualizaLista->blockSignals(true);
+    if(!torrent.isEmpty())
+        torrent.clear();
+//    ui->listaTorrents->clear();
+    QPointer<filedownloader> lbaixaXML(new filedownloader);
+    //https://nyaa.si/?page=rss&c=1_2&f=0&q=Ishuzoku Reviewers
+    QString lfeedEspecifico = cconfig->fretornaFeedAnimeEspecifico();
+    lfeedEspecifico.replace("%title%", rnomeAnimeBuscado);
+    lbaixaXML->fdownloadXMLTorrentList(lfeedEspecifico);
+    connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fleXML);
+}
+
+void janelatorrent::on_botaoInfoAnime_clicked()
+{
+    QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
+    emit infoAnime(ui->listaTorrents->item(select.at(0).row(),1)->text());
+}
+
+void janelatorrent::on_botaoLinkTorrent_clicked()
+{
+    QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
+    QString llink = ui->listaTorrents->item(select.at(0).row(),7)->text();
+    QDesktopServices::openUrl(QUrl(llink,QUrl::TolerantMode));
 }

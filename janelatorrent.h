@@ -14,6 +14,9 @@
 #include <QProcess>
 #include <QTimer>
 #include <QTableWidgetItem>
+#include <QPointer>
+#include <QDesktopServices> //Abre o site do torrent
+#include <QUrl>
 
 #include <anitomy/anitomy.h>
 #include "torrentinfo.h"
@@ -37,16 +40,22 @@ public:
 
     void fpreencheTabela();
     void fpassaPonteiros(leitorlistaanimes*, janeladeconfig*, arquivos*);
+    void fprocuraAnimeEspecifico(QString);
+
 private slots:
     void fesperaTorrent();
     void fleXML();
-    void on_botaoDownload_clicked();
     void fbaixaTorrent();
-
+    void on_botaoDownload_clicked();
     void on_botaoAtualizaLista_clicked();
+
+    void on_botaoInfoAnime_clicked();
+
+    void on_botaoLinkTorrent_clicked();
 
 signals:
     void error(QString);
+    void infoAnime(QString);
 
 private:
     Ui::janelatorrent *ui;

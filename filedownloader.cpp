@@ -53,10 +53,13 @@ void filedownloader::onFinished(QNetworkReply * reply)
 
 void filedownloader::onReadyRead()
 {
-    if(vfile->isWritable())
-        vfile->write(vreply->readAll());
+    if(vfile->isWritable()){
+        QByteArray data = vreply->readAll();
+        vfile->write(data);
+        vfile->waitForBytesWritten(30000);
+    }
     else{
-//        qWarning() << vfile->errorString() << "- Id:" << vlistaSelecionada[vindexLista]->vid << "- Medium image download failed";
+        //qWarning() << vfile->errorString();// << "- Id:" << vlistaSelecionada[vindexLista]->vid << "- Medium image download failed";
         vfile->remove();
     }
 }
@@ -129,12 +132,13 @@ void filedownloader::fdownloadXMLTorrentList(QString fileURL)
 
 void filedownloader::fsetNext()
 {
+    emit sid(vlistaSelecionada[vindexLista]->vid);
     if(vfileIsOpen){
         if(vfile->isOpen())
             vfile->close();
     }
     vfileIsOpen = false;
-    emit sid(vlistaSelecionada[vindexLista]->vid.toInt());
+    vreply->close();
     vindexLista++;
     if(vindexLista >= vlistaSelecionada.size()){
         vindexLista = 0;
@@ -165,7 +169,7 @@ void filedownloader::fsetNextSmall()
         if(vfile->isOpen())
             vfile->close();
     }
-    emit sid(vlistaSelecionada[vindexLista]->vid.toInt());
+    emit sid(vlistaSelecionada[vindexLista]->vid);
     vindexLista++;
     if(vindexLista >= vlistaSelecionada.size()){
         vindexLista = 0;

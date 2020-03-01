@@ -101,15 +101,15 @@ private slots:
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
-    void fsetIdAdicionado(int);
-    void fsetIdBaixado(int);
-    void fsetIdBaixadoGrande(int);
+    void fsetIdAdicionado(QString);
+    void fsetIdBaixado(QString);
+    void fsetIdBaixadoGrande(QString);
+    void fInfoAnimeTorrent(QString);
 
     void on_botaoAnime_clicked();
-
     void on_botaoManga_clicked();
-
     void on_botaoLN_clicked();
+    void on_botaoDownloadAnime_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -124,10 +124,10 @@ private:
     //Crashar o programa
     QVector<anime*> vlistaSelecionada;
     QVector<anime*> vcarregaListaBackground;
-    QMap<int,bool> vimagemBaixada;
-    QMap<int,bool> vimagemCarregada;
-    QMap<int,bool> vimagemBaixadaGrande;
-    QMap<int,bool> vimagemCarregadaGrande;
+    QMap<QString,bool> vimagemBaixada;
+    QMap<QString,bool> vimagemCarregada;
+    QMap<QString,bool> vimagemBaixadaGrande;
+    QMap<QString,bool> vimagemCarregadaGrande;
 
     QPointer<confBase> cconfBase;
     QPointer<confUsuario> cconfUsuario;

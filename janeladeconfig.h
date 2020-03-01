@@ -6,6 +6,8 @@
 #include <QFileDialog> //Pra abrir as janelas de busca de pastas
 #include <QDebug>
 #include <QSettings>
+#include <QDesktopServices> //Abre o site do anilsit
+#include <QUrl>
 
 namespace Ui {
 class janeladeconfig;

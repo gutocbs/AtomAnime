@@ -1150,9 +1150,9 @@ color: rgb(20, 20, 20);</string>
      <widget class="QLabel" name="NumPagina">
       <property name="geometry">
        <rect>
-        <x>519</x>
+        <x>429</x>
         <y>740</y>
-        <width>291</width>
+        <width>381</width>
         <height>70</height>
        </rect>
       </property>

@@ -40,9 +40,9 @@ public:
     QVector<anime*> fbuscaLista(QString, QString);
 
 signals:
-    void sAnimeAdicionadoNaLista(int);
-    void sMangaAdicionadoNaLista(int);
-    void sNovelAdicionadoNaLista(int);
+    void sAnimeAdicionadoNaLista(QString);
+    void sMangaAdicionadoNaLista(QString);
+    void sNovelAdicionadoNaLista(QString);
 
 private:
     QVector<anime*> vlistaWatching;
