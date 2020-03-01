@@ -60,6 +60,7 @@ signals:
 private:
     Ui::janelatorrent *ui;
     anitomy::Anitomy anitomy;
+    anitomy::Anitomy anitomyCompare;
     leitorlistaanimes *cleitor;
     janeladeconfig *cconfig;
     arquivos *carquivos;

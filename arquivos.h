@@ -22,6 +22,7 @@ class arquivos : public QObject
 public:
     explicit arquivos(QObject *parent = nullptr);
     QString fprocuraEpisodio(anime*);
+    QString fprocuraEpisodioEspecifico(anime*, int);
     QString fprocuraUltimoEpisodio(anime*, QString);
     QString fremoveCaracteresDiferentes(QString);
     bool fcomparaDadosAnime(QString, QString, QString, QStringList, int, int);
