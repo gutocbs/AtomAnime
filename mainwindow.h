@@ -13,6 +13,8 @@
 #include <QDesktopWidget> //Pra resolução
 #include <QScreen> //Resolução também
 #include <QtMath> //Também resolução
+#include <QMutex> //Pra lidar com os mapas nas threads
+#include <QMutexLocker> //Pra lidar com os mapas nas threads
 
 #include "leitorlistaanimes.h"
 #include "confbase.h"
@@ -123,7 +125,6 @@ private:
     //A classe já está deletando todos os ponteiros. Tentar deletar isso vai ser tentar deletar uma lista vaiza e possivelemnte irá
     //Crashar o programa
     QVector<anime*> vlistaSelecionada;
-    QVector<anime*> vcarregaListaBackground;
     QMap<QString,bool> vimagemBaixada;
     QMap<QString,bool> vimagemCarregada;
     QMap<QString,bool> vimagemBaixadaGrande;
@@ -160,7 +161,7 @@ private:
     QTimer *timerRefresh;
 
     QMap<QStringList, QString> vlistaAcoes;
-
+    QMutex vmutex;
     //Thread que vai baixar a lista de anime e busca as pastas. Como essa thread fica fora da classe, temos que usar QThread
     QThread cThread;
     QThread dThread;

@@ -3,6 +3,7 @@
 filedownloader::filedownloader(QObject *parent) : QObject(parent)
 {
     vmanager = new QNetworkAccessManager(this);
+    vreply = nullptr;
     vfileIsOpen = false;
     vterminouLista = false;
     vlista = 0;
@@ -53,7 +54,9 @@ void filedownloader::onFinished(QNetworkReply * reply)
 
 void filedownloader::onReadyRead()
 {
+    qDebug() << "tentando avatar";
     if(vfile->isWritable()){
+        qDebug() << "ok";
         QByteArray data = vreply->readAll();
         vfile->write(data);
         vfile->waitForBytesWritten(30000);
@@ -76,13 +79,14 @@ void filedownloader::fdownloadAvatarUsuario(QString fileURL){
     lrequest.setUrl(QUrl(fileURL));
     vreply = vmanager->get(lrequest);
 
-    vfile = new QFile(this);
+    vfile = new QFile;
     vfile->setFileName(lsaveFilePath);
     vfile->open(QIODevice::WriteOnly);
+    vfileIsOpen = true;
 
     connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
     connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
-    connect(vreply,SIGNAL(finished()),this,SIGNAL(savatar()));
+    connect(vreply,SIGNAL(finished()),this,SLOT(fterminouAvatar()));
 }
 
 void filedownloader::fdownloadTorrent(QString fileURL, QString torrentName)
@@ -138,7 +142,8 @@ void filedownloader::fsetNext()
             vfile->close();
     }
     vfileIsOpen = false;
-    vreply->close();
+    if(vreply)
+        vreply->close();
     vindexLista++;
     if(vindexLista >= vlistaSelecionada.size()){
         vindexLista = 0;
@@ -155,6 +160,8 @@ void filedownloader::fsetNextBig()
     }
     vfileIsOpen = false;
 //    emit sidGrande(vlistaSelecionada[vindexLista]->vid.toInt());
+    if(vreply)
+        vreply->close();
     vindexLista++;
     if(vindexLista >= vlistaSelecionada.size()){
         vindexLista = 0;
@@ -182,41 +189,50 @@ void filedownloader::fresetCounters()
 {
     vindexLista = 0;
     vlista = 0;
-//    vindexListaPequeno = 0;
+    //    vindexListaPequeno = 0;
+}
+
+void filedownloader::fterminouAvatar()
+{
+    if(vfileIsOpen){
+        if(vfile->isOpen())
+            vfile->close();
+    }
+    emit savatar();
 }
 
 void filedownloader::fdownloadMedio(){
-    if(vlista == 0)
+    if(vlista == 0 && vlistaSelecionada != cleitorlistaanimes->retornaListaWatching())
         vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
-    else if(vlista == 1)
+    else if(vlista == 1 && vlistaSelecionada != cleitorlistaanimes->retornaListaCompleted())
         vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
-    else if(vlista == 2)
+    else if(vlista == 2 && vlistaSelecionada != cleitorlistaanimes->retornaListaOnHold())
         vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
-    else if(vlista == 3)
+    else if(vlista == 3 && vlistaSelecionada != cleitorlistaanimes->retornaListaDropped())
         vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
-    else if(vlista == 4)
+    else if(vlista == 4 && vlistaSelecionada != cleitorlistaanimes->retornaListaPlanToWatch())
         vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
-    else if(vlista == 5)
+    else if(vlista == 5 && vlistaSelecionada != cleitorlistaanimes->retornaListaMangaReading())
         vlistaSelecionada = cleitorlistaanimes->retornaListaMangaReading();
-    else if(vlista == 6)
+    else if(vlista == 6 && vlistaSelecionada != cleitorlistaanimes->retornaListaMangaCompleted())
         vlistaSelecionada = cleitorlistaanimes->retornaListaMangaCompleted();
-    else if(vlista == 7)
+    else if(vlista == 7 && vlistaSelecionada != cleitorlistaanimes->retornaListaMangaOnHold())
         vlistaSelecionada = cleitorlistaanimes->retornaListaMangaOnHold();
-    else if(vlista == 8)
+    else if(vlista == 8 && vlistaSelecionada != cleitorlistaanimes->retornaListaMangaDropped())
         vlistaSelecionada = cleitorlistaanimes->retornaListaMangaDropped();
-    else if(vlista == 9)
+    else if(vlista == 9 && vlistaSelecionada != cleitorlistaanimes->retornaListaMangaPlanToRead())
         vlistaSelecionada = cleitorlistaanimes->retornaListaMangaPlanToRead();
-    else if(vlista == 10)
+    else if(vlista == 10 && vlistaSelecionada != cleitorlistaanimes->retornaListaNovelReading())
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelReading();
-    else if(vlista == 11)
+    else if(vlista == 11 && vlistaSelecionada != cleitorlistaanimes->retornaListaNovelCompleted())
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelCompleted();
-    else if(vlista == 12)
+    else if(vlista == 12 && vlistaSelecionada != cleitorlistaanimes->retornaListaNovelOnHold())
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelOnHold();
-    else if(vlista == 13)
+    else if(vlista == 13 && vlistaSelecionada != cleitorlistaanimes->retornaListaNovelDropped())
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelDropped();
-    else if(vlista == 14)
+    else if(vlista == 14 && vlistaSelecionada != cleitorlistaanimes->retornaListaNovelPlanToRead())
         vlistaSelecionada = cleitorlistaanimes->retornaListaNovelPlanToRead();
-    else{
+    else if(vlista == 15){
         emit sterminouLista("medium");
         vindexLista = 0;
         vlista = 0;

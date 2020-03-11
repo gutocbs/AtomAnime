@@ -154,7 +154,6 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
 
     //Ele sempre vai tentar baixar a lista. Caso tenha baixado, isso vira true e não é necessário baixar de novo
     //Caso não tenha baixado a lista ainda ou deu algum erro no download, tenta baixar a lista de novo.
-    cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
     if(ldownload == false)
         fcarregouListaFalha();
     else{
@@ -1033,253 +1032,86 @@ bool MainWindow::fcarregaImagensBackground(QString lista){
     }
     else if(lista.compare("big", Qt::CaseInsensitive) == 0){
         vdownloadImagensGrandes = true;
+        cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
     }
     if(!vcarregaImagens.isRunning() && vdownloadImagensAcabou == true)
         vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensSelecionadasBackground);
     return true;
 }
 
-
-//Eu sei, tá bem feio, mas é como funcionou. Provavelmente eu poderia fazer uma função pro que tem dentro do for. Provavelmente eu deveria.
+//Dá load em todas as imagens disponíveis no computador para não ter que carregar elas depois
 bool MainWindow::fcarregaImagensSelecionadasBackground(){
     QPixmap lpix;
-    QPixmap lpixGrande;
     QString file;
     vdownloadImagensAcabou = false;
+    QMutexLocker llocker(&vmutex);
     for(int i = 0; i < 3; i++){
         if(vdownloadImagensPequenas){
-            file = dirPequeno;
-            for(int j = 0; j < 15; j++){
+            file = dirPequeno;                
+            foreach(QString id, vimagemBaixada.keys()){
                 if(vrefreshAcontecendo == true)
                     return false;
-                switch(j){
-                case 0:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
-                    break;
-                case 1:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
-                    break;
-                case 2:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
-                    break;
-                case 3:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
-                    break;
-                case 4:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-                    break;
-                case 5:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
-                    break;
-                case 6:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
-                    break;
-                case 7:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
-                    break;
-                case 8:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
-                    break;
-                case 9:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
-                    break;
-                case 10:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
-                    break;
-                case 11:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
-                    break;
-                case 12:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
-                    break;
-                case 13:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
-                    break;
-                case 14:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
-                    break;
-                }
-                if(!vcarregaListaBackground.isEmpty()){
-                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                        if(vrefreshAcontecendo == true)
-                            return false;
-                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
-    //                    qDebug() << "Carregou pequeno " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregada[vcarregaListaBackground[i]->vid] == false &&
-                                vimagemBaixada[vcarregaListaBackground[i]->vid] == true){
-                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
-                                    ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
-                                }
-                            }
-                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
-                                    ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
-                                }
-                            }
+                if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                    if(QFile::exists(file+id+".jpg")){
+                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
+                        }
+                    }
+                    else if(QFile::exists(file+id+".png")){
+                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
                         }
                     }
                 }
+                lpix = QPixmap();
             }
             vdownloadImagensPequenas = false;
         }
-        else if(vdownloadImagensMedias){
-//            ui->labelImagemBackground->setScaledContents(true);
+        if(vdownloadImagensMedias){
             file = dirMedio;
-            for(int j = 0; j < 15; j++){
+            foreach(QString id, vimagemBaixada.keys()){
                 if(vrefreshAcontecendo == true)
                     return false;
-                switch(j){
-                case 0:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
-                    break;
-                case 1:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
-                    break;
-                case 2:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
-                    break;
-                case 3:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
-                    break;
-                case 4:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-                    break;
-                case 5:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
-                    break;
-                case 6:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
-                    break;
-                case 7:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
-                    break;
-                case 8:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
-                    break;
-                case 9:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
-                    break;
-                case 10:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
-                    break;
-                case 11:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
-                    break;
-                case 12:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
-                    break;
-                case 13:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
-                    break;
-                case 14:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
-                    break;
-                }
-                if(!vcarregaListaBackground.isEmpty()){
-                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                        if(vrefreshAcontecendo == true)
-                            return false;
-                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
-    //                    qDebug() << "Carregou média " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregada[vcarregaListaBackground[i]->vid] == false &&
-                                vimagemBaixada[vcarregaListaBackground[i]->vid] == true){
-                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
-                                    ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true; //Erro no qmap
-                                }
-                            }
-                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpix.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
-                                    ui->labelImagemBackground->setPixmap(lpix);
-                                    vimagemCarregada[vcarregaListaBackground[i]->vid] = true;
-                                }
-                            }
+                if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                    if(QFile::exists(file+id+".jpg")){
+                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
+                        }
+                    }
+                    else if(QFile::exists(file+id+".png")){
+                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
                         }
                     }
                 }
+                lpix = QPixmap();
             }
             vdownloadImagensMedias = false;
         }
-        else if(vdownloadImagensGrandes){
-            ui->labelImagemBackgroundGrande->setScaledContents(true);
+        if(vdownloadImagensGrandes){
             file = dirGrande;
-            for(int j = 0; j < 15; j++){
+            foreach(QString id, vimagemBaixadaGrande.keys()){
                 if(vrefreshAcontecendo == true)
                     return false;
-                switch(j){
-                case 0:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "watching");
-                    break;
-                case 1:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "completed");
-                    break;
-                case 2:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "onhold");
-                    break;
-                case 3:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "dropped");
-                    break;
-                case 4:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-                    break;
-                case 5:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangareading");
-                    break;
-                case 6:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
-                    break;
-                case 7:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaonhold");
-                    break;
-                case 8:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangadropped");
-                    break;
-                case 9:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "mangaplantoread");
-                    break;
-                case 10:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelreading");
-                    break;
-                case 11:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
-                    break;
-                case 12:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelonhold");
-                    break;
-                case 13:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "noveldropped");
-                    break;
-                case 14:
-                    vcarregaListaBackground = cleitorListaAnimes->sortLista(vordem, "novelplantoread");
-                    break;
-                }
-                if(!vcarregaListaBackground.isEmpty()){
-                    for(int i = 0; i < vcarregaListaBackground.size(); i++){
-                        if(vrefreshAcontecendo == true)
-                            return false;
-                        //Testa pra ver se a imagem já foi baixada por completo, pra evitar que a imagem fique corrompida
-    //                    qDebug() << "Carregou grande " << vcarregaListaBackground[i]->vlista << i;
-                        if(vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] == false &&
-                                vimagemBaixadaGrande[vcarregaListaBackground[i]->vid] == true){
-                            if(QFile::exists(file+vcarregaListaBackground[i]->vid+".jpg")){
-                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".jpg", "jpg", Qt::ColorOnly)){
-                                    ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
-                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] = true;
-                                }
-                            }
-                            else if(QFile::exists(file+vcarregaListaBackground[i]->vid+".png")){
-                                if(lpixGrande.load(file+vcarregaListaBackground[i]->vid+".png", "png", Qt::ColorOnly)){
-                                    ui->labelImagemBackgroundGrande->setPixmap(lpixGrande);
-                                    vimagemCarregadaGrande[vcarregaListaBackground[i]->vid] = true;
-                                }
-                            }
+                if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                    if(QFile::exists(file+id+".jpg")){
+                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                            ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                            vimagemCarregadaGrande[id] = true;
+                        }
+                    }
+                    else if(QFile::exists(file+id+".png")){
+                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                            ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                            vimagemCarregadaGrande[id] = true;
                         }
                     }
                 }
+                lpix = QPixmap();
             }
             vdownloadImagensGrandes = false;
         }
@@ -1288,7 +1120,6 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
     }
     vdownloadImagensAcabou = true;
     qDebug() << "Finished loading all pictures";
-    vcarregaListaBackground.clear();
     emit sterminouCarregarImagens();
     return true;
 }
