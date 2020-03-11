@@ -42,6 +42,7 @@ public slots:
     void fsetNextBig();
     void fsetNextSmall();
     void fresetCounters();
+    void fterminouAvatar();
 
 private slots:
     void onFinished(QNetworkReply*);
