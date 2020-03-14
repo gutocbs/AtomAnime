@@ -8,6 +8,7 @@
 #include <QDirIterator>//Itera a pasta
 #include <QFile> // Ler arquivos na pasta
 #include <QDesktopServices> //Abre episódio
+#include <QProcess> //Tentando abrir o epi por aqui
 #include <QUrl> //Também é usado pra abrir o episódio
 #include <QLoggingCategory> //Cria classe de log
 

@@ -183,7 +183,8 @@ void janelatorrent::fleXML()
                     QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                     vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                 }
-                torrent.append(ltorrentAux);
+                if(!ltorrentAux->vnomeTorrent.contains("Torrent File RSS"))
+                    torrent.append(ltorrentAux);
                 lprioridade = 0;
             }
             break;

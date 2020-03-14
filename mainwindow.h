@@ -23,6 +23,8 @@
 #include "confusuario.h"
 #include "logger.h"
 #include "anilist.h"
+#include "robotlib/Robot.h"
+#include "anitomy/anitomy.h"
 
 #include "janeladeconfig.h"
 #include "janelatorrent.h"
@@ -57,6 +59,7 @@ public:
 
 signals:
     void sterminouCarregarImagens();
+    void sanimeReconhecido(QString, QString, QString);
 private slots:
     void on_botaoAnime00_clicked();
     void on_botaoAnime01_clicked();
@@ -100,6 +103,11 @@ private slots:
     void on_botaoOrdemScore_clicked();
     void on_botaoOrdemRelease_clicked();
     void on_botaoOrdemType_clicked();
+    void on_botaoAnime_clicked();
+    void on_botaoManga_clicked();
+    void on_botaoLN_clicked();
+    void on_botaoDownloadAnime_clicked();
+    void on_botaoAnimeAssistindo_clicked();
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
@@ -107,11 +115,10 @@ private slots:
     void fsetIdBaixado(QString);
     void fsetIdBaixadoGrande(QString);
     void fInfoAnimeTorrent(QString);
+    void fVerificaAnimeAberto();
+    void fMostraAnimeAberto(QString, QString, QString);
+    void fAumentaProgressoID(QString);
 
-    void on_botaoAnime_clicked();
-    void on_botaoManga_clicked();
-    void on_botaoLN_clicked();
-    void on_botaoDownloadAnime_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -140,6 +147,8 @@ private:
     int vanimeSelecionado;
     int vpagina;
     int vtimerSegundos;
+    int vcontadorAssistindoEpisodio;
+    QString idAnimeAssistindo;
     QString vordem;
     QString vlistaAtual;
     QString vtipoAtual;
@@ -156,9 +165,12 @@ private:
     bool vJanelaManga = false;
     bool vJanelaNovel = false;
 
+    QVector<QString> vPlayers = {"mpv", "vlc", "qualquercoisa", "dijadsijsa"};
+
     QTimer *timer;
     QTimer *tryTimer;
     QTimer *timerRefresh;
+    QTimer *timerChecaAnimes;
 
     QMap<QStringList, QString> vlistaAcoes;
     QMutex vmutex;

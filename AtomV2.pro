@@ -37,6 +37,22 @@ SOURCES += \
     logger.cpp \
     main.cpp \
     mainwindow.cpp \
+    robotlib/Bounds.cc \
+#    robotlib/Clipboard.cc \
+#    robotlib/Color.cc \
+#    robotlib/Hash.cc \
+#    robotlib/Image.cc \
+#    robotlib/Keyboard.cc \
+#    robotlib/Memory.cc \
+    robotlib/Module.cc \
+#    robotlib/Mouse.cc \
+    robotlib/Point.cc \
+    robotlib/Process.cc \
+#    robotlib/Range.cc \
+#    robotlib/Screen.cc \
+    robotlib/Size.cc \
+#    robotlib/Timer.cc \
+    robotlib/Window.cc \
     torrentinfo.cpp
 
 HEADERS += \
@@ -59,6 +75,26 @@ HEADERS += \
     leitorlistaanimes.h \
     logger.h \
     mainwindow.h \
+    robotlib/Bounds.h \
+#    robotlib/Clipboard.h \
+#    robotlib/Color.h \
+#    robotlib/Enum.h \
+#    robotlib/Global.h \
+#    robotlib/Hash.h \
+#    robotlib/Image.h \
+#    robotlib/Keyboard.h \
+#    robotlib/Memory.h \
+    robotlib/Module.h \
+#    robotlib/Mouse.h \
+    robotlib/Point.h \
+    robotlib/Process.h \
+#    robotlib/Range.h \
+#    robotlib/Robot.h \
+#    robotlib/Screen.h \
+    robotlib/Size.h \
+#    robotlib/Timer.h \
+#    robotlib/Types.h \
+    robotlib/Window.h \
     torrentinfo.h
 
 FORMS += \
@@ -75,6 +111,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 RESOURCES += \
     visuais.qrc
 
-DISTFILES += \
-    Robot/Robot.dll \
-    Robot/Robot.lib
+LIBS += libpsapi
+#unix|win32: LIBS += -L$$PWD/robotlib/ -lRobot
+
+#INCLUDEPATH += $$PWD/robotlib
+#DEPENDPATH += $$PWD/robotlib

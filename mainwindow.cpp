@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+//ROBOT_NS_USE_ALL;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -33,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent)
     cleitorListaAnimes = new leitorlistaanimes(nullptr);
     cfiledownloader = new filedownloader(nullptr);
     vtimerSegundos = 59;
+    vcontadorAssistindoEpisodio = 0;
 
     //E o timer para atualizar a lista automaticamente
     timer = new QTimer(this);
@@ -43,6 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
     tryTimer = new QTimer(this);
     tryTimer->start(30000);
     connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
+    timerChecaAnimes = new QTimer(this);
+    timerChecaAnimes->start(20000);
+    connect(timerChecaAnimes, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fVerificaAnimeAberto));
 
     ui->janelaRotativa->addWidget(&jconfig);
     ui->janelaRotativa->addWidget(&jtorrent);
@@ -68,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cleitorListaAnimes, &leitorlistaanimes::sAnimeAdicionadoNaLista, this, &MainWindow::fsetIdAdicionado, Qt::QueuedConnection);
     connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos, Qt::QueuedConnection);
     connect(this, &MainWindow::sterminouCarregarImagens, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
+    connect(this, &MainWindow::sanimeReconhecido, this, &MainWindow::fMostraAnimeAberto, Qt::QueuedConnection);
     //Se a lista foi carregada com sucesso, temos certeza de que o usuário já foi lido.
     this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
     ui->labelUsername->setText(jconfig.fretornaUsuario());
@@ -115,6 +121,8 @@ MainWindow::~MainWindow()
         }
     }
     vrefreshAcontecendo = true;
+    if(vcarregaImagens.isRunning())
+        vcarregaImagens.waitForFinished();
     cThread.requestInterruption();
     cThread.wait();
     dThread.requestInterruption();
@@ -138,8 +146,10 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::fcarregouListaTeste(bool ldownload){
+    fbloqueiaSinaisBotoes();
     cleitorListaAnimes->fdeletaListaAnimes();
     vlistaLidaSucesso = cleitorListaAnimes->fleJson();
+    fliberaSinaisBotoes();
     if(vlistaLidaSucesso)
         fcarregouListaSucesso(ldownload);
     else{
@@ -224,8 +234,77 @@ void MainWindow::fInfoAnimeTorrent(QString lnomeAnime)
     on_botaoBusca_clicked();
 }
 
+void MainWindow::fVerificaAnimeAberto()
+{
+    anitomy::Anitomy lanitomy;
+    auto vlistaJanelas = Robot::Window::GetList();
+    foreach (const auto& janela, vlistaJanelas) {
+        if(vrefreshAcontecendo)
+            return;
+        if(!QString::fromStdString(janela.GetTitle()).isEmpty()){
+            //Talvez usar o gettitle com mpv já ajude?
+            foreach(QString player, vPlayers){
+                if(vrefreshAcontecendo)
+                    return;
+                if(QString::fromStdString(janela.GetTitle()).contains(player, Qt::CaseInsensitive)){
+                    lanitomy.Parse(QString::fromStdString(janela.GetTitle()).toStdWString());
+                    const auto& lelements = lanitomy.elements();
+                    QString vidAnime = cleitorListaAnimes->fprocuraAnimeNasListas
+                            (carquivos->fremoveCaracteresDiferentes(
+                                 QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle))));
+//                        qDebug() << vidAnime << QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
+                    if(!vidAnime.isEmpty()){
+                        emit sanimeReconhecido(vidAnime, QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle)),
+                                               QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber)));
+                        return;
+                    }
+                }
+            }
+            ui->imagemAnimeAssistindo->clear();
+            ui->labelAnimeAssistindoTitulo->clear();
+            ui->labelAnimeAssistindoEpisodio->clear();
+            ui->botaoAnimeAssistindo->blockSignals(true);
+        }
+    }
+    vcontadorAssistindoEpisodio = 0;
+}
+
+void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QString repisodioAnime)
+{
+    idAnimeAssistindo = ridAnime;
+    ui->imagemAnimeAssistindo->setScaledContents(true);
+    ui->botaoAnimeAssistindo->blockSignals(false);
+    QPixmap lpix;
+    if(vimagemCarregada[ridAnime]){
+        if(QFile::exists(dirMedio+ridAnime+".jpg")){
+            if(lpix.load(dirMedio+ridAnime+".jpg", "jpg", Qt::ColorOnly)){
+                ui->imagemAnimeAssistindo->setPixmap(lpix);
+            }
+        }
+        else if(QFile::exists(dirMedio+ridAnime+".png")){
+            if(lpix.load(dirMedio+ridAnime+".png", "png", Qt::ColorOnly)){
+                ui->imagemAnimeAssistindo->setPixmap(lpix);
+            }
+        }
+    }
+    ui->labelAnimeAssistindoTitulo->setText(rnomeAnime);
+    ui->labelAnimeAssistindoEpisodio->setText("Episode " + repisodioAnime);
+
+
+
+    if(vcontadorAssistindoEpisodio == 12){
+        fAumentaProgressoID(ridAnime);
+        vcontadorAssistindoEpisodio++;
+    }
+    else if(vcontadorAssistindoEpisodio == 13)
+        return;
+    else
+        vcontadorAssistindoEpisodio++;
+}
+
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
 void MainWindow::finfoAnimeSelecionado(){
+    fVerificaAnimeAberto();
     if(!vlistaSelecionada.isEmpty()){
         ui->labelInfoNomeAnime->setText(vlistaSelecionada[vanimeSelecionado]->vnome);
         ui->labelInfoNomeAnimeIngles->setText(vlistaSelecionada[vanimeSelecionado]->vnomeIngles);
@@ -1046,6 +1125,8 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
     vdownloadImagensAcabou = false;
     QMutexLocker llocker(&vmutex);
     for(int i = 0; i < 3; i++){
+        if(vrefreshAcontecendo == true)
+            return false;
         if(vdownloadImagensPequenas){
             file = dirPequeno;                
             foreach(QString id, vimagemBaixada.keys()){
@@ -1623,6 +1704,65 @@ void MainWindow::on_botaoProgressoMais_clicked()
     }
 }
 
+void MainWindow::fAumentaProgressoID(QString ridAnime)
+{
+    fbloqueiaSinaisBotoes();
+    QString llistaAtual = vlistaSelecionada[vanimeSelecionado]->vlista;
+    QString llistaAnimeAssistindo = cleitorListaAnimes->fbuscaAnimePorIDERetornaLista(ridAnime);
+    if(llistaAnimeAssistindo.isEmpty())
+        return;
+    if(llistaAnimeAssistindo != vlistaSelecionada[vanimeSelecionado]->vlista){
+        if(llistaAnimeAssistindo.compare("Watching",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "watching");
+        }
+        else if(llistaAnimeAssistindo.compare("On Hold",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "onhold");
+        }
+        else if(llistaAnimeAssistindo.compare("Dropped",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "dropped");
+        }
+        else if(llistaAnimeAssistindo.compare("Plan to Watch",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "plantowatch");
+        }
+    }
+    for (int i = 0; i < vlistaSelecionada.size(); i++) {
+        if(vlistaSelecionada[i]->vid == ridAnime){
+            int lepisodiosTotais = 0;
+            //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais != "?")
+                lepisodiosTotais = vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+            else
+                lepisodiosTotais = INT_MAX;
+            if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
+                vlistaSelecionada[i]->vnumEpisodiosAssistidos = QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()+1);
+                finfoAnimeSelecionado();
+                QString lacao = "progresso:" + vlistaSelecionada[i]->vid;
+                QStringList lstringListAcao = lacao.split(':');
+                vlistaAcoes.insert(lstringListAcao, QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()));
+                if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() == vlistaSelecionada[i]->vnumEpisodiosTotais.toInt()){
+                    ui->boxMudarPraLista->setCurrentIndex(1);
+                    on_botaoMudarPraLista_clicked();
+                }
+            }
+        }
+    }
+    if(llistaAnimeAssistindo != llistaAtual){
+        if(llistaAtual.compare("watching",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
+        }
+        else if(llistaAnimeAssistindo.compare("onhold",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
+        }
+        else if(llistaAnimeAssistindo.compare("dropped",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
+        }
+        else if(llistaAnimeAssistindo.compare("plantowatch",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+        }
+    }
+    fliberaSinaisBotoes();
+}
+
 void MainWindow::on_botaoProgressoMenos_clicked()
 {
     if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() > 0){
@@ -2190,4 +2330,11 @@ void MainWindow::on_botaoDownloadAnime_clicked()
 {
     jtorrent.fprocuraAnimeEspecifico(vlistaSelecionada[vanimeSelecionado]->vnome);
     ui->janelaRotativa->setCurrentIndex(2);
+}
+
+void MainWindow::on_botaoAnimeAssistindo_clicked()
+{
+    ui->barraBusca->setPlainText(cleitorListaAnimes->fbuscaAnimePorIDERetornaTitulo(idAnimeAssistindo));
+    on_botaoBusca_clicked();
+    ui->barraBusca->clear();
 }

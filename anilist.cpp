@@ -48,6 +48,10 @@ bool anilist::fgetList(){
         vreply->deleteLater();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
     //Verificamos se é uma mensagem de erro
@@ -87,6 +91,10 @@ bool anilist::fgetList(){
                 qApp->processEvents();
             }
             QByteArray response_data = vreply->readAll();
+            if(vreply->isOpen())
+            {
+                vreply->close();
+            }
             jsond = QJsonDocument::fromJson(response_data);
             t.write(jsond.toJson());
         }
@@ -145,6 +153,10 @@ bool anilist::fmudaLista(int rid, QString rNovaLista){
         qWarning() << vreply->errorString();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -190,6 +202,10 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
         qWarning() << vreply->errorString();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -232,6 +248,10 @@ bool anilist::fmudaProgresso(int rid, int rnovoProgresso){
     else{
         qWarning() << vreply->errorString();
         return false;
+    }
+    if(vreply->isOpen())
+    {
+        vreply->close();
     }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
@@ -289,6 +309,10 @@ bool anilist::fexcluiAnime(int rid){
         qWarning() << vreply->errorString();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
 
@@ -308,6 +332,10 @@ bool anilist::fexcluiAnime(int rid){
         qApp->processEvents();
     }
     response_data = vreply->readAll();
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     jsond = QJsonDocument::fromJson(response_data);
     lreplyString = jsond.toJson();
     if(lreplyString.contains("error") || lreplyString.contains("errors"))

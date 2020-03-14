@@ -8,6 +8,7 @@
 #include <QTextStream> //Lê linhas do arquivo
 #include <QPointer> // Crio o ponteiro pro anime
 #include <QDateTime> //Data que lança o episódio
+#include <QHash> //Pra procurar o anime com rapidez
 
 #include "anime.h"
 
@@ -21,6 +22,10 @@ public:
     bool fmudaLista(QString, QString, QString);
     bool fdeletedaLista(QString, QString);
     void fdeletaListaAnimes();
+    QString fbuscaAnimePorIDERetornaEpisodio(QString);
+    QString fbuscaAnimePorIDERetornaTitulo(QString);
+    QString fbuscaAnimePorIDERetornaLista(QString);
+    QString fprocuraAnimeNasListas(QString);
     QVector<anime*> retornaListaWatching();
     QVector<anime*> retornaListaCompleted();
     QVector<anime*> retornaListaOnHold();
@@ -62,6 +67,7 @@ private:
     QVector<anime*> vlistaNovelOnHold;
     QVector<anime*> vlistaNovelDropped;
     QVector<anime*> vlistaNovelPlanToRead;
+    QHash<QString,QString> vHashListaAnimesPorId;
 };
 
 #endif // LEITORLISTAANIMES_H

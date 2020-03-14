@@ -320,6 +320,8 @@ bool leitorlistaanimes::fleJson(){
                         vlistaOnHold.append(lnovoAnime);
                     }
                     sAnimeAdicionadoNaLista(lnovoAnime->vid);
+                    if(!vHashListaAnimesPorId.contains(lnovoAnime->vid))
+                        vHashListaAnimesPorId.insert(lnovoAnime->vid, lnovoAnime->vlista);
                 }
                 else if(lformato == "MANGA" || lformato == "ONE SHOT"){
                     if(lnovoAnime->vstatus.contains("Air", Qt::CaseInsensitive))
@@ -464,6 +466,72 @@ void leitorlistaanimes::fdeletaListaAnimes(){
         qDeleteAll(vlistaNovelPlanToRead.begin(),vlistaNovelPlanToRead.end()); //Deletar todas as listas
         vlistaNovelPlanToRead.clear();
     }
+}
+
+QString leitorlistaanimes::fprocuraAnimeNasListas(QString rnomeAnime)
+{
+    for(int i = 0; i < vlistaWatching.size(); i++){
+        if(vlistaWatching[i]->vnome.contains(rnomeAnime, Qt::CaseInsensitive) == true ||
+                vlistaWatching[i]->vnomeIngles.contains(rnomeAnime, Qt::CaseInsensitive) == true){
+            return vlistaWatching[i]->vid;
+        }
+        else if(vlistaWatching[i]->vnomeAlternativo.size() != 0){
+            for(int w = 0; w < vlistaWatching[i]->vnomeAlternativo.size(); w++){
+                if(vlistaWatching[i]->vnomeAlternativo.at(w).contains(rnomeAnime, Qt::CaseInsensitive)){
+                    return vlistaWatching[i]->vid;
+                }
+            }
+        }
+    }
+    for(int i = 0; i < vlistaPlanToWatch.size(); i++){
+        if(vlistaPlanToWatch[i]->vnome.contains(rnomeAnime, Qt::CaseInsensitive) == true ||
+                vlistaPlanToWatch[i]->vnomeIngles.contains(rnomeAnime, Qt::CaseInsensitive) == true)
+            return vlistaPlanToWatch[i]->vid;
+        else if(vlistaPlanToWatch[i]->vnomeAlternativo.size() != 0){
+            for(int w = 0; w < vlistaPlanToWatch[i]->vnomeAlternativo.size(); w++){
+                if(vlistaPlanToWatch[i]->vnomeAlternativo.at(w).contains(rnomeAnime, Qt::CaseInsensitive)){
+                    return vlistaPlanToWatch[i]->vid;
+                }
+            }
+        }
+    }
+    for(int i = 0; i < vlistaOnHold.size(); i++){
+        if(vlistaOnHold[i]->vnome.contains(rnomeAnime, Qt::CaseInsensitive) == true ||
+                vlistaOnHold[i]->vnomeIngles.contains(rnomeAnime, Qt::CaseInsensitive) == true)
+            return vlistaOnHold[i]->vid;
+        else if(vlistaOnHold[i]->vnomeAlternativo.size() != 0){
+            for(int w = 0; w < vlistaOnHold[i]->vnomeAlternativo.size(); w++){
+                if(vlistaOnHold[i]->vnomeAlternativo.at(w).contains(rnomeAnime, Qt::CaseInsensitive)){
+                    return vlistaOnHold[i]->vid;
+                }
+            }
+        }
+    }
+    for(int i = 0; i < vlistaDropped.size(); i++){
+        if(vlistaDropped[i]->vnome.contains(rnomeAnime, Qt::CaseInsensitive) == true ||
+                vlistaDropped[i]->vnomeIngles.contains(rnomeAnime, Qt::CaseInsensitive) == true)
+            return vlistaDropped[i]->vid;
+        else if(vlistaDropped[i]->vnomeAlternativo.size() != 0){
+            for(int w = 0; w < vlistaDropped[i]->vnomeAlternativo.size(); w++){
+                if(vlistaDropped[i]->vnomeAlternativo.at(w).contains(rnomeAnime, Qt::CaseInsensitive)){
+                    return vlistaDropped[i]->vid;
+                }
+            }
+        }
+    }
+    for(int i = 0; i < vlistaCompleted.size(); i++){
+        if(vlistaCompleted[i]->vnome.contains(rnomeAnime, Qt::CaseInsensitive) == true ||
+                vlistaCompleted[i]->vnomeIngles.contains(rnomeAnime, Qt::CaseInsensitive) == true)
+            return vlistaCompleted[i]->vid;
+        else if(vlistaCompleted[i]->vnomeAlternativo.size() != 0){
+            for(int w = 0; w < vlistaCompleted[i]->vnomeAlternativo.size(); w++){
+                if(vlistaCompleted[i]->vnomeAlternativo.at(w).contains(rnomeAnime, Qt::CaseInsensitive)){
+                    return vlistaCompleted[i]->vid;
+                }
+            }
+        }
+    }
+    return "";
 }
 
 bool leitorlistaanimes::fdeletedaLista(QString rid, QString rlista)
@@ -890,6 +958,65 @@ QVector<anime *> leitorlistaanimes::fbuscaLista(QString rnome, QString rtipoMidi
         }
     }
     return vlistaBusca;
+}
+
+QString leitorlistaanimes::fbuscaAnimePorIDERetornaEpisodio(QString rid)
+{
+    for(int i = 0; i < vlistaWatching.size(); i++){
+        if(vlistaWatching[i]->vid.contains(rid, Qt::CaseInsensitive)){
+            return vlistaWatching[i]->vnumEpisodiosAssistidos+";"+vlistaWatching[i]->vnumEpisodiosTotais;
+        }
+    }
+    for(int i = 0; i < vlistaPlanToWatch.size(); i++){
+        if(vlistaPlanToWatch[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaPlanToWatch[i]->vnumEpisodiosAssistidos+";"+vlistaPlanToWatch[i]->vnumEpisodiosTotais;
+    }
+    for(int i = 0; i < vlistaOnHold.size(); i++){
+        if(vlistaOnHold[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaOnHold[i]->vnumEpisodiosAssistidos+";"+vlistaOnHold[i]->vnumEpisodiosTotais;
+    }
+    for(int i = 0; i < vlistaDropped.size(); i++){
+        if(vlistaDropped[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaDropped[i]->vnumEpisodiosAssistidos+";"+vlistaDropped[i]->vnumEpisodiosTotais;
+    }
+    for(int i = 0; i < vlistaCompleted.size(); i++){
+        if(vlistaCompleted[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaCompleted[i]->vnumEpisodiosAssistidos+";"+vlistaCompleted[i]->vnumEpisodiosTotais;
+    }
+    return "";
+}
+
+QString leitorlistaanimes::fbuscaAnimePorIDERetornaTitulo(QString rid)
+{
+    for(int i = 0; i < vlistaWatching.size(); i++){
+        if(vlistaWatching[i]->vid.contains(rid, Qt::CaseInsensitive)){
+            return vlistaWatching[i]->vnome;
+        }
+    }
+    for(int i = 0; i < vlistaPlanToWatch.size(); i++){
+        if(vlistaPlanToWatch[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaPlanToWatch[i]->vnome;
+    }
+    for(int i = 0; i < vlistaOnHold.size(); i++){
+        if(vlistaOnHold[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaOnHold[i]->vnome;
+    }
+    for(int i = 0; i < vlistaDropped.size(); i++){
+        if(vlistaDropped[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaDropped[i]->vnome;
+    }
+    for(int i = 0; i < vlistaCompleted.size(); i++){
+        if(vlistaCompleted[i]->vid.contains(rid, Qt::CaseInsensitive))
+            return vlistaCompleted[i]->vnome;
+    }
+    return "";
+}
+
+QString leitorlistaanimes::fbuscaAnimePorIDERetornaLista(QString ridAnime)
+{
+    if(vHashListaAnimesPorId.contains(ridAnime))
+        return vHashListaAnimesPorId[ridAnime];
+    return "";
 }
 
 QVector<anime*> leitorlistaanimes::retornaListaWatching()
