@@ -23,6 +23,8 @@
 #include "confusuario.h"
 #include "logger.h"
 #include "anilist.h"
+#include "robotlib/Robot.h"
+#include "anitomy/anitomy.h"
 
 #include "janeladeconfig.h"
 #include "janelatorrent.h"
@@ -57,6 +59,7 @@ public:
 
 signals:
     void sterminouCarregarImagens();
+    void sanimeReconhecido(QString, QString, QString);
 private slots:
     void on_botaoAnime00_clicked();
     void on_botaoAnime01_clicked();
@@ -100,6 +103,15 @@ private slots:
     void on_botaoOrdemScore_clicked();
     void on_botaoOrdemRelease_clicked();
     void on_botaoOrdemType_clicked();
+    void on_botaoAnime_clicked();
+    void on_botaoManga_clicked();
+    void on_botaoLN_clicked();
+    void on_botaoDownloadAnime_clicked();
+    void on_botaoAnimeAssistindo_clicked();
+    void on_botaoSelecionarPastaAnime_clicked();
+    void on_botaoSeason_clicked();
+    void on_botaoDownloadListImages_clicked();
+    void on_botaoAddAlternativeTitle_clicked();
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
@@ -107,11 +119,14 @@ private slots:
     void fsetIdBaixado(QString);
     void fsetIdBaixadoGrande(QString);
     void fInfoAnimeTorrent(QString);
-
-    void on_botaoAnime_clicked();
-    void on_botaoManga_clicked();
-    void on_botaoLN_clicked();
-    void on_botaoDownloadAnime_clicked();
+    void fVerificaAnimeAberto();
+    void fMostraAnimeAberto(QString, QString, QString);
+    void fAumentaProgressoID(QString);
+    void fgetMediaPlayersFromList();
+    void fgetConfigurations();
+    void fsetDownloadImagensAnimesPorAno();
+    void fsalvaNomesAlternativos();
+    void fleNomesAlternativos();
 
 private:
     Ui::MainWindow *ui;
@@ -121,7 +136,6 @@ private:
     arquivos *carquivos;
     anilist *canilist;
 
-    //Esses dois vetores não estão criando uma lista, mas recebendo uma lista criada na classe leitorListaAnimes.
     //A classe já está deletando todos os ponteiros. Tentar deletar isso vai ser tentar deletar uma lista vaiza e possivelemnte irá
     //Crashar o programa
     QVector<anime*> vlistaSelecionada;
@@ -129,6 +143,8 @@ private:
     QMap<QString,bool> vimagemCarregada;
     QMap<QString,bool> vimagemBaixadaGrande;
     QMap<QString,bool> vimagemCarregadaGrande;
+
+    QVector<int> vdownloadImagensAnos;
 
     QPointer<confBase> cconfBase;
     QPointer<confUsuario> cconfUsuario;
@@ -140,27 +156,41 @@ private:
     int vanimeSelecionado;
     int vpagina;
     int vtimerSegundos;
+    int vcontadorAssistindoEpisodio;
+    int vanoBuscaAnimes;
+    QString idAnimeAssistindo;
     QString vordem;
     QString vlistaAtual;
     QString vtipoAtual;
     QString dirGrande;
     QString dirMedio;
     QString dirPequeno;
+    QStringList vPlayers;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
     bool vlistaBaixada = false;
     bool vdownloadImagensMedias = false;
     bool vdownloadImagensGrandes = false;
     bool vdownloadImagensPequenas = false;
+    bool vdownloadImagensAno = false;
     bool vdownloadImagensAcabou = true;
     bool vJanelaManga = false;
     bool vJanelaNovel = false;
+    bool vJanelaSeason = false;
+    bool vbaixandoImagensAno = false;
+
+    //Cofigurações
+    bool vusarImagensBaixaQualidade;
 
     QTimer *timer;
     QTimer *tryTimer;
     QTimer *timerRefresh;
+    QTimer *timerTorrent;
+    QTimer *timerChecaAnimes;
+    QTimer *timerChecaDownloadPorAno;
 
     QMap<QStringList, QString> vlistaAcoes;
+    QMap<QString,QStringList> vcustomNomesAlternativos;
     QMutex vmutex;
     //Thread que vai baixar a lista de anime e busca as pastas. Como essa thread fica fora da classe, temos que usar QThread
     QThread cThread;

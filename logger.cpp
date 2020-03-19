@@ -45,7 +45,11 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
             QTextStream lstreamTexto(&lfile);
             QString larquivo = rcontexto.file;
             larquivo.remove(larquivo.lastIndexOf('.'), 4);
-            lstreamTexto << lmensagemLog << " - " << larquivo.mid(10) << " - " << rcontexto.line << endl;
+            #ifdef QT_DEBUG
+                lstreamTexto << lmensagemLog << " - " << larquivo.mid(10) << " - " << rcontexto.line << endl;
+            #else
+                lstreamTexto << lmensagemLog << endl;
+            #endif
             lstreamTexto.flush();
             lfile.close();
         }

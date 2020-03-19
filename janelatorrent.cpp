@@ -6,7 +6,7 @@ janelatorrent::janelatorrent(QWidget *parent) :
     ui(new Ui::janelatorrent)
 {
     ui->setupUi(this);
-   ui->listaTorrents->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->listaTorrents->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->listaTorrents->setColumnHidden(7,true);
     ui->listaTorrents->setColumnHidden(8,true);
     ui->listaTorrents->setColumnWidth(6, 1034);
@@ -22,6 +22,9 @@ janelatorrent::~janelatorrent()
     delete ui;
 }
 
+
+//SEMPRE vou pegar animes não baixados, desde que estejam na lista e/ou cumpram os filtros.
+//SE já tiver visto/baixado, ou tenha um filtro NOT, não entra na lista.
 void janelatorrent::fleXML()
 {
     QFile file(QDir::currentPath() + "/Configurações/Temp/torrents.xml");
@@ -35,7 +38,6 @@ void janelatorrent::fleXML()
     QByteArray ldata = file.readAll();
     file.close();
 
-    QString lnomeAnimeListaSimplicado;
     QString lnomeTorrent;
     QString lnomeAnime;
     QString lfansub;
@@ -44,7 +46,17 @@ void janelatorrent::fleXML()
     QString llinkTorrent;
     QString ldescricaoTorrent;
     QString llinkInfoTorrent;
+    QString lfiltrocondicao;
+    QString lfiltroespecifico;
+    QString lnomeAnimeSimplificado;
     int lprioridade = 0;
+
+    QString lid;
+    QString lepisodiosAssistidos;
+    QString lista;
+    int lposicaoAnimeNaLista;
+    QStringList filtros;
+
     QXmlStreamReader stream(ldata);
     while (!stream.atEnd()) {
         QXmlStreamReader::TokenType token = stream.readNext();
@@ -77,59 +89,130 @@ void janelatorrent::fleXML()
                 const auto& elements = anitomy.elements();
                 lnomeTorrent = name;
                 lnomeAnime = QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle));
-                QString lnomeAnimeSimplificado = carquivos->fremoveCaracteresDiferentes(
+                lnomeAnimeSimplificado = carquivos->fremoveCaracteresDiferentes(
                             QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle)));
                 lepisodioAnime = QString::fromStdWString(elements.get(anitomy::kElementEpisodeNumber));
-                for(int w = 0; w < cconfig->fretornaDownloadListasAnimes().size(); w++){
-                    switch (cconfig->fretornaDownloadListasAnimes()[w]) {
-                    case 'w':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('w')){
+                lid = cleitor->fprocuraAnimeNasListas(lnomeAnime);
+                lepisodiosAssistidos = cleitor->fbuscaAnimePorIDERetornaEpisodio(lid);
+                lista = cleitor->fbuscaAnimePorIDERetornaLista(lid);
+                lposicaoAnimeNaLista = cleitor->fbuscaAnimePorIDERetornaPosicao(lid);
+
+                filtros = fchecaFiltroDownloadFromList(lid).split(";");
+                filtros.removeAll(QString(""));
+                //Caso o filtro seja de não baixar o anime de ID x, não baixamos.
+                if(!filtros.isEmpty()){
+                    if(filtros.at(0).contains("not", Qt::CaseInsensitive))
+                        lprioridade -= 10;
+                    else if(lista.compare(filtros.at(1), Qt::CaseInsensitive) == 0){
+                        if(lista.compare("Watching", Qt::CaseInsensitive) == 0){
                             vlistaAtual = cleitor->retornaListaWatching();
                         }
-                    break;
-                    case 'd':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('d')){
-                            vlistaAtual = cleitor->retornaListaDropped();
-                        }
-                    break;
-                    case 'o':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('o')){
-                            vlistaAtual = cleitor->retornaListaOnHold();
-                        }
-                    break;
-                    case 'p':
-                        if(cconfig->fretornaDownloadListasAnimes().contains('p')){
+                        else if(lista.compare("Plan to Watch", Qt::CaseInsensitive) == 0){
                             vlistaAtual = cleitor->retornaListaPlanToWatch();
                         }
-                    }
-                    for(int i = 0; i < vlistaAtual.size(); i++){
-                        lnomeAnimeListaSimplicado = carquivos->fremoveCaracteresDiferentes(vlistaAtual[i]->vnome);
-                        if(lnomeAnimeSimplificado.compare(lnomeAnimeListaSimplicado, Qt::CaseInsensitive) == 0){
-                            lprioridade++;
-                            if(lepisodioAnime.toInt() > vlistaAtual[i]->vnumEpisodiosAssistidos.toInt()){
-                                //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
-                                //Se não estiver, o episódio já existe no computador.
-                                QString lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico(vlistaAtual[i],
-                                                                                                       lepisodioAnime.toInt());
+                        else if(lista.compare("On Hold", Qt::CaseInsensitive) == 0){
+                            vlistaAtual = cleitor->retornaListaOnHold();
+                        }
+                        else if(lista.compare("Completed", Qt::CaseInsensitive) == 0){
+                            vlistaAtual = cleitor->retornaListaCompleted();
+                        }
+                        else if(lista.compare("Dropped", Qt::CaseInsensitive) == 0){
+                            vlistaAtual = cleitor->retornaListaDropped();
+                        }
+                        if(lepisodioAnime.toInt() > lepisodiosAssistidos.toInt()){
+                            //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
+                            //Se não estiver, o episódio já existe no computador.
+                            if(lposicaoAnimeNaLista != -1){
+                                QString lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
+                                        (vlistaAtual[lposicaoAnimeNaLista],lepisodioAnime.toInt());
+                                //Caso não exista o episódio na pasta, a string retorna vazia.
                                 lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
                                 if(lultimoEpisodioBaixado.isEmpty())
-                                    lprioridade++;
+                                    lprioridade += 10;
                                 else
-                                    lprioridade = -4;
+                                    lprioridade -= 10;
                             }
-                            else
-                                lprioridade--;
-                            break;
                         }
+                        else
+                            lprioridade -= 10;
                     }
                 }
-                lfansub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
-                if(lfansub.compare(cconfig->fretornaSubEscolhido(), Qt::CaseInsensitive) == 0){
-                    lprioridade++;
+                else{
+                    if(lista.compare("Watching", Qt::CaseInsensitive) == 0 &&
+                            cconfig->fretornaDownloadListasAnimes().contains("w")){
+                        vlistaAtual = cleitor->retornaListaWatching();
+                    }
+                    else if(lista.compare("Plan to Watch", Qt::CaseInsensitive) == 0 &&
+                            cconfig->fretornaDownloadListasAnimes().contains("p")){
+                        vlistaAtual = cleitor->retornaListaPlanToWatch();
+                    }
+                    else if(lista.compare("On Hold", Qt::CaseInsensitive) == 0 &&
+                            cconfig->fretornaDownloadListasAnimes().contains("o")){
+                        vlistaAtual = cleitor->retornaListaOnHold();
+                    }
+                    else if(lista.compare("Dropped", Qt::CaseInsensitive) == 0 &&
+                            cconfig->fretornaDownloadListasAnimes().contains("d")){
+                        vlistaAtual = cleitor->retornaListaDropped();
+                    }
+                    if(lepisodioAnime.toInt() > lepisodiosAssistidos.toInt()){
+                        //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
+                        //Se não estiver, o episódio já existe no computador.
+                        if(lposicaoAnimeNaLista != -1){
+                            QString lultimoEpisodioBaixado;
+                            if(!vlistaAtual.isEmpty())
+                                lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
+                                    (vlistaAtual[lposicaoAnimeNaLista],lepisodioAnime.toInt());
+                            //Caso não exista o episódio na pasta, a string retorna vazia.
+                            if(lid == "10800")
+                                qDebug() << lultimoEpisodioBaixado;
+                            lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
+                            if(lultimoEpisodioBaixado.isEmpty()){
+//                                qDebug() << vlistaAtual[lposicaoAnimeNaLista]->vid << vlistaAtual[lposicaoAnimeNaLista]->vnome;
+                                lprioridade += 10;
+                            }
+                            //Se já tiver baixado, sai da lista
+                            else
+                                lprioridade -= 10;
+                        }
+                    }
+                    //Caso já tenha sido assistido, sai da lista.
+                    else
+                        lprioridade -= 10;
                 }
+                //Se for do sub certo +2
+                lfansub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
+                filtros = fchecaFiltroFansub(lid).split(";");
+                filtros.removeAll(QString(""));
+                if(!filtros.isEmpty()){
+                    if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
+                        if(filtros.at(1).compare(lfansub, Qt::CaseInsensitive) == 0){
+                            lprioridade = -10;
+                        }
+                    }
+                    else if(lfansub.compare(filtros.at(1), Qt::CaseInsensitive) == 0)
+                        lprioridade+=2;
+                }
+                else{
+                    if(lfansub.compare(cconfig->fretornaSubEscolhido(), Qt::CaseInsensitive) == 0)
+                        lprioridade+=2;
+                }
+                //Se for a resolução certa +2
                 lresolucao = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
-                if(cconfig->fretornaQualidadeEscolhida().compare(lresolucao.toUtf8(), Qt::CaseInsensitive) == 0)
-                    lprioridade++;
+                filtros = fchecaFiltroResolution(lid).split(";");
+                filtros.removeAll(QString(""));
+                if(!filtros.isEmpty()){
+                    if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
+                        if(filtros.at(1).contains(lresolucao, Qt::CaseInsensitive)){
+                            lprioridade -= 10;
+                        }
+                    }
+                    else if(filtros.at(1).contains(lresolucao, Qt::CaseInsensitive))
+                        lprioridade+=2;
+                }
+                else{
+                    if(cconfig->fretornaQualidadeEscolhida().compare(lresolucao.toUtf8(), Qt::CaseInsensitive) == 0)
+                        lprioridade+=2;
+                }
             }
             if(stream.name() == "link") {
                 QString link = stream.readElementText();
@@ -163,6 +246,29 @@ void janelatorrent::fleXML()
                     description.remove("]]>");
                     description.remove("</a>");
                     ldescricaoTorrent = description;
+
+                    filtros = fchecaFiltroLaguage(lid).split(";");
+                    filtros.removeAll(QString(""));
+                    if(!filtros.isEmpty()){
+                        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
+                            if(description.contains(filtros.at(1), Qt::CaseInsensitive)){
+                                lprioridade = -10;
+                            }
+                        }
+                        else if(description.contains(filtros.at(1), Qt::CaseInsensitive))
+                            lprioridade++;
+                    }
+                    filtros = fchecaFiltroHasKeyword(lid).split(";");
+                    filtros.removeAll(QString(""));
+                    if(!filtros.isEmpty()){
+                        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
+                            if(description.contains(filtros.at(1), Qt::CaseInsensitive)){
+                                lprioridade = -10;
+                            }
+                        }
+                        else if(description.contains(filtros.at(1), Qt::CaseInsensitive))
+                            lprioridade++;
+                    }
                 }
                 QPointer<torrentinfo> ltorrentAux(new torrentinfo);
                 ltorrentAux->vnomeTorrent = lnomeTorrent;
@@ -173,17 +279,34 @@ void janelatorrent::fleXML()
                 ltorrentAux->vresolucao = lresolucao;
                 ltorrentAux->vepisodioAnime = lepisodioAnime;
                 ltorrentAux->vtorrentInfoLink = llinkInfoTorrent;
+                //Checamos se já existe um anime na lista de downloads com esse nome e episódio
                 if(vbaixar.contains(lnomeAnime+lepisodioAnime)){
-                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 4 && lprioridade == 4){
+                    //Caso o torrent existente tenha menos prioridade do que o torrent atual, ele é substituido
+                    //A prioridade mínima é 14. Com 14, posso ter um conjunto de dois:
+                    //sub, resolução e (lingua+keyword)
+                    //E sempre tem que não ter sido baixado
+                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 16 && lprioridade == 16){
+                        QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
+                        vbaixar.insert(lnomeAnime+lepisodioAnime, value);
+                    }
+                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 15 && lprioridade == 15){
+                        QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
+                        vbaixar.insert(lnomeAnime+lepisodioAnime, value);
+                    }
+                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 14 && lprioridade == 14){
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                         vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                     }
                 }
-                else if(lprioridade >= 3){
+                //Caso não exista nenhum torrent na lista de downloads com o anime certo, é colocado um, mesmo que
+                //Não esteja nas condições ideiais.
+                //Filtros com NOT não deixam chegar aqui.
+                else if(lprioridade >= 14){
                     QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                     vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                 }
-                torrent.append(ltorrentAux);
+                if(!ltorrentAux->vnomeTorrent.contains("Torrent File RSS"))
+                    torrent.append(ltorrentAux);
                 lprioridade = 0;
             }
             break;
@@ -224,30 +347,44 @@ void janelatorrent::fpreencheTabela()
             }
             case 1:
                 litem->setText(torrent[i]->vnomeAnime);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w,litem);
             break;
             case 2:
                 litem->setText(torrent[i]->vfansub);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 3:
                 litem->setText(torrent[i]->vresolucao);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 4:
                 litem->setText(torrent[i]->vepisodioAnime);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 5:
                 litem->setText(torrent[i]->vnomeTorrent);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 6:
                 litem->setText(torrent[i]->vdescricaoTorrent);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 7:
                 litem->setText(torrent[i]->vtorrentInfoLink);
+                if(torrent[i]->vbox.isChecked())
+                    litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 8:
@@ -342,6 +479,78 @@ void janelatorrent::fprocuraAnimeEspecifico(QString rnomeAnimeBuscado){
     lfeedEspecifico.replace("%title%", rnomeAnimeBuscado);
     lbaixaXML->fdownloadXMLTorrentList(lfeedEspecifico);
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fleXML);
+}
+
+void janelatorrent::fautoDownload()
+{
+    void on_botaoAtualizaLista_clicked();
+    void on_botaoDownload_clicked();
+}
+
+QString janelatorrent::fchecaFiltroFansub(QString lid)
+{
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+                if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("fansub", Qt::CaseInsensitive))
+                    return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
+            }
+        }
+    }
+    return nullptr;
+}
+
+QString janelatorrent::fchecaFiltroDownloadFromList(QString lid)
+{
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+                if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("list", Qt::CaseInsensitive))
+                    return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
+            }
+        }
+    }
+    return nullptr;
+}
+
+QString janelatorrent::fchecaFiltroResolution(QString lid)
+{
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+                if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("resolution", Qt::CaseInsensitive))
+                    return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
+            }
+        }
+    }
+    return nullptr;
+}
+
+QString janelatorrent::fchecaFiltroLaguage(QString lid)
+{
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+                if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("language", Qt::CaseInsensitive))
+                    return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
+            }
+        }
+    }
+    return nullptr;
+}
+
+QString janelatorrent::fchecaFiltroHasKeyword(QString lid)
+{
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+                if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("keyword", Qt::CaseInsensitive))
+                    return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
+            }
+        }
+    }
+    return nullptr;
+
 }
 
 void janelatorrent::on_botaoInfoAnime_clicked()

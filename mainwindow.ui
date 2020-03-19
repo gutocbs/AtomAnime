@@ -1819,19 +1819,6 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="label">
-      <property name="geometry">
-       <rect>
-        <x>50</x>
-        <y>680</y>
-        <width>711</width>
-        <height>91</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Now playing</string>
-      </property>
-     </widget>
      <widget class="QLabel" name="labelInfoAirTop">
       <property name="geometry">
        <rect>
@@ -2965,8 +2952,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoRemoverdaLista">
       <property name="geometry">
        <rect>
-        <x>1130</x>
-        <y>460</y>
+        <x>1500</x>
+        <y>630</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -3017,6 +3004,161 @@ color: rgb(20, 20, 20);</string>
        <string/>
       </property>
      </widget>
+     <widget class="QPushButton" name="botaoAnimeAssistindo">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>640</y>
+        <width>110</width>
+        <height>150</height>
+       </rect>
+      </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+
+QPushButton#clickAnime1:hover:!pressed
+{
+  background-color: yellow;
+}</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="autoDefault">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="imagemAnimeAssistindo">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>640</y>
+        <width>110</width>
+        <height>150</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color : transparent;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelAnimeAssistindoEpisodio">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>693</y>
+        <width>150</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+font: 75 8pt &quot;Calibri&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelAnimeAssistindoTitulo">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>640</y>
+        <width>150</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+font: 75 8pt &quot;Calibri&quot;;
+font-weight: bold; 
+color: rgb(20, 20, 20);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoSelecionarPastaAnime">
+      <property name="geometry">
+       <rect>
+        <x>1590</x>
+        <y>630</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Selecionar Pasta</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoDownloadListImages">
+      <property name="geometry">
+       <rect>
+        <x>1500</x>
+        <y>680</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Load List Images</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoAddAlternativeTitle">
+      <property name="geometry">
+       <rect>
+        <x>1500</x>
+        <y>730</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Alternative Title</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="barraAddNomeAlternativo">
+      <property name="geometry">
+       <rect>
+        <x>1590</x>
+        <y>730</y>
+        <width>311</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="lineWrapMode">
+       <enum>QPlainTextEdit::NoWrap</enum>
+      </property>
+     </widget>
+     <zorder>imagemAnimeAssistindo</zorder>
      <zorder>labelImagemBackgroundGrande</zorder>
      <zorder>labelImagemBackground</zorder>
      <zorder>labelFundoAnime04Titulo</zorder>
@@ -3156,7 +3298,6 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelAnime02Nota</zorder>
      <zorder>botaoCrunchyroll</zorder>
      <zorder>labelMensagem</zorder>
-     <zorder>label</zorder>
      <zorder>labelInfoAirTop</zorder>
      <zorder>labelInfoRelease</zorder>
      <zorder>boxMudarPraLista</zorder>
@@ -3173,6 +3314,13 @@ color: rgb(20, 20, 20);</string>
      <zorder>botaoRemoverdaLista</zorder>
      <zorder>NumPagina</zorder>
      <zorder>checkBox</zorder>
+     <zorder>botaoAnimeAssistindo</zorder>
+     <zorder>labelAnimeAssistindoTitulo</zorder>
+     <zorder>labelAnimeAssistindoEpisodio</zorder>
+     <zorder>botaoSelecionarPastaAnime</zorder>
+     <zorder>botaoDownloadListImages</zorder>
+     <zorder>botaoAddAlternativeTitle</zorder>
+     <zorder>barraAddNomeAlternativo</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">
@@ -3451,7 +3599,7 @@ color: rgb(53, 68, 120);</string>
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>20</y>
+      <y>70</y>
       <width>88</width>
       <height>34</height>
      </rect>
@@ -3463,6 +3611,56 @@ color: rgb(53, 68, 120);</string>
      <string>Ajuda</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="botaoSeason">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>88</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: rgb(121, 121, 121);</string>
+    </property>
+    <property name="text">
+     <string>Season</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="boxSelecionaAno">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>120</y>
+      <width>88</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: white</string>
+    </property>
+   </widget>
+   <zorder>boxSelecionaAno</zorder>
+   <zorder>janelaRotativa</zorder>
+   <zorder>Dropped</zorder>
+   <zorder>Completed</zorder>
+   <zorder>PlanToWatch</zorder>
+   <zorder>OnHold</zorder>
+   <zorder>Watching</zorder>
+   <zorder>barraBusca</zorder>
+   <zorder>botaoBusca</zorder>
+   <zorder>botaoRefresh</zorder>
+   <zorder>labelRefreshTimer</zorder>
+   <zorder>botaoAnime</zorder>
+   <zorder>botaoManga</zorder>
+   <zorder>botaoLN</zorder>
+   <zorder>botaoHome</zorder>
+   <zorder>botaoConfiguracao</zorder>
+   <zorder>botaoTorrent</zorder>
+   <zorder>labelAvatar</zorder>
+   <zorder>labelUsername</zorder>
+   <zorder>botaoAjuda</zorder>
+   <zorder>botaoSeason</zorder>
   </widget>
  </widget>
  <resources/>

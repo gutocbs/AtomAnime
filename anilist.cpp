@@ -39,7 +39,7 @@ bool anilist::fgetList(){
     {
         qApp->processEvents();
     }
-    
+
     //Após isso, pegamos a resposta e convertemos em um formato que possamos ler
     QByteArray response_data;
     if(vreply->isReadable())
@@ -47,6 +47,10 @@ bool anilist::fgetList(){
     else{
         vreply->deleteLater();
         return false;
+    }
+    if(vreply->isOpen())
+    {
+        vreply->close();
     }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
@@ -87,6 +91,10 @@ bool anilist::fgetList(){
                 qApp->processEvents();
             }
             QByteArray response_data = vreply->readAll();
+            if(vreply->isOpen())
+            {
+                vreply->close();
+            }
             jsond = QJsonDocument::fromJson(response_data);
             t.write(jsond.toJson());
         }
@@ -112,6 +120,111 @@ bool anilist::fgetList(){
         return true;
     }
 }
+
+bool anilist::fgetListasAnoSeason()
+{
+    for(int i = 0; i <  QDate::currentDate().year()-1999; i++){
+        fgetListaAno(QString::number(2000+i));
+    }
+    return true;
+}
+
+bool anilist::fgetListaAno(QString rano){
+    if(QFile::exists("Configurações/Temp/Lists/animeList"+rano+".txt") && rano != QString::number(QDate::currentDate().year())){
+        return true;
+    }
+    //Cria o pedido em javascript
+    QNetworkRequest lrequest(graphqlUrl);
+    lrequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    lrequest.setRawHeader(QByteArray("Accept"), "application/json; charset=utf-8");
+    QJsonObject json;
+    QNetworkAccessManager lacessManager;
+
+    //Query que irá solicitar o avatar e o número de páginas que temos que pegar
+    QString totalPages = "query ($id: Int) {   Page (page: 1 perPage: 50) {     pageInfo {       total        currentPage        lastPage        hasNextPage        perPage     }     media(id: $id, seasonYear: " + rano + ", isAdult: false, sort: ID) {       status     }   } }";
+    json.insert("query", totalPages);
+
+    //Checa se a thread está sendo interrompida, ou seja, se o programa está sendo fechado durante a execução da função
+    //Isso vai ocorrer em diversos pontos da thread por conta dos loops
+    if(this->thread()->isInterruptionRequested()){
+        this->thread()->exit(0);
+        return false;
+    }
+
+    //Post faz o pedido ao servidor lrequest, usando os argumentos em Json
+//    QPointer<QNetworkReply> vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    QNetworkReply* vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+    //Espera uma resposta
+    while (!vreply->isFinished())
+    {
+        qApp->processEvents();
+    }
+
+    //Após isso, pegamos a resposta e convertemos em um formato que possamos ler
+    QByteArray response_data;
+    if(vreply->isReadable())
+        response_data = vreply->readAll();
+    else{
+        vreply->deleteLater();
+        return false;
+    }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
+    QJsonDocument jsond = QJsonDocument::fromJson(response_data);
+    QString lastpage = jsond.toJson();
+    //Verificamos se é uma mensagem de erro
+    if(lastpage.contains("errors") == true){
+        this->thread()->exit(0);
+        vreply->deleteLater();
+        return false;
+    }
+    lastpage = lastpage.toLatin1();
+    //Pega avatar
+    QString llastpage = lastpage.mid(lastpage.lastIndexOf("avatar"));
+    vavatar = llastpage.left(llastpage.indexOf("\"\n"));
+    //Pega total de páginas
+    llastpage = lastpage.mid(lastpage.lastIndexOf("lastPage")+11);
+    lastpage = llastpage.left(llastpage.indexOf(",\n"));
+
+    QFile t("Configurações/Temp/Lists/animeList"+rano+"Temp.txt");
+    if(t.open(QIODevice::WriteOnly)){
+        for(int i = 1; i < lastpage.toInt()+1; i++){
+            QString query = "query ($id: Int, $perPage: Int) {  	 	Page (page:" + QString::number(i) + ", perPage: $perPage) {  		 		 		media(id: $id, seasonYear: " + rano + ", isAdult: false, sort: ID) {  			 			 			status    			 			 				 				 			format 				 				 			averageScore 				 				 			id 				 				 			title{ 					 					 				romaji 					 					 				english 				 				 			} 				 				 			synonyms 				 				 			description 				 				 			status 				 				 			coverImage{ 					 					 				large 				 				 			} 				 				 			season 				 				 			startDate { 					 					 				year 					 					 				month 				 				 			} 				 				 			chapters 				 				 			volumes 				 				 			episodes 				 				 			nextAiringEpisode{ 					 					 					 				airingAt 					 					 				episode 				 				 			} 				 				 			siteUrl 				 				 			streamingEpisodes{ 					 					 				site 					 					 				url 				 				 			}  			 			 		  		 		 		} 	  	 	 	}    }";
+            json.insert("query", query.trimmed());
+            vreply = lacessManager.post(lrequest, QJsonDocument(json).toJson());
+            while (!vreply->isFinished())
+            {
+                qApp->processEvents();
+            }
+            QByteArray response_data = vreply->readAll();
+            if(vreply->isOpen())
+            {
+                vreply->close();
+            }
+            jsond = QJsonDocument::fromJson(response_data);
+            t.write(jsond.toJson());
+        }
+        t.close();
+    }
+    QString lreplyString = jsond.toJson();
+    if(lreplyString.contains("errors") == true){
+        vreply->deleteLater();
+        return false;
+    }
+    else{
+        if(QFile::exists("Configurações/Temp/Lists/animeList"+rano+".txt")){
+            if(QFile::remove("Configurações/Temp/Lists/animeList"+rano+".txt"))
+                t.rename("Configurações/Temp/Lists/animeList"+rano+".txt");
+        }
+        else
+            t.rename("Configurações/Temp/Lists/animeList"+rano+".txt");
+        vreply->deleteLater();
+        return true;
+    }
+}
+
 
 bool anilist::fmudaLista(int rid, QString rNovaLista){
     ///Preciso por o token em um arquvio de configuração criptografado
@@ -144,6 +257,10 @@ bool anilist::fmudaLista(int rid, QString rNovaLista){
     else{
         qWarning() << vreply->errorString();
         return false;
+    }
+    if(vreply->isOpen())
+    {
+        vreply->close();
     }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
@@ -190,6 +307,10 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
         qWarning() << vreply->errorString();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
@@ -232,6 +353,10 @@ bool anilist::fmudaProgresso(int rid, int rnovoProgresso){
     else{
         qWarning() << vreply->errorString();
         return false;
+    }
+    if(vreply->isOpen())
+    {
+        vreply->close();
     }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
@@ -289,6 +414,10 @@ bool anilist::fexcluiAnime(int rid){
         qWarning() << vreply->errorString();
         return false;
     }
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lreplyString = jsond.toJson();
 
@@ -308,6 +437,10 @@ bool anilist::fexcluiAnime(int rid){
         qApp->processEvents();
     }
     response_data = vreply->readAll();
+    if(vreply->isOpen())
+    {
+        vreply->close();
+    }
     jsond = QJsonDocument::fromJson(response_data);
     lreplyString = jsond.toJson();
     if(lreplyString.contains("error") || lreplyString.contains("errors"))

@@ -41,6 +41,12 @@ public:
     void fpreencheTabela();
     void fpassaPonteiros(leitorlistaanimes*, janeladeconfig*, arquivos*);
     void fprocuraAnimeEspecifico(QString);
+    void fautoDownload();
+    QString fchecaFiltroFansub(QString);
+    QString fchecaFiltroDownloadFromList(QString);
+    QString fchecaFiltroResolution(QString);
+    QString fchecaFiltroLaguage(QString);
+    QString fchecaFiltroHasKeyword(QString);
 
 private slots:
     void fesperaTorrent();
@@ -48,9 +54,7 @@ private slots:
     void fbaixaTorrent();
     void on_botaoDownload_clicked();
     void on_botaoAtualizaLista_clicked();
-
     void on_botaoInfoAnime_clicked();
-
     void on_botaoLinkTorrent_clicked();
 
 signals:

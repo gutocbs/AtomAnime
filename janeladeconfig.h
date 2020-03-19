@@ -8,6 +8,14 @@
 #include <QSettings>
 #include <QDesktopServices> //Abre o site do anilsit
 #include <QUrl>
+#include <QTableWidgetItem>
+#include <QBoxLayout> //Pra poder por as caixas e tickar elas
+#include <QCheckBox>
+#include <QWidget>
+#include <QPointer>
+
+#include "filtros.h"
+#include "leitorlistaanimes.h"
 
 namespace Ui {
 class janeladeconfig;
@@ -35,19 +43,38 @@ public:
     QByteArray fretornaFeedAnime();
     QByteArray fretornaFeedAnimeEspecifico();
     QByteArray fretornaFiltrosDownload();
-
+    QStringList fretornaPlayers();
     void fleArquivoConfig();
+    void frecebeListasAnimes(leitorlistaanimes*);
+    void fgetAnimeLists();
+    void flimpaFiltros();
+    QVector<Filtros*> vfiltrosAnimes;
 signals:
     void sauthcodesave();
     void ssavebutton();
 private slots:
     void on_botaoSalvar_clicked();
-
     void on_botaoAdicionar_clicked();
     void on_botaoRemover_clicked();
     void on_botaoSelecionarPastaDownload_clicked();
     void on_botaoAutorizarUser_clicked();
     void on_botaoSalvarCodigo_clicked();
+    void on_botaoWatching_clicked();
+    void on_botaoFiltroAdd_clicked();
+    void on_botaoCompleted_clicked();
+    void on_botaoOnHold_clicked();
+    void on_botaoDropped_clicked();
+    void on_botaoPlanToWatch_clicked();
+    void on_botaoFiltroRemove_clicked();
+    void on_botaoOk_clicked();
+    void fupdateFiltros();
+    void fupdateTabelaFiltros();
+    void on_botaoCheck_clicked();
+    void on_botaoInserirAnime_clicked();
+    void on_botaoRemoverAnime_clicked();
+
+    void on_botaoEnableDisable_clicked();
+
 private:
     Ui::janeladeconfig *ui;
 
@@ -62,8 +89,13 @@ private:
     QString vquality;
     QString vtorrentFeed;
     QString vanimeTorrentFeed;
+    QStringList vPlayers;
     bool vautoDownload;
     bool vlowQuality;
+    QVector<QString> vIdNovoFiltro;
+
+    QVector<anime*> vlistaAtual;
+    leitorlistaanimes *cleitor;
 };
 
 #endif // JANELADECONFIG_H

@@ -1,16 +1,30 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+//ROBOT_NS_USE_ALL;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    ui->botaoDownloadListImages->hide();
+    ui->boxSelecionaAno->hide();
+    if(ui->boxSelecionaAno->count() != QDate::currentDate().year()-2000){
+        int date = QDate::currentDate().year()-1999;
+        for(int i = 0; i < date; i++){
+            ui->boxSelecionaAno->addItem(QString::number(2000+i));
+        }
+        ui->boxSelecionaAno->setCurrentIndex(QDate::currentDate().year()-2000);
+        connect(ui->boxSelecionaAno, QOverload<int>::of(&QComboBox::currentIndexChanged),[=](){
+            on_botaoSeason_clicked();
+        });
+    }
     ui->barraBusca->setMaximumBlockCount(1);
     ///um dia ainda faço qml disso
     //fmudaResolucao();
     logger::fattachLogger();
     qInfo() << QDateTime::currentDateTime().toString();
+    vusarImagensBaixaQualidade = false;
     canilist = new anilist(nullptr);
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
     cconfBase = new confBase(nullptr);
@@ -24,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent)
         dirPequeno = "0";
     if(dirMedio.isEmpty())
         dirMedio = "0";
+    fgetConfigurations();
     qDebug() << "Main configuration is up";
     carquivos = new arquivos(this);
     qDebug() << "File system is up";
@@ -33,6 +48,7 @@ MainWindow::MainWindow(QWidget *parent)
     cleitorListaAnimes = new leitorlistaanimes(nullptr);
     cfiledownloader = new filedownloader(nullptr);
     vtimerSegundos = 59;
+    vcontadorAssistindoEpisodio = 0;
 
     //E o timer para atualizar a lista automaticamente
     timer = new QTimer(this);
@@ -43,10 +59,16 @@ MainWindow::MainWindow(QWidget *parent)
     tryTimer = new QTimer(this);
     tryTimer->start(30000);
     connect(tryTimer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fatualizaAnilist));
-
+    timerChecaAnimes = new QTimer(this);
+    timerChecaAnimes->start(20000);
+    connect(timerChecaAnimes, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fVerificaAnimeAberto));
+    timerChecaDownloadPorAno = new QTimer(this);
+    connect(timerChecaDownloadPorAno, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fsetDownloadImagensAnimesPorAno));
+    timerTorrent = new QTimer(this);
     ui->janelaRotativa->addWidget(&jconfig);
     ui->janelaRotativa->addWidget(&jtorrent);
     jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
+    jconfig.frecebeListasAnimes(cleitorListaAnimes);
     connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
 
     vordem = "";
@@ -60,6 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(canilist, &anilist::sterminouDownload, this, &MainWindow::fcarregouListaTeste, Qt::QueuedConnection);
     connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
+    connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fgetConfigurations);
     connect(&jtorrent, &janelatorrent::infoAnime, this, &MainWindow::fInfoAnimeTorrent, Qt::QueuedConnection);
     //Quando baixa todas as imagens, carrega as imagens na página
     connect(cfiledownloader,&filedownloader::sterminouLista,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
@@ -68,6 +91,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(cleitorListaAnimes, &leitorlistaanimes::sAnimeAdicionadoNaLista, this, &MainWindow::fsetIdAdicionado, Qt::QueuedConnection);
     connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos, Qt::QueuedConnection);
     connect(this, &MainWindow::sterminouCarregarImagens, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
+    connect(this, &MainWindow::sanimeReconhecido, this, &MainWindow::fMostraAnimeAberto, Qt::QueuedConnection);
     //Se a lista foi carregada com sucesso, temos certeza de que o usuário já foi lido.
     this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
     ui->labelUsername->setText(jconfig.fretornaUsuario());
@@ -114,7 +138,10 @@ MainWindow::~MainWindow()
             lfile.close();
         }
     }
+    fsalvaNomesAlternativos();
     vrefreshAcontecendo = true;
+    if(vcarregaImagens.isRunning())
+        vcarregaImagens.waitForFinished();
     cThread.requestInterruption();
     cThread.wait();
     dThread.requestInterruption();
@@ -138,10 +165,13 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::fcarregouListaTeste(bool ldownload){
+    fbloqueiaSinaisBotoes();
     cleitorListaAnimes->fdeletaListaAnimes();
     vlistaLidaSucesso = cleitorListaAnimes->fleJson();
-    if(vlistaLidaSucesso)
+    if(vlistaLidaSucesso){
+        fliberaSinaisBotoes();
         fcarregouListaSucesso(ldownload);
+    }
     else{
         qDebug() << "Failed to read the anime list.";
         ui->labelMensagem->setText("Failed to read the anime list");
@@ -161,11 +191,11 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
         vlistaBaixada = true;
     }
     qDebug() << "The anime list have been read successfully";
-
+    fleNomesAlternativos();
     //Atualiza o avatar do usuário também.
     qDebug() << "The download system is up";
     cfiledownloader->fresetCounters();
-    cfiledownloader->fdownloadMedio();
+    cfiledownloader->fsetDownload(vusarImagensBaixaQualidade);
     //Até aqui, tem 54 de memória no primeiro refresh
     //Começa a crescer depois desse ponto. E passa aqui uma segunda vez com um único refresh?
     //Descobrir por que passa a segunda vez
@@ -224,8 +254,77 @@ void MainWindow::fInfoAnimeTorrent(QString lnomeAnime)
     on_botaoBusca_clicked();
 }
 
+void MainWindow::fVerificaAnimeAberto()
+{
+    anitomy::Anitomy lanitomy;
+    auto vlistaJanelas = Robot::Window::GetList();
+    foreach (const auto& janela, vlistaJanelas) {
+        if(vrefreshAcontecendo)
+            return;
+        if(!QString::fromStdString(janela.GetTitle()).isEmpty()){
+            //Talvez usar o gettitle com mpv já ajude?
+            foreach(QString player, vPlayers){
+                if(vrefreshAcontecendo)
+                    return;
+                if(QString::fromStdString(janela.GetTitle()).contains(player, Qt::CaseInsensitive)){
+                    lanitomy.Parse(QString::fromStdString(janela.GetTitle()).toStdWString());
+                    const auto& lelements = lanitomy.elements();
+                    QString vidAnime = cleitorListaAnimes->fprocuraAnimeNasListas
+                            (carquivos->fremoveCaracteresDiferentes(
+                                 QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle))));
+//                        qDebug() << vidAnime << QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
+                    if(!vidAnime.isEmpty()){
+                        emit sanimeReconhecido(vidAnime, QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle)),
+                                               QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber)));
+                        return;
+                    }
+                }
+            }
+            ui->imagemAnimeAssistindo->clear();
+            ui->labelAnimeAssistindoTitulo->clear();
+            ui->labelAnimeAssistindoEpisodio->clear();
+            ui->botaoAnimeAssistindo->blockSignals(true);
+        }
+    }
+    vcontadorAssistindoEpisodio = 0;
+}
+
+void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QString repisodioAnime)
+{
+    idAnimeAssistindo = ridAnime;
+    ui->imagemAnimeAssistindo->setScaledContents(true);
+    ui->botaoAnimeAssistindo->blockSignals(false);
+    QPixmap lpix;
+    if(vimagemCarregada[ridAnime]){
+        if(QFile::exists(dirMedio+ridAnime+".jpg")){
+            if(lpix.load(dirMedio+ridAnime+".jpg", "jpg", Qt::ColorOnly)){
+                ui->imagemAnimeAssistindo->setPixmap(lpix);
+            }
+        }
+        else if(QFile::exists(dirMedio+ridAnime+".png")){
+            if(lpix.load(dirMedio+ridAnime+".png", "png", Qt::ColorOnly)){
+                ui->imagemAnimeAssistindo->setPixmap(lpix);
+            }
+        }
+    }
+    ui->labelAnimeAssistindoTitulo->setText(rnomeAnime);
+    ui->labelAnimeAssistindoEpisodio->setText("Episode " + repisodioAnime);
+
+
+
+    if(vcontadorAssistindoEpisodio == 12){
+        fAumentaProgressoID(ridAnime);
+        vcontadorAssistindoEpisodio++;
+    }
+    else if(vcontadorAssistindoEpisodio == 13)
+        return;
+    else
+        vcontadorAssistindoEpisodio++;
+}
+
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
 void MainWindow::finfoAnimeSelecionado(){
+    fVerificaAnimeAberto();
     if(!vlistaSelecionada.isEmpty()){
         ui->labelInfoNomeAnime->setText(vlistaSelecionada[vanimeSelecionado]->vnome);
         ui->labelInfoNomeAnimeIngles->setText(vlistaSelecionada[vanimeSelecionado]->vnomeIngles);
@@ -315,7 +414,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[0+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime00Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime00Nota->setText("Nota: " + vlistaSelecionada[0+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime00Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime00Lista->setText(vlistaSelecionada[0+(12*(vpagina-1))]->vlista);
         }
@@ -382,7 +481,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[1+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime01Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Nota->setText("Nota: " + vlistaSelecionada[1+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime01Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime01Lista->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vlista);
         }
@@ -442,7 +541,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[2+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime02Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime02Nota->setText("Nota: " + vlistaSelecionada[2+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime02Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime02Lista->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vlista);
         }
@@ -502,7 +601,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[3+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime03Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime03Nota->setText("Nota: " + vlistaSelecionada[3+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime03Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime03Lista->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vlista);
         }
@@ -562,7 +661,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[4+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime04Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime04Nota->setText("Nota: " + vlistaSelecionada[4+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime04Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime04Lista->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vlista);
         }
@@ -622,7 +721,7 @@ void MainWindow::fcarregaImagensLista(){
         else
             ui->labelAnime05Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime05Nota->setText("Nota: " + vlistaSelecionada[5+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime05Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime05Lista->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vlista);
         }
@@ -682,7 +781,7 @@ void MainWindow::fcarregaImagensLista(){
         else
             ui->labelAnime06Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime06Nota->setText("Nota: " + vlistaSelecionada[6+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime06Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime06Lista->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vlista);
         }
@@ -742,7 +841,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[7+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime07Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime07Nota->setText("Nota: " + vlistaSelecionada[7+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime07Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime07Lista->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vlista);
         }
@@ -802,7 +901,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[8+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime08Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime08Nota->setText("Nota: " + vlistaSelecionada[8+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime08Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime08Lista->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vlista);
         }
@@ -862,7 +961,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[9+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime09Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime09Nota->setText("Nota: " + vlistaSelecionada[9+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime09Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime09Lista->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vlista);
         }
@@ -922,7 +1021,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[10+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime10Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime10Nota->setText("Nota: " + vlistaSelecionada[10+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime10Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime10Lista->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vlista);
         }
@@ -982,7 +1081,7 @@ void MainWindow::fcarregaImagensLista(){
                     "/" + vlistaSelecionada[11+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime11Nota->setAlignment(Qt::AlignCenter);
         ui->labelAnime11Nota->setText("Nota: " + vlistaSelecionada[11+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
-        if(vlistaAtual == "busca"){
+        if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime11Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
             ui->labelFundoAnime11Lista->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vlista);
         }
@@ -1022,17 +1121,26 @@ void MainWindow::fcarregaImagensLista(){
 }
 
 bool MainWindow::fcarregaImagensBackground(QString lista){
-    if(lista.compare("small", Qt::CaseInsensitive) == 0)
+    if(lista.compare("small", Qt::CaseInsensitive) == 0){
         vdownloadImagensPequenas = true;
+        cfiledownloader->fresetCounters();
+        cfiledownloader->fdownloadMedio();
+    }
     else if(lista.compare("medium", Qt::CaseInsensitive) == 0){
         vdownloadImagensMedias = true;
-        //if(imagenspequenas == false)
-        cfiledownloader->fresetCounters();
-        cfiledownloader->fdownloadGrande();
+        if(!vusarImagensBaixaQualidade){
+            cfiledownloader->fresetCounters();
+            cfiledownloader->fdownloadGrande();
+        }
+        else
+            cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
     }
     else if(lista.compare("big", Qt::CaseInsensitive) == 0){
         vdownloadImagensGrandes = true;
         cfiledownloader->fdownloadAvatarUsuario(canilist->fretornaAvatar());
+    }
+    else if(lista.compare("ano", Qt::CaseInsensitive) == 0){
+        vdownloadImagensAno = true;
     }
     if(!vcarregaImagens.isRunning() && vdownloadImagensAcabou == true)
         vcarregaImagens = QtConcurrent::run(this, &MainWindow::fcarregaImagensSelecionadasBackground);
@@ -1045,79 +1153,121 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
     QString file;
     vdownloadImagensAcabou = false;
     QMutexLocker llocker(&vmutex);
-    for(int i = 0; i < 3; i++){
-        if(vdownloadImagensPequenas){
-            file = dirPequeno;                
-            foreach(QString id, vimagemBaixada.keys()){
-                if(vrefreshAcontecendo == true)
-                    return false;
-                if(!vimagemCarregada[id] && vimagemBaixada[id]){
-                    if(QFile::exists(file+id+".jpg")){
-                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
-                            ui->labelImagemBackground->setPixmap(lpix);
-                            vimagemCarregada[id] = true;
-                        }
-                    }
-                    else if(QFile::exists(file+id+".png")){
-                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
-                            ui->labelImagemBackground->setPixmap(lpix);
-                            vimagemCarregada[id] = true;
-                        }
+    if(vrefreshAcontecendo == true)
+        return false;
+    if(vdownloadImagensPequenas){
+        file = dirPequeno;
+        foreach(QString id, vimagemBaixada.keys()){
+            if(vrefreshAcontecendo == true)
+                return false;
+            if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                if(QFile::exists(file+id+".jpg")){
+                    if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                        ui->labelImagemBackground->setPixmap(lpix);
+                        vimagemCarregada[id] = true;
                     }
                 }
-                lpix = QPixmap();
-            }
-            vdownloadImagensPequenas = false;
-        }
-        if(vdownloadImagensMedias){
-            file = dirMedio;
-            foreach(QString id, vimagemBaixada.keys()){
-                if(vrefreshAcontecendo == true)
-                    return false;
-                if(!vimagemCarregada[id] && vimagemBaixada[id]){
-                    if(QFile::exists(file+id+".jpg")){
-                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
-                            ui->labelImagemBackground->setPixmap(lpix);
-                            vimagemCarregada[id] = true;
-                        }
-                    }
-                    else if(QFile::exists(file+id+".png")){
-                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
-                            ui->labelImagemBackground->setPixmap(lpix);
-                            vimagemCarregada[id] = true;
-                        }
+                else if(QFile::exists(file+id+".png")){
+                    if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                        ui->labelImagemBackground->setPixmap(lpix);
+                        vimagemCarregada[id] = true;
                     }
                 }
-                lpix = QPixmap();
             }
-            vdownloadImagensMedias = false;
+            lpix = QPixmap();
         }
-        if(vdownloadImagensGrandes){
-            file = dirGrande;
-            foreach(QString id, vimagemBaixadaGrande.keys()){
-                if(vrefreshAcontecendo == true)
-                    return false;
-                if(!vimagemCarregada[id] && vimagemBaixada[id]){
-                    if(QFile::exists(file+id+".jpg")){
-                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
-                            ui->labelImagemBackgroundGrande->setPixmap(lpix);
-                            vimagemCarregadaGrande[id] = true;
-                        }
-                    }
-                    else if(QFile::exists(file+id+".png")){
-                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
-                            ui->labelImagemBackgroundGrande->setPixmap(lpix);
-                            vimagemCarregadaGrande[id] = true;
-                        }
-                    }
-                }
-                lpix = QPixmap();
-            }
-            vdownloadImagensGrandes = false;
-        }
-        ui->labelImagemBackgroundGrande->clear();
-        ui->labelImagemBackground->clear();
+        vdownloadImagensPequenas = false;
     }
+    if(vdownloadImagensMedias){
+        file = dirMedio;
+        foreach(QString id, vimagemBaixada.keys()){
+            if(vrefreshAcontecendo == true)
+                return false;
+            if(!vusarImagensBaixaQualidade){
+                if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                    if(QFile::exists(file+id+".jpg")){
+                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
+                        }
+                    }
+                    else if(QFile::exists(file+id+".png")){
+                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregada[id] = true;
+                        }
+                    }
+                }
+            }
+            else{
+                if(!vimagemCarregadaGrande[id] && vimagemBaixadaGrande[id]){
+                    if(QFile::exists(file+id+".jpg")){
+                        if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregadaGrande[id] = true;
+                        }
+                    }
+                    else if(QFile::exists(file+id+".png")){
+                        if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                            ui->labelImagemBackground->setPixmap(lpix);
+                            vimagemCarregadaGrande[id] = true;
+                        }
+                    }
+                }
+            }
+            lpix = QPixmap();
+        }
+        vdownloadImagensMedias = false;
+    }
+    if(vdownloadImagensGrandes){
+        file = dirGrande;
+        foreach(QString id, vimagemBaixadaGrande.keys()){
+            if(vrefreshAcontecendo == true)
+                return false;
+            if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                if(QFile::exists(file+id+".jpg")){
+                    if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                        ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                        vimagemCarregadaGrande[id] = true;
+                    }
+                }
+                else if(QFile::exists(file+id+".png")){
+                    if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                        ui->labelImagemBackgroundGrande->setPixmap(lpix);
+                        vimagemCarregadaGrande[id] = true;
+                    }
+                }
+            }
+            lpix = QPixmap();
+        }
+        vdownloadImagensGrandes = false;
+    }
+    if(vdownloadImagensAno){
+        file = dirMedio;
+        foreach(QString id, vimagemBaixada.keys()){
+            if(vrefreshAcontecendo == true)
+                return false;
+            if(!vimagemCarregada[id] && vimagemBaixada[id]){
+                if(QFile::exists(file+id+".jpg")){
+                    if(lpix.load(file+id+".jpg", "jpg", Qt::ColorOnly)){
+                        ui->labelImagemBackground->setPixmap(lpix);
+                        vimagemCarregada[id] = true;
+                    }
+                }
+                else if(QFile::exists(file+id+".png")){
+                    if(lpix.load(file+id+".png", "png", Qt::ColorOnly)){
+                        ui->labelImagemBackground->setPixmap(lpix);
+                        vimagemCarregada[id] = true;
+                    }
+                }
+            }
+            lpix = QPixmap();
+        }
+        vbaixandoImagensAno = false;
+        vdownloadImagensAno = false;
+    }
+    ui->labelImagemBackgroundGrande->clear();
+    ui->labelImagemBackground->clear();
     vdownloadImagensAcabou = true;
     qDebug() << "Finished loading all pictures";
     emit sterminouCarregarImagens();
@@ -1286,6 +1436,11 @@ void MainWindow::on_Watching_clicked()
         vlistaAtual = "novelreading";
         ui->NumPagina->setText("Reading - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
+    else if(vlistaAtual.contains("season")){
+        vlistaAtual = "season"+QString::number(vanoBuscaAnimes);
+        vtipoAtual = "Winter";
+        on_botaoBusca_clicked();
+    }
     else{
         qDebug() << "Selected list: Watching";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
@@ -1300,6 +1455,7 @@ void MainWindow::on_Completed_clicked()
     vanimeSelecionado = 0;
     vpagina = 1;
     qDebug() << "Selected list: Completed";
+    qDebug() << vlistaAtual;
     if(vJanelaManga){
         vlistaAtual = "mangacompleted";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "mangacompleted");
@@ -1309,6 +1465,11 @@ void MainWindow::on_Completed_clicked()
         vlistaAtual = "novelcompleted";
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "novelcompleted");
         ui->NumPagina->setText("Completed - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vlistaAtual.contains("season")){
+        vlistaAtual = "season"+QString::number(vanoBuscaAnimes);
+        vtipoAtual = "Spring";
+        on_botaoBusca_clicked();
     }
     else{
         vlistaAtual = "completed";
@@ -1333,6 +1494,11 @@ void MainWindow::on_OnHold_clicked()
         vlistaAtual = "novelonhold";
         ui->NumPagina->setText("On Hold - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
     }
+    else if(vlistaAtual.contains("season")){
+        vlistaAtual = "season"+QString::number(vanoBuscaAnimes);
+        vtipoAtual = "Summer";
+        on_botaoBusca_clicked();
+    }
     else{
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
         vlistaAtual = "onhold";
@@ -1355,6 +1521,11 @@ void MainWindow::on_Dropped_clicked()
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "noveldropped");
         vlistaAtual = "noveldropped";
         ui->NumPagina->setText("Dropped - " + QString::number(vlistaSelecionada.size()) + " novels in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    }
+    else if(vlistaAtual.contains("season")){
+        vlistaAtual = "season"+QString::number(vanoBuscaAnimes);
+        vtipoAtual = "Fall";
+        on_botaoBusca_clicked();
     }
     else{
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
@@ -1425,6 +1596,23 @@ void MainWindow::on_botaoBusca_clicked()
             else{
                 qDebug() << ui->barraBusca->toPlainText() << " not found!";
                 ui->labelMensagem->setText(ui->barraBusca->toPlainText()+" not found!");
+                vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
+            }
+        }
+        else if(vlistaAtual.contains("season", Qt::CaseInsensitive)){
+            QString tempSeason = vlistaAtual;
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem,vlistaAtual+vtipoAtual);
+            if(!vlistaSelecionada.isEmpty()){
+                ui->NumPagina->setText(vtipoAtual + " " + tempSeason.remove("season") + "  - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+                vlistaAtual = vlistaAtual+vtipoAtual;
+                vanimeSelecionado = 0;
+                vpagina = 1;
+                finfoAnimeSelecionado();
+            }
+            else{
+                tempSeason = tempSeason.remove("season");
+                qDebug() << vtipoAtual + " " + tempSeason << " not found!";
+                ui->labelMensagem->setText(vtipoAtual + " " + vlistaAtual.remove("season")+" not found!");
                 vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
             }
         }
@@ -1523,6 +1711,8 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     ui->labelMensagem->setText("As listas foram atualizadas!");
     fliberaSinaisBotoes();
     vrefreshAcontecendo = false;
+    ///Deixar aqui até pensar no que fazer com isso
+    canilist->fgetListasAnoSeason();
 }
 
 void MainWindow::fmandaDiretoriosArquivos()
@@ -1621,6 +1811,134 @@ void MainWindow::on_botaoProgressoMais_clicked()
             on_botaoMudarPraLista_clicked();
         }
     }
+}
+
+void MainWindow::fAumentaProgressoID(QString ridAnime)
+{
+    fbloqueiaSinaisBotoes();
+    QString llistaAtual = vlistaSelecionada[vanimeSelecionado]->vlista;
+    QString llistaAnimeAssistindo = cleitorListaAnimes->fbuscaAnimePorIDERetornaLista(ridAnime);
+    if(llistaAnimeAssistindo.isEmpty())
+        return;
+    if(llistaAnimeAssistindo != vlistaSelecionada[vanimeSelecionado]->vlista){
+        if(llistaAnimeAssistindo.compare("Watching",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "watching");
+        }
+        else if(llistaAnimeAssistindo.compare("On Hold",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "onhold");
+        }
+        else if(llistaAnimeAssistindo.compare("Dropped",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "dropped");
+        }
+        else if(llistaAnimeAssistindo.compare("Plan to Watch",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "plantowatch");
+        }
+    }
+    for (int i = 0; i < vlistaSelecionada.size(); i++) {
+        if(vlistaSelecionada[i]->vid == ridAnime){
+            int lepisodiosTotais = 0;
+            //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais != "?")
+                lepisodiosTotais = vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+            else
+                lepisodiosTotais = INT_MAX;
+            if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
+                vlistaSelecionada[i]->vnumEpisodiosAssistidos = QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()+1);
+                finfoAnimeSelecionado();
+                QString lacao = "progresso:" + vlistaSelecionada[i]->vid;
+                QStringList lstringListAcao = lacao.split(':');
+                vlistaAcoes.insert(lstringListAcao, QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()));
+                if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() == vlistaSelecionada[i]->vnumEpisodiosTotais.toInt()){
+                    ui->boxMudarPraLista->setCurrentIndex(1);
+                    on_botaoMudarPraLista_clicked();
+                }
+            }
+        }
+    }
+    if(llistaAnimeAssistindo != llistaAtual){
+        if(llistaAtual.compare("watching",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
+        }
+        else if(llistaAnimeAssistindo.compare("onhold",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
+        }
+        else if(llistaAnimeAssistindo.compare("dropped",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
+        }
+        else if(llistaAnimeAssistindo.compare("plantowatch",Qt::CaseInsensitive) == 0){
+            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+        }
+    }
+    fliberaSinaisBotoes();
+}
+
+void MainWindow::fgetConfigurations()
+{
+    fgetMediaPlayersFromList();
+    if(jconfig.fretornaBaixaQualidade().contains("yes"))
+        vusarImagensBaixaQualidade = true;
+    if(jconfig.fretornaDownloadAutomatico().contains("yes")){
+        timerTorrent->start(jconfig.fretornaTempoDownload().toInt());
+        connect(timerTorrent, &QTimer::timeout, &jtorrent, QOverload<>::of(&janelatorrent::fautoDownload));
+    }
+}
+
+void MainWindow::fsetDownloadImagensAnimesPorAno()
+{
+    if(vdownloadImagensAcabou && !vbaixandoImagensAno){
+        if(canilist->fgetListasAnoSeason()){
+            if(!vdownloadImagensAnos.isEmpty())
+                cfiledownloader->fdownloadPorAno(vdownloadImagensAnos.takeFirst());
+            else
+                cfiledownloader->fdownloadPorAno(vanoBuscaAnimes);
+            vbaixandoImagensAno = true;
+            if(vdownloadImagensAnos.isEmpty()){
+                if(timerChecaDownloadPorAno->isActive())
+                    timerChecaDownloadPorAno->stop();
+            }
+        }
+    }
+    else{
+        if(!timerChecaDownloadPorAno->isActive())
+            timerChecaDownloadPorAno->start(20000);
+        if(!vdownloadImagensAnos.contains(vanoBuscaAnimes))
+            vdownloadImagensAnos.append(vanoBuscaAnimes);
+    }
+}
+
+void MainWindow::fsalvaNomesAlternativos()
+{
+    QFile larquivo("Configurações/nomesAlternativosAnimes.txt");
+    if(larquivo.open(QIODevice::WriteOnly)){
+        QTextStream lstreamTexto(&larquivo);
+        foreach(QString key, vcustomNomesAlternativos.keys()){
+            lstreamTexto << key << ";" << vcustomNomesAlternativos[key].join(";").trimmed() << endl;
+        }
+        larquivo.close();
+    }
+}
+
+void MainWindow::fleNomesAlternativos()
+{
+    QFile larquivo("Configurações/nomesAlternativosAnimes.txt");
+    if(larquivo.size() == 0)
+        return;
+    if(larquivo.open(QIODevice::ReadOnly)){
+        while(!larquivo.atEnd()){
+            QString lstreamTexto = larquivo.readLine();
+            QStringList lnomesAlternativos = lstreamTexto.split(";");
+            lnomesAlternativos.last() = lnomesAlternativos.last().trimmed();
+            QString id = lnomesAlternativos.takeFirst();
+            vcustomNomesAlternativos.insert(id,lnomesAlternativos);
+            cleitorListaAnimes->finsereNomeAlternativo(id,lnomesAlternativos);
+        }
+        larquivo.close();
+    }
+}
+
+void MainWindow::fgetMediaPlayersFromList()
+{
+    vPlayers = jconfig.fretornaPlayers();
 }
 
 void MainWindow::on_botaoProgressoMenos_clicked()
@@ -2151,10 +2469,15 @@ void MainWindow::on_botaoAnime_clicked()
     vlistaAtual = "watching";
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
     ui->Watching->setText("Watching");
+    ui->Completed->setText("Completed");
+    ui->OnHold->setText("On Hold");
+    ui->Dropped->setText("Dropped");
     ui->PlanToWatch->setText("Plan to Watch");
+    ui->PlanToWatch->show();
     vtipoAtual = "anime";
     ui->boxMudarPraLista->setItemText(0, "Watching");
     ui->boxMudarPraLista->setItemText(4, "Plan to Watch");
+    ui->botaoDownloadListImages->hide();
     on_Watching_clicked();
 }
 
@@ -2165,10 +2488,15 @@ void MainWindow::on_botaoManga_clicked()
     vlistaAtual = "mangareading";
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
     ui->Watching->setText("Reading");
+    ui->Completed->setText("Completed");
+    ui->OnHold->setText("On Hold");
+    ui->Dropped->setText("Dropped");
     ui->PlanToWatch->setText("Plan to Read");
+    ui->PlanToWatch->show();
     vtipoAtual = "manga";
     ui->boxMudarPraLista->setItemText(0, "Reading");
     ui->boxMudarPraLista->setItemText(4, "Plan to Read");
+    ui->botaoDownloadListImages->hide();
     on_Watching_clicked();
 }
 
@@ -2179,10 +2507,15 @@ void MainWindow::on_botaoLN_clicked()
     vlistaAtual = "novelreading";
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
     ui->Watching->setText("Reading");
+    ui->Completed->setText("Completed");
+    ui->OnHold->setText("On Hold");
+    ui->Dropped->setText("Dropped");
     ui->PlanToWatch->setText("Plan to Read");
+    ui->PlanToWatch->show();
     vtipoAtual = "novel";
     ui->boxMudarPraLista->setItemText(0, "Reading");
     ui->boxMudarPraLista->setItemText(4, "Plan to Read");
+    ui->botaoDownloadListImages->hide();
     on_Watching_clicked();
 }
 
@@ -2190,4 +2523,69 @@ void MainWindow::on_botaoDownloadAnime_clicked()
 {
     jtorrent.fprocuraAnimeEspecifico(vlistaSelecionada[vanimeSelecionado]->vnome);
     ui->janelaRotativa->setCurrentIndex(2);
+}
+
+void MainWindow::on_botaoAnimeAssistindo_clicked()
+{
+    ui->barraBusca->setPlainText(cleitorListaAnimes->fbuscaAnimePorIDERetornaTitulo(idAnimeAssistindo));
+    on_botaoBusca_clicked();
+    ui->barraBusca->clear();
+}
+
+void MainWindow::on_botaoSelecionarPastaAnime_clicked()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                    "/home", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    if(dir != ""){
+        cconfUsuario->fselecionaPastaEspecificaAnime(vlistaSelecionada[vanimeSelecionado]->vid, dir);
+    }
+}
+
+void MainWindow::on_botaoSeason_clicked()
+{
+    vanoBuscaAnimes = ui->boxSelecionaAno->currentText().toInt();
+    vJanelaSeason = true;
+    vJanelaManga = false;
+    vJanelaNovel = false;
+    vlistaAtual = "season"+QString::number(vanoBuscaAnimes);
+    vlistaSelecionada = cleitorListaAnimes->sortLista(vordem,vlistaAtual);
+    if(vlistaSelecionada.isEmpty())
+        ui->labelMensagem->setText("The list isn't loaded yet.");
+    else
+        ui->labelMensagem->setText("The images from animes that are not in some list are not downloaded by default.\n"
+                                   "If needed, you can use the Load button to download and load the images from the animes in this year.");
+    ui->NumPagina->setText(QString::number(QDate::currentDate().year()) + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    ui->Watching->setText("Winter");
+    ui->Completed->setText("Spring");
+    ui->OnHold->setText("Summer");
+    ui->Dropped->setText("Fall");
+    ui->PlanToWatch->hide();
+    vtipoAtual = "anime";
+    ui->boxMudarPraLista->setItemText(0, "Watching");
+    ui->boxMudarPraLista->setItemText(4, "Plan to Watch");
+    vanimeSelecionado = 0;
+    vpagina = 1;
+    ui->botaoDownloadListImages->show();
+    ui->boxSelecionaAno->show();
+    finfoAnimeSelecionado();
+}
+
+void MainWindow::on_botaoDownloadListImages_clicked()
+{
+    ui->labelMensagem->setText("Downloading and updating images. It can take a few minutos to download every image");
+    fsetDownloadImagensAnimesPorAno();
+}
+
+void MainWindow::on_botaoAddAlternativeTitle_clicked()
+{
+    if(!ui->barraAddNomeAlternativo->toPlainText().isEmpty()){
+        QStringList tempAnimeList;
+        tempAnimeList.append(ui->barraAddNomeAlternativo->toPlainText());
+        if(!vcustomNomesAlternativos.contains(vlistaSelecionada[vanimeSelecionado]->vid))
+            vcustomNomesAlternativos.insert(vlistaSelecionada[vanimeSelecionado]->vid, tempAnimeList);
+        else
+            vcustomNomesAlternativos[vlistaSelecionada[vanimeSelecionado]->vid].append((ui->barraAddNomeAlternativo->toPlainText()));
+        cleitorListaAnimes->finsereNomeAlternativo(vlistaSelecionada[vanimeSelecionado]->vid,tempAnimeList);
+        ui->barraAddNomeAlternativo->clear();
+    }
 }
