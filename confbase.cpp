@@ -44,6 +44,10 @@ void confBase::fcriaDiretoriosBase()
         if(!QDir().mkdir(ltempPath + QDir::separator() + "Imagens"))
             qDebug() << "Could not create path Configurações/Temp/Imagens";
     }
+    if(!QDir("Configurações/Temp/Lists").exists()){
+        if(!QDir().mkdir(ltempPath + QDir::separator() + "Lists"))
+            qDebug() << "Could not create path Configurações/Temp/Lists";
+    }
     vdiretorioImagensPequenas = limagePath + QDir::separator() + "Pequeno" + QDir::separator();
     vdiretorioImagensMedio = limagePath + QDir::separator() + "Medio" + QDir::separator();
     vdiretorioImagensGrandes = limagePath + QDir::separator() + "Grande" + QDir::separator();

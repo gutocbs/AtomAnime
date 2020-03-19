@@ -24,6 +24,7 @@ public:
     ///id, progresso
     bool fmudaProgresso(int, int);
     bool fexcluiAnime(int);
+    bool fgetListasAnoSeason();
 
     QString fretornaAvatar();
 
@@ -35,6 +36,8 @@ public slots:
 
 signals:
     void sterminouDownload(bool);
+private slots:
+    bool fgetListaAno(QString);
 private:
 //    QNetworkReply *vreply = nullptr;
     QString vtoken;

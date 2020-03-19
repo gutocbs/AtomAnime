@@ -29,6 +29,7 @@ public:
     void fbuscaPastasThread(QThread &dThread);
     void fsalvaPastasArquivos();
     void flePastasArquivos();
+    void fselecionaPastaEspecificaAnime(QString, QString);
 
 public slots:
     void fsetupListasPraBusca();

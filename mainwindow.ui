@@ -2952,8 +2952,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoRemoverdaLista">
       <property name="geometry">
        <rect>
-        <x>1130</x>
-        <y>460</y>
+        <x>1500</x>
+        <y>630</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -3092,6 +3092,70 @@ color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
        <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoSelecionarPastaAnime">
+      <property name="geometry">
+       <rect>
+        <x>1590</x>
+        <y>630</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Selecionar Pasta</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoDownloadListImages">
+      <property name="geometry">
+       <rect>
+        <x>1500</x>
+        <y>680</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Load List Images</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoAddAlternativeTitle">
+      <property name="geometry">
+       <rect>
+        <x>1500</x>
+        <y>730</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Alternative Title</string>
+      </property>
+     </widget>
+     <widget class="QPlainTextEdit" name="barraAddNomeAlternativo">
+      <property name="geometry">
+       <rect>
+        <x>1590</x>
+        <y>730</y>
+        <width>311</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="lineWrapMode">
+       <enum>QPlainTextEdit::NoWrap</enum>
       </property>
      </widget>
      <zorder>imagemAnimeAssistindo</zorder>
@@ -3253,6 +3317,10 @@ color: rgb(20, 20, 20);</string>
      <zorder>botaoAnimeAssistindo</zorder>
      <zorder>labelAnimeAssistindoTitulo</zorder>
      <zorder>labelAnimeAssistindoEpisodio</zorder>
+     <zorder>botaoSelecionarPastaAnime</zorder>
+     <zorder>botaoDownloadListImages</zorder>
+     <zorder>botaoAddAlternativeTitle</zorder>
+     <zorder>barraAddNomeAlternativo</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">
@@ -3531,7 +3599,7 @@ color: rgb(53, 68, 120);</string>
     <property name="geometry">
      <rect>
       <x>280</x>
-      <y>20</y>
+      <y>70</y>
       <width>88</width>
       <height>34</height>
      </rect>
@@ -3543,6 +3611,56 @@ color: rgb(53, 68, 120);</string>
      <string>Ajuda</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="botaoSeason">
+    <property name="geometry">
+     <rect>
+      <x>280</x>
+      <y>20</y>
+      <width>88</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: rgb(121, 121, 121);</string>
+    </property>
+    <property name="text">
+     <string>Season</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="boxSelecionaAno">
+    <property name="geometry">
+     <rect>
+      <x>460</x>
+      <y>120</y>
+      <width>88</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: white</string>
+    </property>
+   </widget>
+   <zorder>boxSelecionaAno</zorder>
+   <zorder>janelaRotativa</zorder>
+   <zorder>Dropped</zorder>
+   <zorder>Completed</zorder>
+   <zorder>PlanToWatch</zorder>
+   <zorder>OnHold</zorder>
+   <zorder>Watching</zorder>
+   <zorder>barraBusca</zorder>
+   <zorder>botaoBusca</zorder>
+   <zorder>botaoRefresh</zorder>
+   <zorder>labelRefreshTimer</zorder>
+   <zorder>botaoAnime</zorder>
+   <zorder>botaoManga</zorder>
+   <zorder>botaoLN</zorder>
+   <zorder>botaoHome</zorder>
+   <zorder>botaoConfiguracao</zorder>
+   <zorder>botaoTorrent</zorder>
+   <zorder>labelAvatar</zorder>
+   <zorder>labelUsername</zorder>
+   <zorder>botaoAjuda</zorder>
+   <zorder>botaoSeason</zorder>
   </widget>
  </widget>
  <resources/>

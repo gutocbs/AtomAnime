@@ -31,6 +31,7 @@ SOURCES += \
     confbase.cpp \
     confusuario.cpp \
     filedownloader.cpp \
+    filtros.cpp \
     janeladeconfig.cpp \
     janelatorrent.cpp \
     leitorlistaanimes.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     confbase.h \
     confusuario.h \
     filedownloader.h \
+    filtros.h \
     janeladeconfig.h \
     janelatorrent.h \
     leitorlistaanimes.h \

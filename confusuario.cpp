@@ -149,6 +149,14 @@ void confUsuario::flePastasArquivos()
     }
 }
 
+void confUsuario::fselecionaPastaEspecificaAnime(QString ridAnime, QString rdirAnime)
+{
+    if(vdiretorioEspecificoAnime.contains(ridAnime))
+        vdiretorioEspecificoAnime.remove(ridAnime);
+    vdiretorioEspecificoAnime.insert(ridAnime,rdirAnime);
+    fsalvaPastasArquivos();
+}
+
 //Aparentemente nunca entra aqui
 void confUsuario::fsetupListasPraBusca()
 {

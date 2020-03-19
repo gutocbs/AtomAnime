@@ -799,8 +799,8 @@ color: rgb(20, 20, 20);</string>
   <widget class="QLabel" name="label_18">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>50</y>
+     <x>1140</x>
+     <y>40</y>
      <width>321</width>
      <height>31</height>
     </rect>
@@ -845,24 +845,11 @@ color: rgb(20, 20, 20);</string>
     <string>Torrent configuration</string>
    </property>
   </widget>
-  <widget class="QTableView" name="tabelaFiltros">
-   <property name="geometry">
-    <rect>
-     <x>980</x>
-     <y>80</y>
-     <width>431</width>
-     <height>421</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background: white;</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_21">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>20</y>
+     <x>1140</x>
+     <y>10</y>
      <width>261</width>
      <height>21</height>
     </rect>
@@ -876,11 +863,11 @@ color: rgb(20, 20, 20);</string>
     <string>Anime download configuration</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_8">
+  <widget class="QPushButton" name="botaoFiltroAdd">
    <property name="geometry">
     <rect>
-     <x>1320</x>
-     <y>510</y>
+     <x>1360</x>
+     <y>340</y>
      <width>93</width>
      <height>28</height>
     </rect>
@@ -889,30 +876,17 @@ color: rgb(20, 20, 20);</string>
     <string>Add</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_9">
+  <widget class="QPushButton" name="botaoFiltroRemove">
    <property name="geometry">
     <rect>
-     <x>1220</x>
-     <y>510</y>
+     <x>1260</x>
+     <y>340</y>
      <width>93</width>
      <height>28</height>
     </rect>
    </property>
    <property name="text">
     <string>Remove</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>1490</x>
-     <y>90</y>
-     <width>311</width>
-     <height>591</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>desenho com info quando passar o mouse em cima</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botaoSalvar_2">
@@ -928,17 +902,597 @@ color: rgb(20, 20, 20);</string>
     <string>Redownload images</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="botaoRedownload">
+  <widget class="QFrame" name="frameplayers">
    <property name="geometry">
     <rect>
-     <x>980</x>
-     <y>570</y>
-     <width>141</width>
+     <x>940</x>
+     <y>80</y>
+     <width>441</width>
+     <height>191</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Raised</enum>
+   </property>
+   <widget class="QCheckBox" name="boxReconhecimento01">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Crunchyroll</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento02">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AnimeLab</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento03">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>50</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Funimation</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento04">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>80</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Hulu</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento05">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>100</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>VRV</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento06">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>120</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Netflix</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento11">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>90</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>mpv</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento12">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>120</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>VLC media player</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento07">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>0</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Baka MPlayer</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento08">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>30</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>BS.Player</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento09">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>50</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>DivX Player</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento10">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>70</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Media Player Classic</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento18">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>120</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>w</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento14">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>30</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Winamp</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento16">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>70</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>x</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento15">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>50</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Windows Media Player</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento17">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>90</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>z</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="boxReconhecimento13">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>0</y>
+      <width>81</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>WebTorrent Desktop</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QComboBox" name="boxListaFiltros">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>401</y>
+     <width>241</width>
      <height>31</height>
     </rect>
    </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: white;</string>
+   </property>
+   <item>
+    <property name="text">
+     <string>Prefer fansub</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Prefer resolution</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Prefer language</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Download anime from list</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Have keyword in description</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Do not choose fansub</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Do not choose reslution</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Do not choose language</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Do not download from list</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Do not have keywork in description</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPlainTextEdit" name="boxFiltroEspecifico">
+   <property name="geometry">
+    <rect>
+     <x>1170</x>
+     <y>400</y>
+     <width>191</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tabelaAnimes">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>520</y>
+     <width>451</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <column>
+    <property name="text">
+     <string>Anime</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>id</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>watching</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>completed</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>onhold</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>dropped</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>plantowatch</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="tabelaFiltros">
+   <property name="geometry">
+    <rect>
+     <x>1460</x>
+     <y>30</y>
+     <width>421</width>
+     <height>411</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <column>
+    <property name="text">
+     <string>index</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Nome</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="botaoWatching">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>440</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
    <property name="text">
-    <string>Re-Downlaod Images</string>
+    <string>Watching</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoCompleted">
+   <property name="geometry">
+    <rect>
+     <x>1020</x>
+     <y>440</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Complete</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoOnHold">
+   <property name="geometry">
+    <rect>
+     <x>1120</x>
+     <y>440</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>On Hold</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoDropped">
+   <property name="geometry">
+    <rect>
+     <x>1220</x>
+     <y>440</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Dropped</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoPlanToWatch">
+   <property name="geometry">
+    <rect>
+     <x>1320</x>
+     <y>440</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Plan to Watch</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="boxNomeFiltro">
+   <property name="geometry">
+    <rect>
+     <x>920</x>
+     <y>360</y>
+     <width>241</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoOk">
+   <property name="geometry">
+    <rect>
+     <x>1360</x>
+     <y>380</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>ok</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoEnableDisable">
+   <property name="geometry">
+    <rect>
+     <x>990</x>
+     <y>470</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>EnableDisable</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoCheck">
+   <property name="geometry">
+    <rect>
+     <x>1090</x>
+     <y>470</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Check</string>
+   </property>
+  </widget>
+  <widget class="QTableWidget" name="tabelaAnimesSelecionados">
+   <property name="geometry">
+    <rect>
+     <x>1440</x>
+     <y>520</y>
+     <width>451</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background: white;</string>
+   </property>
+   <column>
+    <property name="text">
+     <string>Anime</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>id</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>watching</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>completed</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>onhold</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>dropped</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>plantowatch</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QPushButton" name="botaoInserirAnime">
+   <property name="geometry">
+    <rect>
+     <x>1360</x>
+     <y>620</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Inserir</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="botaoRemoverAnime">
+   <property name="geometry">
+    <rect>
+     <x>1360</x>
+     <y>650</y>
+     <width>93</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Remover</string>
    </property>
   </widget>
  </widget>

@@ -10,10 +10,6 @@ class anime : public QObject
     Q_OBJECT
 public:
     explicit anime(QObject *parent = nullptr);
-    //Eu realmente preciso disso?
-//    bool operator<(const anime& other) const {
-//            return vnome < other.vnome; // sort by namefile
-//    }
     QString vnome;
     QString vnomeIngles;
     QString vnomeJapones;

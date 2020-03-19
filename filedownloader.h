@@ -7,6 +7,7 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QPointer>
+#include <QDate>//Checar qual ano estamos
 
 #include "leitorlistaanimes.h"
 #include "confbase.h"
@@ -35,6 +36,7 @@ signals:
     void sterminouLista(QString);
 
 public slots:
+    void fsetDownload(bool);
     void fdownloadMedio();
     void fdownloadGrande();
     void fdownloadPequeno();
@@ -43,6 +45,8 @@ public slots:
     void fsetNextSmall();
     void fresetCounters();
     void fterminouAvatar();
+    void fdownloadPorAno(int);
+    void fsetNextAno();
 
 private slots:
     void onFinished(QNetworkReply*);
@@ -60,10 +64,14 @@ private:
     QString vsaveFilePath;
     QString vlink;
 
+    bool vdownloadPequeno  = false;
     bool vfileIsOpen;
     bool vterminouLista;
+    bool vdownloadAcontecendo;
+    bool vdownloadAnoAcontecendo;
     int vlista;
     int vindexLista;
+    int ano;
 };
 
 #endif // FILEDOWNLOADER_H
