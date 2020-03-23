@@ -13,13 +13,13 @@
 #include "anitomy/anitomy.h"
 #include "leitorlistaanimes.h"
 #include "janeladeconfig.h"
+#include "formatapalavras.h"
 
 class confUsuario : public QObject
 {
     Q_OBJECT
 public:
     explicit confUsuario(QObject *parent = nullptr);
-    QString fsimplificaNomeArquivo(QString);
     QString fretornaDiretorioEspecifico(int);
     QVector<QString> fretornaDiretoriosAnimes();
     void fbuscaDiretoriosAnimes();
@@ -38,10 +38,11 @@ signals:
     void schecouPastas();
 
 private:
-    QVector<anime*> vlistaAnimes;
     janeladeconfig *jconfig;
     QPointer<leitorlistaanimes> cleitorlistaanimes;
+    FormataPalavras formatador;
 
+    QVector<anime*> vlistaAnimes;
     QVector<QString> vdiretorioAnimes;
 
     QMap<QString, QString> vdiretorioEspecificoAnime;

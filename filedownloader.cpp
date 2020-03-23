@@ -30,6 +30,7 @@ void filedownloader::fsetConfBase(confBase *rconfbase){
 
 void filedownloader::onFinished(QNetworkReply * reply)
 {
+//    qDebug() << vfile->fileName() << reply->errorString();
     switch(reply->error())
     {
         case QNetworkReply::NoError:
@@ -62,7 +63,7 @@ void filedownloader::onReadyRead()
         vfile->waitForBytesWritten(30000);
     }
     else{
-        //qWarning() << vfile->errorString();// << "- Id:" << vlistaSelecionada[vindexLista]->vid << "- Medium image download failed";
+//        qWarning() << vfile->errorString();// << "- Id:" << vlistaSelecionada[vindexLista]->vid << "- Medium image download failed";
         vfile->remove();
     }
 }
@@ -104,11 +105,9 @@ void filedownloader::fdownloadTorrent(QString fileURL, QString torrentName)
     QNetworkRequest lrequest;
     lrequest.setUrl(QUrl(fileURL));
     vreply = vmanager->get(lrequest);
-
     vfile = new QFile(this);
     vfile->setFileName(lsaveFilePath);
     vfile->open(QIODevice::WriteOnly);
-
     connect(vmanager,SIGNAL(finished(QNetworkReply*)),this,SLOT(onFinished(QNetworkReply*)));
     connect(vreply,SIGNAL(readyRead()),this,SLOT(onReadyRead()));
     connect(vreply,SIGNAL(finished()),this,SIGNAL(storrent()));

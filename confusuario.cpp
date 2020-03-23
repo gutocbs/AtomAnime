@@ -20,36 +20,12 @@ QVector<QString> confUsuario::fretornaDiretoriosAnimes(){
     return vdiretorioAnimes;
 }
 
-QString confUsuario::fsimplificaNomeArquivo(QString rnomeArquivo){
-    anitomy::Anitomy lanitomy;
-    lanitomy.Parse(rnomeArquivo.toStdWString());
-    const auto& lelements = lanitomy.elements();
-    rnomeArquivo = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
-    rnomeArquivo = rnomeArquivo.toLower();
-    rnomeArquivo.remove(".");
-    rnomeArquivo.remove("?");
-    rnomeArquivo.remove(":");
-    rnomeArquivo.remove("-");
-
-    rnomeArquivo.remove("s1");
-    rnomeArquivo.remove("s2");
-    rnomeArquivo.remove("s3");
-    rnomeArquivo.remove("s4");
-    rnomeArquivo.remove("s01");
-    rnomeArquivo.remove("s02");
-    rnomeArquivo.remove("s03");
-    rnomeArquivo.remove("s04");
-    rnomeArquivo.remove("season 1");
-    rnomeArquivo.remove("season 2");
-    rnomeArquivo.remove("season 3");
-    rnomeArquivo.remove("season 4");
-    rnomeArquivo.remove("/");
-    rnomeArquivo.remove("♥");
-    rnomeArquivo = rnomeArquivo.simplified();
-    return rnomeArquivo;
-}
-
 void confUsuario::fbuscaDiretoriosAnimes(){
+    anitomy::Anitomy lanitomy;
+    if(this->thread()->isInterruptionRequested()){
+        this->thread()->exit(0);
+        return;
+    }
     qDebug() << "Searching for anime folders";
     //Busca cada diretorio existente nas configurações
     for(int i = 0; i < vdiretorioAnimes.size(); i++){
@@ -57,13 +33,18 @@ void confUsuario::fbuscaDiretoriosAnimes(){
         QDirIterator lit(vdiretorioAnimes[i], QDir::Dirs| QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
         while(lit.hasNext()){
             QFile lfile(lit.next());
+            lanitomy.Parse(lit.fileName().toStdWString());
+            const auto& lelements = lanitomy.elements();
+            //Usamos isso para pegar o número do episódio e o nome do anime a partir do nome do arquivo
+            QString lfileName = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
             //Pega o nome de cada diretorio e divide, pegando apenas o nome do anime
-            QString lnomeAnime = fsimplificaNomeArquivo(lit.fileName());
             //Compara o nome do anime com os animes da lista
             for(int w = 0; w < vlistaAnimes.size(); w++){
+                if(this->thread()->isInterruptionRequested()){
+                    this->thread()->exit(0);
+                    return;
+                }
                 //Anitomy, aqui, simplifica os nomes dos anime para garantir que a função vai comparar os nomes certos
-                QString lnomeAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnome);
-                QString lnomeInglesAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeIngles);
                 //Compara os nomes, sempre ignorando letras maiusculas e minusculas para garantir que o anime será encontrado.
                 if(vdiretorioEspecificoAnime.contains(vlistaAnimes[w]->vid)){
                     if(!vdiretorioEspecificoAnime[vlistaAnimes[w]->vid].isEmpty()){
@@ -75,12 +56,16 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                             vdiretorioEspecificoAnime.remove(vlistaAnimes[w]->vid);
                     }
                 }
-                if(lnomeAnime.compare(lnomeAnimeLista,Qt::CaseInsensitive) == 0 && lnomeAnime.isEmpty() == false){
+                if(this->thread()->isInterruptionRequested()){
+                    this->thread()->exit(0);
+                    return;
+                }
+                if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnome)){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else if(lnomeAnime.compare(lnomeInglesAnimeLista, Qt::CaseInsensitive) == 0 && lnomeInglesAnimeLista.isEmpty() == false){
+                else if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeIngles)){
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
@@ -88,12 +73,13 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 else{
                     //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
                     //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
-                    for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
-                        QString lnomeAlternativoAnimeLista = fsimplificaNomeArquivo(vlistaAnimes[w]->vnomeAlternativo.at(z));
-                        if(lnomeAnime.compare(lnomeAlternativoAnimeLista, Qt::CaseInsensitive) == 0){
-                            vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
-                            vlistaAnimes.remove(w);
-                            break;
+                    if(vlistaAnimes[w]->vnomeAlternativo.size() != 0){
+                        for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
+                            if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeAlternativo.at(z))){
+                                vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
+                                vlistaAnimes.remove(w);
+                                break;
+                            }
                         }
                     }
                 }
@@ -113,7 +99,7 @@ void confUsuario::fmostraPastas(){
 void confUsuario::fbuscaPastasThread(QThread &dThread)
 {
     vlista = 0;
-    connect(&dThread, &QThread::started, this, &confUsuario::fsetupListasPraBusca);
+    connect(&dThread, &QThread::started, this, &confUsuario::fsetupListasPraBusca, Qt::QueuedConnection);
 }
 
 void confUsuario::fsalvaPastasArquivos()

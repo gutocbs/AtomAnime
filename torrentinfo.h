@@ -18,7 +18,9 @@ public:
     QString vresolucao;
     QString vsize;
     QString vtorrentInfoLink;
+    QString vlista;
     QCheckBox vbox;
+    bool vbaixar;
 signals:
 
 public slots:

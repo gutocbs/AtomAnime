@@ -67,7 +67,12 @@
    </column>
    <column>
     <property name="text">
-     <string/>
+     <string>prioridade</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>index</string>
     </property>
    </column>
   </widget>
@@ -135,7 +140,7 @@
     <string>Abrir link </string>
    </property>
   </widget>
-  <widget class="QPushButton" name="botaoDownload_4">
+  <widget class="QPushButton" name="botaoSelectSubForTorrent">
    <property name="geometry">
     <rect>
      <x>230</x>
@@ -151,7 +156,7 @@
     <string>Selecionar esse sub para este anime</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="botaoDownload_5">
+  <widget class="QPushButton" name="botaoSearchThisanime">
    <property name="geometry">
     <rect>
      <x>530</x>

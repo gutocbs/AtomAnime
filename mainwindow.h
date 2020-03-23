@@ -28,6 +28,7 @@
 
 #include "janeladeconfig.h"
 #include "janelatorrent.h"
+#include "torrenttab.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -121,12 +122,14 @@ private slots:
     void fInfoAnimeTorrent(QString);
     void fVerificaAnimeAberto();
     void fMostraAnimeAberto(QString, QString, QString);
-    void fAumentaProgressoID(QString);
+    void fAumentaProgressoID(QString, QString);
     void fgetMediaPlayersFromList();
     void fgetConfigurations();
     void fsetDownloadImagensAnimesPorAno();
     void fsalvaNomesAlternativos();
     void fleNomesAlternativos();
+
+    void on_botaoAjuda_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -178,6 +181,7 @@ private:
     bool vJanelaNovel = false;
     bool vJanelaSeason = false;
     bool vbaixandoImagensAno = false;
+    bool vbaixaECarregaAnos = false;
 
     //Cofigurações
     bool vusarImagensBaixaQualidade;
@@ -198,6 +202,6 @@ private:
 
     //Janelas
     janeladeconfig jconfig;
-    janelatorrent jtorrent;
+    TorrentTab ttorrent;
 };
 #endif // MAINWINDOW_H

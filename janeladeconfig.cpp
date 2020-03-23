@@ -190,11 +190,11 @@ void janeladeconfig::fleArquivoConfig(){
                     ui->boxReconhecimento14->setCheckState(Qt::Checked);
                 if(vPlayers.contains("Windows Media Player"))
                     ui->boxReconhecimento15->setCheckState(Qt::Checked);
-                if(vPlayers.contains("x"))
+                if(vPlayers.contains("KissAnime"))
                     ui->boxReconhecimento16->setCheckState(Qt::Checked);
-                if(vPlayers.contains("z"))
+                if(vPlayers.contains("CRUnchyyyrolll"))
                     ui->boxReconhecimento17->setCheckState(Qt::Checked);
-                if(vPlayers.contains("w"))
+                if(vPlayers.contains("whatisthisthing"))
                     ui->boxReconhecimento18->setCheckState(Qt::Checked);
             }
         }
@@ -229,6 +229,44 @@ void janeladeconfig::flimpaFiltros()
     ui->boxFiltroEspecifico->clear();
     ui->boxNomeFiltro->clear();
     ui->boxListaFiltros->setCurrentIndex(0);
+}
+
+void janeladeconfig::fselectSubFromTorrent(QString id, QString sub)
+{
+    flimpaFiltros();
+    on_botaoFiltroAdd_clicked();
+    ui->boxNomeFiltro->setPlainText(cleitor->fbuscaAnimePorIDERetornaTitulo(id) + " Select Fansub " + sub);
+    ui->boxFiltroEspecifico->setPlainText(sub);
+    ui->boxListaFiltros->setCurrentIndex(0);
+    QModelIndexList selectAnimes = ui->tabelaAnimes->selectionModel()->selectedRows();
+    ui->tabelaAnimes->selectRow(0);
+    for(int i = 0; i < ui->tabelaAnimes->rowCount(); i++){
+       if(ui->tabelaAnimes->item(i,1)->text().compare(id) == 0){
+           ui->tabelaAnimes->selectRow(i);
+           on_botaoInserirAnime_clicked();
+           break;
+       }
+    }
+    on_botaoOk_clicked();
+}
+
+void janeladeconfig::fsalvaFiltros()
+{
+    QFile larquivoFiltros("Configurações/animeFilters.txt");
+    if(larquivoFiltros.open(QIODevice::WriteOnly)){
+        QTextStream lstreamTexto(&larquivoFiltros);
+        for(int i = 0; i < vfiltrosAnimes.size(); i++){
+            lstreamTexto << vfiltrosAnimes[i]->nome + ";";
+            lstreamTexto << vfiltrosAnimes[i]->filtroDeCondicao + ";";
+            lstreamTexto << vfiltrosAnimes[i]->filtroEspecifico + ";";
+            if(vfiltrosAnimes[i]->Ativo)
+                lstreamTexto << "true;";
+            else
+                lstreamTexto << "false;";
+            lstreamTexto << vfiltrosAnimes[i]->idAnimesAfetados.join(";").trimmed() << endl;
+        }
+        larquivoFiltros.close();
+    }
 }
 
 QByteArray janeladeconfig::fretornaUsuario(){
@@ -359,11 +397,11 @@ QStringList janeladeconfig::fretornaPlayers()
     if(ui->boxReconhecimento15->isChecked())
         vPlayers.append("Windows Media Player");
     if(ui->boxReconhecimento16->isChecked())
-        vPlayers.append("x");
+        vPlayers.append("KissAnime");
     if(ui->boxReconhecimento17->isChecked())
-        vPlayers.append("z");
+        vPlayers.append("CRUnchyyyrolll");
     if(ui->boxReconhecimento18->isChecked())
-        vPlayers.append("w");
+        vPlayers.append("whatisthisthing");
     return vPlayers;
 }
 
@@ -394,24 +432,6 @@ void janeladeconfig::on_botaoSalvar_clicked()
         for(int i = 0; i < vPlayers.size(); i++){
             if(!vPlayers.at(i).isEmpty())
                 lstreamTexto << ";" << vPlayers.at(i);
-        }
-        larquivo.close();
-    }
-    QFile larquivoFiltros("Configurações/animeFilters.txt");
-    if(larquivo.open(QIODevice::WriteOnly)){
-        QTextStream lstreamTexto(&larquivo);
-        for(int i = 0; i < vfiltrosAnimes.size(); i++){
-            lstreamTexto << vfiltrosAnimes[i]->nome + ";";
-            lstreamTexto << vfiltrosAnimes[i]->filtroDeCondicao + ";";
-            lstreamTexto << vfiltrosAnimes[i]->filtroEspecifico + ";";
-            if(vfiltrosAnimes[i]->Ativo)
-                lstreamTexto << "true;";
-            else
-                lstreamTexto << "false;";
-            for(int w = 0; w < vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-                lstreamTexto << vfiltrosAnimes[i]->idAnimesAfetados[w] + ";";
-            }
-            lstreamTexto << endl;
         }
         larquivo.close();
     }
@@ -660,8 +680,9 @@ void janeladeconfig::fupdateTabelaFiltros()
 //Limpa tabela e salva tudo num ponteiro, adicionando na tabela de filtros
 void janeladeconfig::on_botaoOk_clicked()
 {
+    if(ui->boxNomeFiltro->toPlainText().isEmpty())
+        return;
     QPointer<Filtros> f(new Filtros);
-    qDebug() << ui->tabelaAnimesSelecionados->rowCount();
     QModelIndexList select = ui->tabelaAnimesSelecionados->selectionModel()->selectedRows();
     for(int i = 0; i < ui->tabelaAnimesSelecionados->rowCount(); i++){
         f->idAnimesAfetados.append(ui->tabelaAnimesSelecionados->item(i,1)->text());
@@ -677,6 +698,7 @@ void janeladeconfig::on_botaoOk_clicked()
 
 void janeladeconfig::on_botaoCheck_clicked()
 {
+    on_botaoFiltroAdd_clicked();
     flimpaFiltros();
     QModelIndexList select = ui->tabelaFiltros->selectionModel()->selectedRows();
     int index = ui->tabelaFiltros->item(select.at(0).row(),0)->text().toInt();
