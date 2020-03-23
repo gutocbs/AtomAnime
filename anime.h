@@ -24,6 +24,7 @@ public:
     QString vsinopse;
     QString vid;
     QString vseason;
+    QString vSeasonSemAno;
     QString vlista; //Esse atributo será usado para a função de busca e para função de mudar a lista do anime
     QString vformato; //Usado pra organizar a lista
     QString vdataEpisodio;

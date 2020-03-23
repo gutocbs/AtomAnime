@@ -199,6 +199,7 @@ void confUsuario::fsetupListasPraBusca()
         this->thread()->exit(0);
         fsalvaPastasArquivos();
     }
+    cleitorlistaanimes->fcarregaListaAnoEmThread();
 }
 
 void confUsuario::frecebeListaAnime(leitorlistaanimes *rlistaAnime)

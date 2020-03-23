@@ -21,9 +21,6 @@ bool FormataPalavras::fcomparaNomes(QString rnome1, QString rnome2)
     if(fremoveSeason(rnome1).compare(fremoveSeason(rnome2)) == 0)
         return true;
 
-    if(rnome1.contains("chihayafuru", Qt::CaseInsensitive) && rnome2.contains("chihayafuru", Qt::CaseInsensitive))
-        qDebug() << rnome1 << rnome2;
-
     if(fremoveCaracteresEspeciais(rnome1).compare(fremoveCaracteresEspeciais(rnome2)) == 0)
         return true;
 
