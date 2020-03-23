@@ -372,7 +372,7 @@ QString anilist::fretornaAvatar(){
 
 void anilist::fbaixaListaThread(QThread &cThread)
 {
-    connect(&cThread, SIGNAL(started()), this, SLOT(fgetList()));
+    connect(&cThread, SIGNAL(started()), this, SLOT(fgetList()), Qt::QueuedConnection);
 }
 
 void anilist::frecebeAutorizacao(QString ruser, QString rauthcode)

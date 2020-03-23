@@ -13,7 +13,7 @@ public:
     QString filtroDeCondicao;
     QString filtroEspecifico;
     QString lista;
-    QVector<QString> idAnimesAfetados;
+    QStringList idAnimesAfetados;
     bool Ativo;
 
 signals:

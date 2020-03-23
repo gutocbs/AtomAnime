@@ -32,6 +32,7 @@ SOURCES += \
     confusuario.cpp \
     filedownloader.cpp \
     filtros.cpp \
+    formatapalavras.cpp \
     janeladeconfig.cpp \
     janelatorrent.cpp \
     leitorlistaanimes.cpp \
@@ -54,7 +55,8 @@ SOURCES += \
     robotlib/Size.cc \
 #    robotlib/Timer.cc \
     robotlib/Window.cc \
-    torrentinfo.cpp
+    torrentinfo.cpp \
+    torrenttab.cpp
 
 HEADERS += \
     anilist.h \
@@ -72,6 +74,7 @@ HEADERS += \
     confusuario.h \
     filedownloader.h \
     filtros.h \
+    formatapalavras.h \
     janeladeconfig.h \
     janelatorrent.h \
     leitorlistaanimes.h \
@@ -97,13 +100,15 @@ HEADERS += \
 #    robotlib/Timer.h \
 #    robotlib/Types.h \
     robotlib/Window.h \
-    torrentinfo.h
+    torrentinfo.h \
+    torrenttab.h
 
 FORMS += \
     janeladeconfig.ui \
     janelatorrent.ui \
     mainwindow.ui \
-    mainwindow_copy.ui
+    mainwindow_copy.ui \
+    torrenttab.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

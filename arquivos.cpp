@@ -13,18 +13,10 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
     anitomy::Anitomy lanitomy;
     lanitomy.Parse(rfileName.toStdWString());
     const auto& lelements = lanitomy.elements();
-    //Usamos isso para pegar o nome do anime a partir do nome do arquivo
+    //Usamos isso para pegar o número do episódio e o nome do anime a partir do nome do arquivo
     rfileName = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
-    //E pegar o número do episódio do arquivo
     int lepisodioAnime = QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber)).toInt();
-    lanitomy.Parse(rnomeAnime.toStdWString());
-    //Alguns animes tem títulos complicados, usando Season 2 ou 2 no título
-    //Anitomy, nesse caso, remove tudo o que não é essencial ao nome
-    rnomeAnime = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
-    //Após isso, simplificamos o nome de tudo, removendo tudo o que pode causar falhas na comparação e não é importante para o título
-    rfileName = fremoveCaracteresDiferentes(rfileName);
-    rnomeAnime = fremoveCaracteresDiferentes(rnomeAnime);
-    rnomeAnimeIngles = fremoveCaracteresDiferentes(rnomeAnimeIngles);
+
     int repisodiosTotais = 0;
     if(rtemporada != 1)
         repisodiosTotais = fcomparaSeasons(rnomeAnime,lepisodioAnime, rtemporada);
@@ -32,20 +24,22 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
     //Por esse motivo, é dado o número 1 como número de episódio, assim o programa consegue reconhecer como episódio não visto
     if(lepisodioAnime == 0)
         lepisodioAnime++;
+
+
     //Episódios totais é a variável que conta todos os episódios do anime, em todas as seasons. Caso algum sub coloque, por exemplo
     //One Piece episódio 201, ele ainda vai ser lido e saberemos qual o episódio/temporada certa.
-    if(rfileName.compare(rnomeAnime, Qt::CaseInsensitive) == 0 && (lepisodioAnime == repisodioAnime+1 ||
+    if(formatador.fcomparaNomes(rfileName,rnomeAnime) && (lepisodioAnime == repisodioAnime+1 ||
                                                                    lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
     }
-    else if(rfileName.compare(rnomeAnimeIngles, Qt::CaseInsensitive) == 0 && (lepisodioAnime == repisodioAnime+1 ||
+    else if(formatador.fcomparaNomes(rfileName, rnomeAnimeIngles) && (lepisodioAnime == repisodioAnime+1 ||
             lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
     }
     else{
         for(int i = 0; i < rnomesAlternativosAnime.size(); i++){
-            if(rfileName.compare(rnomesAlternativosAnime.at(i), Qt::CaseInsensitive) == 0 && (lepisodioAnime == repisodioAnime+1 ||
-                                                                                lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
+            if(formatador.fcomparaNomes(rfileName,rnomesAlternativosAnime.at(i)) && (lepisodioAnime == repisodioAnime+1 ||
+                                        lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
                 return true;
             }
         }
@@ -96,7 +90,6 @@ QString arquivos::fprocuraEpisodio(anime *ranimeBuscado){
 QString arquivos::fprocuraEpisodioEspecifico(anime *ranimeBuscado, int rEpisodioBuscado){
     //Verifica se a função retorna um valor que não está vazio, ou seja
     //Se existe uma pasta com o nome do anime
-    qDebug() << ranimeBuscado->vid << ranimeBuscado->vnome;
     if(!cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()).isEmpty()){
         //Começa a iterar a pasta em busca das pastas de animes
         QDirIterator lit(cconfUsuario->fretornaDiretorioEspecifico(ranimeBuscado->vid.toInt()), QDirIterator::Subdirectories);
@@ -134,40 +127,6 @@ QString arquivos::fprocuraEpisodioEspecifico(anime *ranimeBuscado, int rEpisodio
     return "";
 }
 
-QString arquivos::fremoveCaracteresDiferentes(QString rnome)
-{
-    rnome = rnome.toLower();
-    rnome.remove(".");
-    rnome.remove("?");
-    rnome.remove("!");
-    rnome.remove(":");
-    rnome.remove("-");
-    rnome.remove("ii");
-    rnome.remove("iii");
-    rnome.remove("s1");
-    rnome.remove("s2");
-    rnome.remove("s3");
-    rnome.remove("s4");
-    rnome.remove("s01");
-    rnome.remove("s02");
-    rnome.remove("s03");
-    rnome.remove("s04");
-    rnome.remove("season 1");
-    rnome.remove("season 2");
-    rnome.remove("season 3");
-    rnome.remove("season 4");
-    rnome.remove("1");
-    rnome.remove("2");
-    rnome.remove("3");
-    rnome.remove("4");
-    rnome.remove("/");
-    rnome.replace("☆", " ");
-    rnome.replace("△", " ");
-    rnome.replace("♥", " ");
-    rnome = rnome.simplified();
-    return rnome;
-}
-
 bool arquivos::fabreEpisodio(QByteArray rcaminhoArquivo){
     if(!rcaminhoArquivo.isEmpty()){
         QDesktopServices::openUrl(QUrl("file:///"+rcaminhoArquivo,QUrl::TolerantMode));
@@ -188,82 +147,103 @@ void arquivos::frecebeAnimes(leitorlistaanimes* cleitorlistaanimes)
 
 int arquivos::fcomparaSeasons(QString rnome, int repisodio, int rtemporada)
 {
-    QString lnomeSimplificado;
     int lepisodiosTotais = 0;
-    //Mano, confuso. Basicamente, eu comparo o nome do anime com o nome dos outros animes na lista.
+    //Compara o nome do anime com o nome dos outros animes na lista.
     //Se forem o mesmo anime, checo se são animes ou ovas/filmes.
     //Se forem animes, checo se a temporada é diferente da que eu busco, e caso for menor, eu só somo todos os episódios
     //Pra obter o número total de episódios
+    rnome = formatador.fremoveTudo(rnome);
+
+    if(vEpisodiosTotaisPorAnime.contains(rnome))
+        return vEpisodiosTotaisPorAnime[rnome];
+
+    QString nomeAnimeTemp;
+
     vlistaSelecionada = cleitorlistaanimes->retornaListaWatching();
     for(int i = 0; i < vlistaSelecionada.size(); i++){
-        lnomeSimplificado = fremoveCaracteresDiferentes(vlistaSelecionada[i]->vnome);
-        if(vlistaSelecionada[i]->vnome.contains(rnome, Qt::CaseInsensitive) && vlistaSelecionada[i]->vtemporada < rtemporada
+        nomeAnimeTemp = formatador.fremoveTudo(vlistaSelecionada[i]->vnome);
+        if(rnome.compare(nomeAnimeTemp) == 0 && vlistaSelecionada[i]->vtemporada < rtemporada
                 && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
             if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
                 if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
                     lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
                 }
-                else
+                else{
+                    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
                     return lepisodiosTotais;
-            }
-        }
-    }
-    vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
-    for(int i = 0; i < vlistaSelecionada.size(); i++){
-        lnomeSimplificado = fremoveCaracteresDiferentes(vlistaSelecionada[i]->vnome);
-        if(vlistaSelecionada[i]->vnome.contains(rnome, Qt::CaseInsensitive) && vlistaSelecionada[i]->vtemporada < rtemporada
-                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
-            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
-                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
-                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
                 }
-                else
-                    return lepisodiosTotais;
-            }
-        }
-    }
-    vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
-    for(int i = 0; i < vlistaSelecionada.size(); i++){
-        lnomeSimplificado = fremoveCaracteresDiferentes(vlistaSelecionada[i]->vnome);
-        if(vlistaSelecionada[i]->vnome.contains(rnome, Qt::CaseInsensitive) && vlistaSelecionada[i]->vtemporada < rtemporada
-                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
-            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
-                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
-                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
-                }
-                else
-                    return lepisodiosTotais;
-            }
-        }
-    }
-    vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
-    for(int i = 0; i < vlistaSelecionada.size(); i++){
-        lnomeSimplificado = fremoveCaracteresDiferentes(vlistaSelecionada[i]->vnome);
-        if(vlistaSelecionada[i]->vnome.contains(rnome, Qt::CaseInsensitive) && vlistaSelecionada[i]->vtemporada < rtemporada
-                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
-            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
-                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
-                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
-                }
-                else
-                    return lepisodiosTotais;
-            }
-        }
-    }
-    vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
-    for(int i = 0; i < vlistaSelecionada.size(); i++){
-        lnomeSimplificado = fremoveCaracteresDiferentes(vlistaSelecionada[i]->vnome);
-        if(vlistaSelecionada[i]->vnome.contains(rnome, Qt::CaseInsensitive) && vlistaSelecionada[i]->vtemporada < rtemporada
-                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
-            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
-                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
-                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
-                }
-                else
-                    return lepisodiosTotais;
             }
         }
     }
 
+    vlistaSelecionada = cleitorlistaanimes->retornaListaCompleted();
+    for(int i = 0; i < vlistaSelecionada.size(); i++){
+        nomeAnimeTemp = formatador.fremoveTudo(vlistaSelecionada[i]->vnome);
+        if(rnome.compare(nomeAnimeTemp) == 0 && vlistaSelecionada[i]->vtemporada < rtemporada
+                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
+                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
+                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+                }
+                else{
+                    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
+                    return lepisodiosTotais;
+                }
+            }
+        }
+    }
+
+    vlistaSelecionada = cleitorlistaanimes->retornaListaOnHold();
+    for(int i = 0; i < vlistaSelecionada.size(); i++){
+        nomeAnimeTemp = formatador.fremoveTudo(vlistaSelecionada[i]->vnome);
+        if(rnome.compare(nomeAnimeTemp) == 0 && vlistaSelecionada[i]->vtemporada < rtemporada
+                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
+                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
+                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+                }
+                else{
+                    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
+                    return lepisodiosTotais;
+                }
+            }
+        }
+    }
+
+    vlistaSelecionada = cleitorlistaanimes->retornaListaDropped();
+    for(int i = 0; i < vlistaSelecionada.size(); i++){
+        nomeAnimeTemp = formatador.fremoveTudo(vlistaSelecionada[i]->vnome);
+        if(rnome.compare(nomeAnimeTemp) == 0 && vlistaSelecionada[i]->vtemporada < rtemporada
+                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
+                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
+                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+                }
+                else{
+                    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
+                    return lepisodiosTotais;
+                }
+            }
+        }
+    }
+
+    vlistaSelecionada = cleitorlistaanimes->retornaListaPlanToWatch();
+    for(int i = 0; i < vlistaSelecionada.size(); i++){
+        nomeAnimeTemp = formatador.fremoveTudo(vlistaSelecionada[i]->vnome);
+        if(rnome.compare(nomeAnimeTemp) == 0 && vlistaSelecionada[i]->vtemporada < rtemporada
+                && vlistaSelecionada[i]->vformato == "TV"){ //DUVIDA NISSO DA TV. SERÁ QUE OVAS CONTAM PRO INDEX DO HORRIBLE?
+            if(vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() != 0){
+                if(lepisodiosTotais+vlistaSelecionada[i]->vnumEpisodiosTotais.toInt() < repisodio){
+                    lepisodiosTotais += vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+                }
+                else{
+                    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
+                    return lepisodiosTotais;
+                }
+            }
+        }
+    }
+
+    vEpisodiosTotaisPorAnime.insert(rnome,lepisodiosTotais);
     return lepisodiosTotais;
 }

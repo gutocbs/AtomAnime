@@ -1083,7 +1083,7 @@ color: rgb(20, 20, 20);</string>
      </rect>
     </property>
     <property name="text">
-     <string>w</string>
+     <string>whatisthisthing</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="boxReconhecimento14">
@@ -1109,7 +1109,7 @@ color: rgb(20, 20, 20);</string>
      </rect>
     </property>
     <property name="text">
-     <string>x</string>
+     <string>KissAnime</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="boxReconhecimento15">
@@ -1135,7 +1135,7 @@ color: rgb(20, 20, 20);</string>
      </rect>
     </property>
     <property name="text">
-     <string>z</string>
+     <string>CRUnchyyyrolll</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="boxReconhecimento13">

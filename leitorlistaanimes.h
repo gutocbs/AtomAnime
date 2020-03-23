@@ -10,8 +10,11 @@
 #include <QDateTime> //Data que lança o episódio
 #include <QHash> //Pra procurar o anime com rapidez
 #include <QDir>
+#include <QFuture>
+#include <QtConcurrent>
 
 #include "anime.h"
+#include "formatapalavras.h"
 
 class leitorlistaanimes : public QObject
 {
@@ -21,15 +24,19 @@ public:
     ~leitorlistaanimes();
     bool fleJson();
     bool fmudaLista(QString, QString, QString);
-    bool fdeletedaLista(QString, QString);
+    bool fdeletedaLista(QString);
     void fdeletaListaAnimes();
     void finsereNomeAlternativo(QString,QStringList);
+    void fsetListasPorAnoEmThread();
+    void fleListaIdsNomesAnos();
+    void fsalvaListaIdsNomesAnos();
     int fbuscaAnimePorIDERetornaPosicao(QString);
     QString fbuscaAnimePorIDERetornaEpisodio(QString);
     QString fbuscaAnimePorIDERetornaNota(QString);
     QString fbuscaAnimePorIDERetornaTitulo(QString);
     QString fbuscaAnimePorIDERetornaLista(QString);
     QString fprocuraAnimeNasListas(QString);
+    QString fprocuraIdNasListasRapido(QString);
     QVector<anime*> retornaListaWatching();
     QVector<anime*> retornaListaCompleted();
     QVector<anime*> retornaListaOnHold();
@@ -55,7 +62,12 @@ signals:
     void sMangaAdicionadoNaLista(QString);
     void sNovelAdicionadoNaLista(QString);
 
+private slots:
+    void fcarregaListaAnoEmThread();
+
 private:
+    FormataPalavras formatador;
+
     QVector<anime*> vlistaWatching;
     QVector<anime*> vlistaCompleted;
     QVector<anime*> vlistaOnHold;
@@ -74,6 +86,12 @@ private:
     QVector<anime*> vlistaNovelDropped;
     QVector<anime*> vlistaNovelPlanToRead;
     QHash<QString,QString> vHashListaAnimesPorId;
+    QHash<QString,int> vHashPosicaoAnimesPorId;
+    QHash<QString,QStringList> vHashNomeAnimesPorId;
+    QHash<int,QString> vHashSizeListasPorAno;
+
+    QFuture<void> vcarregaListas;
+    bool vcarregaListasAnoAcabou;
 };
 
 #endif // LEITORLISTAANIMES_H

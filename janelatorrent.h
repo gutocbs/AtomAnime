@@ -56,6 +56,9 @@ private slots:
     void on_botaoAtualizaLista_clicked();
     void on_botaoInfoAnime_clicked();
     void on_botaoLinkTorrent_clicked();
+    void on_botaoSearchThisanime_clicked();
+    void on_botaoSelectSubForTorrent_clicked();
+    void fchecaEstado(int);
 
 signals:
     void error(QString);
@@ -68,10 +71,14 @@ private:
     leitorlistaanimes *cleitor;
     janeladeconfig *cconfig;
     arquivos *carquivos;
+    filedownloader *qdown;
+
+    QMap<int,QCheckBox*> vcontroladorCheckbox;
     QVector<torrentinfo*> torrent;
     QVector<anime*> vlistaAtual;
     QVector<int> vlistaDownload;
     QMap<QString, QStringList> vbaixar;
+    QHash<QString,QString> vHashDeNomeEId;
 };
 
 #endif // JANELATORRENT_H

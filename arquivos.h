@@ -15,6 +15,7 @@
 #include "anime.h"
 #include "confusuario.h" //Retorna os diretorios de animes
 #include "logger.h" //Mensagens de log customizadas
+#include "formatapalavras.h" //... Bom, pra comparar palavras
 #include "anitomy/anitomy.h"
 
 class arquivos : public QObject
@@ -24,7 +25,6 @@ public:
     explicit arquivos(QObject *parent = nullptr);
     QString fprocuraEpisodio(anime*);
     QString fprocuraEpisodioEspecifico(anime*, int);
-    QString fremoveCaracteresDiferentes(QString);
     bool fcomparaDadosAnime(QString, QString, QString, QStringList, int, int);
     bool fabreEpisodio(QByteArray);
     void frecebeDiretorios(confUsuario*);
@@ -37,6 +37,8 @@ private:
     QPointer<confUsuario> cconfUsuario;
     QPointer<leitorlistaanimes> cleitorlistaanimes;
     QVector<anime*> vlistaSelecionada;
+    FormataPalavras formatador;
+    QHash<QString,int> vEpisodiosTotaisPorAnime;
 };
 
 #endif // ARQUIVOS_H

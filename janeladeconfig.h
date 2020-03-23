@@ -48,6 +48,8 @@ public:
     void frecebeListasAnimes(leitorlistaanimes*);
     void fgetAnimeLists();
     void flimpaFiltros();
+    void fselectSubFromTorrent(QString, QString);
+    void fsalvaFiltros();
     QVector<Filtros*> vfiltrosAnimes;
 signals:
     void sauthcodesave();
@@ -72,7 +74,6 @@ private slots:
     void on_botaoCheck_clicked();
     void on_botaoInserirAnime_clicked();
     void on_botaoRemoverAnime_clicked();
-
     void on_botaoEnableDisable_clicked();
 
 private:
@@ -92,7 +93,7 @@ private:
     QStringList vPlayers;
     bool vautoDownload;
     bool vlowQuality;
-    QVector<QString> vIdNovoFiltro;
+    QStringList vIdNovoFiltro;
 
     QVector<anime*> vlistaAtual;
     leitorlistaanimes *cleitor;
