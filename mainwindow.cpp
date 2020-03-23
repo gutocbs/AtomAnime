@@ -169,6 +169,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::fcarregouListaTeste(bool ldownload){
     fbloqueiaSinaisBotoes();
+    fsalvaNomesAlternativos();
     cleitorListaAnimes->fdeletaListaAnimes();
     vlistaLidaSucesso = cleitorListaAnimes->fleJson();
     if(vlistaLidaSucesso){
@@ -184,7 +185,6 @@ void MainWindow::fcarregouListaTeste(bool ldownload){
 
 
 void MainWindow::fcarregouListaSucesso(bool ldownload){
-
     //Ele sempre vai tentar baixar a lista. Caso tenha baixado, isso vira true e não é necessário baixar de novo
     //Caso não tenha baixado a lista ainda ou deu algum erro no download, tenta baixar a lista de novo.
     if(ldownload == false)
@@ -323,7 +323,7 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QStrin
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
 void MainWindow::finfoAnimeSelecionado(){
     fVerificaAnimeAberto();
-    if(!vlistaSelecionada.isEmpty()){
+    if(!vlistaSelecionada.isEmpty() || vanimeSelecionado != -1){
         ui->labelInfoNomeAnime->setText(vlistaSelecionada[vanimeSelecionado]->vnome);
         ui->labelInfoNomeAnimeIngles->setText(vlistaSelecionada[vanimeSelecionado]->vnomeIngles);
         ui->labelInfoSinopse->setText(vlistaSelecionada[vanimeSelecionado]->vsinopse);
@@ -343,7 +343,6 @@ void MainWindow::finfoAnimeSelecionado(){
         ui->labelInfoTipo->setText(vlistaSelecionada[vanimeSelecionado]->vformato);
     }
     else{
-        qWarning() << "Anime list is empty!";
         ui->labelInfoNomeAnime->clear();
         ui->labelInfoNomeAnimeIngles->clear();
         ui->labelInfoSinopse->clear();
@@ -413,6 +412,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime00Nota->setText("Nota: " + vlistaSelecionada[0+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime00Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime00Lista->setText(vlistaSelecionada[(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime00Lista->setText(vlistaSelecionada[0+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -480,6 +485,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime01Nota->setText("Nota: " + vlistaSelecionada[1+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime01Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[1+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime01Lista->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime01Lista->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -540,6 +551,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime02Nota->setText("Nota: " + vlistaSelecionada[2+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime02Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[2+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime02Lista->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime02Lista->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -600,6 +617,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime03Nota->setText("Nota: " + vlistaSelecionada[3+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime03Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[3+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime03Lista->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime03Lista->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -660,6 +683,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime04Nota->setText("Nota: " + vlistaSelecionada[4+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime04Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[4+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime04Lista->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime04Lista->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -720,6 +749,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime05Nota->setText("Nota: " + vlistaSelecionada[5+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime05Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[5+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime05Lista->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime05Lista->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -780,7 +815,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime06Nota->setText("Nota: " + vlistaSelecionada[6+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime06Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-            ui->labelFundoAnime06Lista->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vlista);
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[6+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime06Lista->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vSeasonSemAno);
+            else
+                ui->labelFundoAnime06Lista->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vlista);
         }
         else{
             ui->labelFundoAnime06Lista->clear();
@@ -840,6 +881,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime07Nota->setText("Nota: " + vlistaSelecionada[7+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime07Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[7+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime07Lista->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime07Lista->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -900,6 +947,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime08Nota->setText("Nota: " + vlistaSelecionada[8+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime08Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[8+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime08Lista->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime08Lista->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -960,6 +1013,12 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime09Nota->setText("Nota: " + vlistaSelecionada[9+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime09Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[9+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime09Lista->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vSeasonSemAno);
+            else
             ui->labelFundoAnime09Lista->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vlista);
         }
         else{
@@ -1020,7 +1079,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime10Nota->setText("Nota: " + vlistaSelecionada[10+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime10Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-            ui->labelFundoAnime10Lista->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vlista);
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[10+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime10Lista->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vSeasonSemAno);
+            else
+                ui->labelFundoAnime10Lista->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vlista);
         }
         else{
             ui->labelFundoAnime10Lista->clear();
@@ -1080,7 +1145,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime11Nota->setText("Nota: " + vlistaSelecionada[11+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime11Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-            ui->labelFundoAnime11Lista->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vlista);
+            bool ok;
+            //Checa se a lista é um número válido
+            vlistaSelecionada[11+(12*(vpagina-1))]->vlista.toInt(&ok);
+            if(ok)
+                ui->labelFundoAnime11Lista->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vSeasonSemAno);
+            else
+                ui->labelFundoAnime11Lista->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vlista);
         }
         else{
             ui->labelFundoAnime11Lista->clear();
@@ -1734,14 +1805,16 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     ui->labelMensagem->setText("As listas foram atualizadas!");
     fliberaSinaisBotoes();
     vrefreshAcontecendo = false;
-    ///ISSO GASTA MEMÓRIA PRA PORRA!
-    if(!vbaixaECarregaAnos){
-        if(canilist->fgetListasAnoSeason()){
-            ///ESPECIFICAMENTE AQUI
-            cleitorListaAnimes->fsetListasPorAnoEmThread();
-            vbaixaECarregaAnos = true;
-        }
-    }
+
+    //Por mais que isso seja útil, faz dar muita merda.
+//    ///ISSO GASTA MEMÓRIA PRA PORRA!
+//    if(!vbaixaECarregaAnos){
+//        if(canilist->fgetListasAnoSeason()){
+//            ///ESPECIFICAMENTE AQUI
+//            cleitorListaAnimes->fsetListasPorAnoEmThread();
+//            vbaixaECarregaAnos = true;
+//        }
+//    }
 }
 
 void MainWindow::fmandaDiretoriosArquivos()
@@ -2161,17 +2234,18 @@ void MainWindow::on_botaoTorrent_clicked()
 
 void MainWindow::on_botaoRemoverdaLista_clicked()
 {
-    qDebug() << "Removing anime from list";
+    qDebug() << "Removing " << vlistaSelecionada[vanimeSelecionado]->vnome << "from list";
     vordem = "";
     QString lacao = "remove:" + vlistaSelecionada[vanimeSelecionado]->vid;
     QStringList lstringListAcao = lacao.split(':');
     vlistaAcoes.insert(lstringListAcao, "null");
     cleitorListaAnimes->fdeletedaLista(vlistaSelecionada[vanimeSelecionado]->vid);
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
-    if(vlistaSelecionada.size() <= vanimeSelecionado){
-        vanimeSelecionado = 0;
-        vpagina = 1;
+    if(vlistaSelecionada.size() > vanimeSelecionado && vanimeSelecionado != 0){
+        vanimeSelecionado--;
     }
+    else
+        vanimeSelecionado = -1;
     finfoAnimeSelecionado();
     fatualizaAnilist();
 }

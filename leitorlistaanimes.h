@@ -27,7 +27,6 @@ public:
     bool fdeletedaLista(QString);
     void fdeletaListaAnimes();
     void finsereNomeAlternativo(QString,QStringList);
-    void fsetListasPorAnoEmThread();
     void fleListaIdsNomesAnos();
     void fsalvaListaIdsNomesAnos();
     int fbuscaAnimePorIDERetornaPosicao(QString);
@@ -56,6 +55,8 @@ public:
     QVector<anime*> fbuscaLista(QString, QString);
     QVector<anime*> fleListaAno(int);
     QVector<anime*> fleListaAnoSeason(int, QString);
+    anime* fbuscaAnimeNoAno(int, QString);
+    void fcarregaListaAnoEmThread();
 
 signals:
     void sAnimeAdicionadoNaLista(QString);
@@ -63,7 +64,6 @@ signals:
     void sNovelAdicionadoNaLista(QString);
 
 private slots:
-    void fcarregaListaAnoEmThread();
 
 private:
     FormataPalavras formatador;
@@ -86,12 +86,16 @@ private:
     QVector<anime*> vlistaNovelDropped;
     QVector<anime*> vlistaNovelPlanToRead;
     QHash<QString,QString> vHashListaAnimesPorId;
+    QHash<QString,QString> vHashListaMangasPorId;
+    QHash<QString,QString> vHashListaNovelsPorId;
     QHash<QString,int> vHashPosicaoAnimesPorId;
+    QHash<QString,int> vHashPosicaoMangasPorId;
+    QHash<QString,int> vHashPosicaoNovelsPorId;
     QHash<QString,QStringList> vHashNomeAnimesPorId;
+    QHash<QString,QStringList> vHashNomeMangasPorId;
+    QHash<QString,QStringList> vHashNomeNovelsPorId;
     QHash<int,QString> vHashSizeListasPorAno;
 
-    QFuture<void> vcarregaListas;
-    bool vcarregaListasAnoAcabou;
 };
 
 #endif // LEITORLISTAANIMES_H
