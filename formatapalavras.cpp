@@ -64,15 +64,9 @@ QString FormataPalavras::fremoveTudo(QString rpalavra)
     rpalavra = fremovePontuacao(rpalavra);
     rpalavra = fremoveCaracteresEspeciais(rpalavra);
     rpalavra = fremoveSeason(rpalavra);
-    rpalavra = fmudaNumeracaoArabePraRomana(rpalavra);
     rpalavra = fremoveNumeracao(rpalavra);
-    rpalavra = fmudaNumeracaoRomanaPraArabe(rpalavra);
     rpalavra = fremoveNumeracaoRomana(rpalavra);
     rpalavra = fremoveCaracteresExtras(rpalavra);
-    rpalavra = fmudaOVAPraSpecials(rpalavra);
-    rpalavra = fmudaSpecialsPraOVA(rpalavra);
-    rpalavra = fmudaOVAPraSpecial(rpalavra);
-    rpalavra = fmudaSpecialPraOVA(rpalavra);
     return rpalavra;
 }
 
@@ -234,6 +228,7 @@ QString FormataPalavras::fremoveCaracteresExtras(QString rpalavra)
     rpalavra.remove("\\");
     rpalavra.remove("+");
     rpalavra.remove("-");
+    rpalavra.remove("_");
     rpalavra.remove("=");
     rpalavra.remove(":");
     rpalavra = rpalavra.simplified();

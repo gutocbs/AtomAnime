@@ -58,6 +58,7 @@ janeladeconfig::janeladeconfig(QWidget *parent) :
     ui->tabelaAnimesSelecionados->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tabelaFiltros->setSelectionBehavior(QAbstractItemView::SelectRows);
     fleArquivoConfig();
+    fgetStreamLanguages();
 }
 
 janeladeconfig::~janeladeconfig()
@@ -255,6 +256,7 @@ void janeladeconfig::fsalvaFiltros()
     QFile larquivoFiltros("Configurações/animeFilters.txt");
     if(larquivoFiltros.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivoFiltros);
+        lstreamTexto.setCodec("UTF-8");
         for(int i = 0; i < vfiltrosAnimes.size(); i++){
             lstreamTexto << vfiltrosAnimes[i]->nome + ";";
             lstreamTexto << vfiltrosAnimes[i]->filtroDeCondicao + ";";
@@ -267,6 +269,16 @@ void janeladeconfig::fsalvaFiltros()
         }
         larquivoFiltros.close();
     }
+}
+
+void janeladeconfig::fgetStreamLanguages()
+{
+    vStreamLanguages.append("(Legendado)");
+    vStreamLanguages.append("Episódio");
+    vStreamLanguages.append("Episode");
+    vStreamLanguages.append("Episodio");
+    vStreamLanguages.append("Épisode");
+    vStreamLanguages.append("Folge");
 }
 
 QByteArray janeladeconfig::fretornaUsuario(){
@@ -405,12 +417,18 @@ QStringList janeladeconfig::fretornaPlayers()
     return vPlayers;
 }
 
+QStringList janeladeconfig::fretornaStreamLanguages()
+{
+    return vStreamLanguages;
+}
+
 void janeladeconfig::on_botaoSalvar_clicked()
 {
 //        qEncode(fretornaUsuario());///Encode de alguma maneira
     QFile larquivo("Configurações/userConfig.txt");
     if(larquivo.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivo);
+        lstreamTexto.setCodec("UTF-8");
         lstreamTexto << "User:" << fretornaUsuario() << endl;
         lstreamTexto << "Directory";
         for(int i = 0; i < vdirectory.size(); i++){

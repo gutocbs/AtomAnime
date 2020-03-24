@@ -44,12 +44,14 @@ public:
     QByteArray fretornaFeedAnimeEspecifico();
     QByteArray fretornaFiltrosDownload();
     QStringList fretornaPlayers();
+    QStringList fretornaStreamLanguages();
     void fleArquivoConfig();
     void frecebeListasAnimes(leitorlistaanimes*);
     void fgetAnimeLists();
     void flimpaFiltros();
     void fselectSubFromTorrent(QString, QString);
     void fsalvaFiltros();
+    void fgetStreamLanguages();
     QVector<Filtros*> vfiltrosAnimes;
 signals:
     void sauthcodesave();
@@ -91,6 +93,7 @@ private:
     QString vtorrentFeed;
     QString vanimeTorrentFeed;
     QStringList vPlayers;
+    QStringList vStreamLanguages;
     bool vautoDownload;
     bool vlowQuality;
     QStringList vIdNovoFiltro;

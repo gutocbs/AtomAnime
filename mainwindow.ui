@@ -3158,6 +3158,57 @@ color: rgb(20, 20, 20);</string>
        <enum>QPlainTextEdit::NoWrap</enum>
       </property>
      </widget>
+     <widget class="QLabel" name="labelLoading">
+      <property name="geometry">
+       <rect>
+        <x>1590</x>
+        <y>730</y>
+        <width>321</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Progresso</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoAnimeCerto">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>760</y>
+        <width>88</width>
+        <height>34</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(121, 121, 121);</string>
+      </property>
+      <property name="text">
+       <string>Right</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelMensagemAnimeAssistindo">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>710</y>
+        <width>251</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+font: 75 8pt &quot;Calibri&quot;;
+font-weight: bold; 
+color: rgb(20, 20, 20);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="wordWrap">
+       <bool>true</bool>
+      </property>
+     </widget>
      <zorder>imagemAnimeAssistindo</zorder>
      <zorder>labelImagemBackgroundGrande</zorder>
      <zorder>labelImagemBackground</zorder>
@@ -3321,6 +3372,9 @@ color: rgb(20, 20, 20);</string>
      <zorder>botaoDownloadListImages</zorder>
      <zorder>botaoAddAlternativeTitle</zorder>
      <zorder>barraAddNomeAlternativo</zorder>
+     <zorder>labelLoading</zorder>
+     <zorder>botaoAnimeCerto</zorder>
+     <zorder>labelMensagemAnimeAssistindo</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">

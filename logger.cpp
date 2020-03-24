@@ -27,7 +27,11 @@ void logger::fhandlerMensagem(QtMsgType rtipo, const QMessageLogContext &rcontex
                 lmensagemLog = QString("Info: %1").arg(rmensagem);
             break;
             case QtDebugMsg:
+                #ifdef QT_DEBUG
                     lmensagemLog = QString("Debug: %1").arg(rmensagem);
+                #else
+                    lmensagemLog = QString(rmensagem);
+                #endif
             break;
             case QtCriticalMsg:
                 lmensagemLog = QString("Critical Error: %1").arg(rmensagem);
