@@ -25,6 +25,7 @@
 #include "anilist.h"
 #include "robotlib/Robot.h"
 #include "anitomy/anitomy.h"
+#include "checainfoplayer.h"
 
 #include "janeladeconfig.h"
 #include "janelatorrent.h"
@@ -113,6 +114,7 @@ private slots:
     void on_botaoSeason_clicked();
     void on_botaoDownloadListImages_clicked();
     void on_botaoAddAlternativeTitle_clicked();
+    void on_botaoAjuda_clicked();
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
@@ -124,12 +126,13 @@ private slots:
     void fMostraAnimeAberto(QString, QString, QString);
     void fAumentaProgressoID(QString, QString);
     void fgetMediaPlayersFromList();
+    void fgetStreamLanguages();
     void fgetConfigurations();
     void fsetDownloadImagensAnimesPorAno();
     void fsalvaNomesAlternativos();
     void fleNomesAlternativos();
 
-    void on_botaoAjuda_clicked();
+    void on_botaoAnimeCerto_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -161,6 +164,9 @@ private:
     int vtimerSegundos;
     int vcontadorAssistindoEpisodio;
     int vanoBuscaAnimes;
+    int vprogressoLoadingBar;
+    int vtotalAnimesLoadingBar;
+    int vcontadorBotaoLoadImages;
     QString idAnimeAssistindo;
     QString vordem;
     QString vlistaAtual;
@@ -168,7 +174,9 @@ private:
     QString dirGrande;
     QString dirMedio;
     QString dirPequeno;
+    QString vnomeAnimeAberto;
     QStringList vPlayers;
+    QStringList vStreamLanguages;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
     bool vlistaBaixada = false;

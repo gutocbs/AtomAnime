@@ -84,14 +84,15 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fgetConfigurations);
     connect(&ttorrent, &TorrentTab::infoAnime, this, &MainWindow::fInfoAnimeTorrent, Qt::QueuedConnection);
+
     //Quando baixa todas as imagens, carrega as imagens na página
     connect(cfiledownloader,&filedownloader::sterminouLista,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
     connect(cfiledownloader,&filedownloader::sid,this,&MainWindow::fsetIdBaixado, Qt::QueuedConnection);
-//    connect(cfiledownloader,&filedownloader::sidGrande,this,&MainWindow::fsetIdBaixadoGrande, Qt::QueuedConnection);
     connect(cleitorListaAnimes, &leitorlistaanimes::sAnimeAdicionadoNaLista, this, &MainWindow::fsetIdAdicionado, Qt::QueuedConnection);
     connect(cconfUsuario, &confUsuario::schecouPastas, this, &MainWindow::fmandaDiretoriosArquivos, Qt::QueuedConnection);
     connect(this, &MainWindow::sterminouCarregarImagens, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
     connect(this, &MainWindow::sanimeReconhecido, this, &MainWindow::fMostraAnimeAberto, Qt::QueuedConnection);
+
     //Se a lista foi carregada com sucesso, temos certeza de que o usuário já foi lido.
     this->setWindowTitle("Atom - " + jconfig.fretornaUsuario());
     ui->labelUsername->setText(jconfig.fretornaUsuario());
@@ -113,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent)
     if(lfile.exists() && lfile.size() != 0){
         if(lfile.open(QIODevice::ReadOnly)) {
             QTextStream lstreamTexto(&lfile);
+            lstreamTexto.setCodec("UTF-8");
             while(!lstreamTexto.atEnd()){
                 QStringList linha = lstreamTexto.readLine().split("-");
                 QString act = linha.last();
@@ -123,6 +125,9 @@ MainWindow::MainWindow(QWidget *parent)
         }
     }
     cleitorListaAnimes->fleListaIdsNomesAnos();
+    vprogressoLoadingBar = 0;
+    vtotalAnimesLoadingBar = 0;
+    vcontadorBotaoLoadImages = 0;
 }
 
 MainWindow::~MainWindow()
@@ -131,6 +136,7 @@ MainWindow::~MainWindow()
         QFile lfile("Configurações/Temp/ListUpdates.txt");
         if(lfile.open(QIODevice::WriteOnly | QIODevice::Append)) {
             QTextStream lstreamTexto(&lfile);
+            lstreamTexto.setCodec("UTF-8");
             foreach (QStringList key, vlistaAcoes.keys()){
                 lstreamTexto << key.at(0) << "-" << key.at(1) << "-" << vlistaAcoes[key] << endl;
                 vlistaAcoes.remove(key);
@@ -197,6 +203,7 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
     fleNomesAlternativos();
     //Atualiza o avatar do usuário também.
     qDebug() << "The download system is up";
+    vprogressoLoadingBar = 0;
     cfiledownloader->fresetCounters();
     cfiledownloader->fsetDownload(vusarImagensBaixaQualidade);
     vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, vlistaAtual);
@@ -230,6 +237,7 @@ void MainWindow::fcarregouListaFalha(){
 void MainWindow::fsetIdAdicionado(QString lid)
 {
     if(!vimagemBaixada.contains(lid)){
+        vtotalAnimesLoadingBar++;
         vimagemBaixada.insert(lid, false);
         vimagemCarregada.insert(lid, false);
         vimagemBaixadaGrande.insert(lid, false);
@@ -239,6 +247,9 @@ void MainWindow::fsetIdAdicionado(QString lid)
 
 void MainWindow::fsetIdBaixado(QString lid)
 {
+    vprogressoLoadingBar++;
+    ui->labelLoading->setText("Downloaded " + QString::number(vprogressoLoadingBar) + " of " +
+                              QString::number(vtotalAnimesLoadingBar) + " images");
     vimagemBaixada[lid] = true;
 }
 
@@ -256,24 +267,36 @@ void MainWindow::fInfoAnimeTorrent(QString lnomeAnime)
 
 void MainWindow::fVerificaAnimeAberto()
 {
-    anitomy::Anitomy lanitomy;
+    QString nomejanela;
     auto vlistaJanelas = Robot::Window::GetList();
     foreach (const auto& janela, vlistaJanelas) {
         if(vrefreshAcontecendo)
             return;
         if(!QString::fromStdString(janela.GetTitle()).isEmpty()){
-            //Talvez usar o gettitle com mpv já ajude?
             foreach(QString player, vPlayers){
                 if(vrefreshAcontecendo)
                     return;
-                if(QString::fromStdString(janela.GetTitle()).contains(player, Qt::CaseInsensitive)){
-                    lanitomy.Parse(QString::fromStdString(janela.GetTitle()).toStdWString());
-                    const auto& lelements = lanitomy.elements();
-                    QString vidAnime = cleitorListaAnimes->fprocuraAnimeNasListas
-                            (QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle)));
+                nomejanela = QString::fromStdString(janela.GetTitle());
+                if(nomejanela.contains("online in high quality - ") && player.compare("kissanime", Qt::CaseInsensitive) == 0)
+                    nomejanela.replace("online in high quality", "kissanime"); //Sim, é uma gambiarra.
+                if(nomejanela.contains(player, Qt::CaseInsensitive)){
+                    QPointer<ChecaInfoPlayer> c(new ChecaInfoPlayer);
+                    c->fchecaStream(player, nomejanela);
+                    QString nomeAnime = c->fretornaAnime();
+                    QString episodio = c->fretornaEpisodio();
+
+                    QString vidAnime = cleitorListaAnimes->fprocuraAnimeNasListas(nomeAnime);
                     if(!vidAnime.isEmpty()){
-                        emit sanimeReconhecido(vidAnime, QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle)),
-                                               QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber)));
+                        emit sanimeReconhecido(vidAnime, nomeAnime, episodio);
+                        return;
+                    }
+                    else{
+                        vnomeAnimeAberto = nomeAnime;
+                        ui->labelAnimeAssistindoTitulo->setText(nomeAnime);
+                        ui->labelAnimeAssistindoEpisodio->setText("Not recognized.");
+                        ui->labelMensagemAnimeAssistindo->setText("If the anime wasn't recognized correctly, search for the right"
+                        " anime and click here to change!");
+                        ui->botaoAnimeCerto->show();
                         return;
                     }
                 }
@@ -285,11 +308,18 @@ void MainWindow::fVerificaAnimeAberto()
         }
     }
     vcontadorAssistindoEpisodio = 0;
+    vnomeAnimeAberto = "";
+    ui->labelMensagemAnimeAssistindo->clear();
+    ui->botaoAnimeCerto->hide();
 }
 
 void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QString repisodioAnime)
 {
+    vnomeAnimeAberto = rnomeAnime;
     idAnimeAssistindo = ridAnime;
+    ui->botaoAnimeCerto->show();
+    ui->labelMensagemAnimeAssistindo->setText("If the anime wasn't recognized correctly, search for the right"
+    " anime and click here to change!");
     ui->imagemAnimeAssistindo->setScaledContents(true);
     ui->botaoAnimeAssistindo->blockSignals(false);
     QPixmap lpix;
@@ -309,7 +339,6 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QStrin
     ui->labelAnimeAssistindoEpisodio->setText("Episode " + repisodioAnime);
 
 
-
     if(vcontadorAssistindoEpisodio == 12){
         fAumentaProgressoID(ridAnime, repisodioAnime);
         vcontadorAssistindoEpisodio++;
@@ -318,6 +347,7 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QStrin
         return;
     else
         vcontadorAssistindoEpisodio++;
+    finfoAnimeSelecionado();
 }
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
@@ -1249,6 +1279,8 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
     }
     if(vdownloadImagensMedias){
         file = dirMedio;
+        vprogressoLoadingBar = 0;
+        vtotalAnimesLoadingBar = vimagemBaixada.size();
         foreach(QString id, vimagemBaixada.keys()){
             if(vrefreshAcontecendo == true)
                 return false;
@@ -1266,6 +1298,9 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                             vimagemCarregada[id] = true;
                         }
                     }
+                    vprogressoLoadingBar++;
+                    ui->labelLoading->setText("Loaded " + QString::number(vprogressoLoadingBar) + " of " +
+                                              QString::number(vtotalAnimesLoadingBar) + " images");
                 }
             }
             else{
@@ -1314,6 +1349,7 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
         vdownloadImagensGrandes = false;
     }
     if(vdownloadImagensAno){
+        vprogressoLoadingBar = 0;
         file = dirMedio;
         foreach(QString id, vimagemBaixada.keys()){
             if(vrefreshAcontecendo == true)
@@ -1331,6 +1367,9 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                         vimagemCarregada[id] = true;
                     }
                 }
+                vprogressoLoadingBar++;
+                ui->labelLoading->setText("Loaded " + QString::number(vprogressoLoadingBar) + " of " +
+                                          QString::number(vtotalAnimesLoadingBar) + " images");
             }
             lpix = QPixmap();
             ui->labelImagemBackground->setPixmap(lpix);
@@ -1802,7 +1841,7 @@ void MainWindow::frefreshListas(bool rcheckDownload){
         vanimeSelecionado = lanimeAtual;
     }
     qDebug() << "The lists were updated";
-    ui->labelMensagem->setText("As listas foram atualizadas!");
+    ui->labelMensagem->setText("The lists were updated! Searching animes in the computer.");
     fliberaSinaisBotoes();
     vrefreshAcontecendo = false;
 
@@ -1873,8 +1912,11 @@ void MainWindow::on_botaoConfiguracao_clicked()
 void MainWindow::on_botaoNotaMais_clicked()
 {
     if(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt() < 10){
-        vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal = QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt()+1);
+        vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal =
+                QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt()+1);
         ui->labelInfoNota->setText(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal);
+        cleitorListaAnimes->fmudaNota(vlistaSelecionada[vanimeSelecionado]->vid,
+                                       vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal);
         finfoAnimeSelecionado();
         QString lacao = "nota:" + vlistaSelecionada[vanimeSelecionado]->vid;
         QStringList lstringListAcao = lacao.split(':');
@@ -1885,8 +1927,11 @@ void MainWindow::on_botaoNotaMais_clicked()
 void MainWindow::on_botaoNotaMenos_clicked()
 {
     if(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt() > 0){
-        vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal = QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt()-1);
+        vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal =
+                QString::number(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal.toInt()-1);
         ui->labelInfoNota->setText(vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal);
+        cleitorListaAnimes->fmudaNota(vlistaSelecionada[vanimeSelecionado]->vid,
+                                       vlistaSelecionada[vanimeSelecionado]->vnotaMediaPessoal);
         finfoAnimeSelecionado();
         QString lacao = "nota:" + vlistaSelecionada[vanimeSelecionado]->vid;
         QStringList lstringListAcao = lacao.split(':');
@@ -1903,12 +1948,16 @@ void MainWindow::on_botaoProgressoMais_clicked()
     else
         lepisodiosTotais = INT_MAX;
     if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
-        vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos = QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()+1);
+        vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos =
+                QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()+1);
+        cleitorListaAnimes->fmudaProgresso(vlistaSelecionada[vanimeSelecionado]->vid,
+                                       vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos);
         finfoAnimeSelecionado();
         QString lacao = "progresso:" + vlistaSelecionada[vanimeSelecionado]->vid;
         QStringList lstringListAcao = lacao.split(':');
         vlistaAcoes.insert(lstringListAcao, QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()));
-        if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() == vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosTotais.toInt()){
+        if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() ==
+                vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosTotais.toInt()){
             ui->boxMudarPraLista->setCurrentIndex(1);
             on_botaoMudarPraLista_clicked();
         }
@@ -1922,42 +1971,45 @@ void MainWindow::fAumentaProgressoID(QString ridAnime, QString repisodioAnime)
 
     int lposicao = cleitorListaAnimes->fbuscaAnimePorIDERetornaPosicao(ridAnime);
     QString llistaAnimeAssistindo = cleitorListaAnimes->fbuscaAnimePorIDERetornaLista(ridAnime);
-
+    //A função vai rodar tudo em uma lista temporária e dar refresh na lista atual, pra mudar o progresso
+    QVector<anime*> listaTemp;
     if(llistaAnimeAssistindo.isEmpty())
         return;
     else if(llistaAnimeAssistindo != vlistaSelecionada[vanimeSelecionado]->vlista){
         if(llistaAnimeAssistindo.compare("Watching",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "watching");
+            listaTemp = cleitorListaAnimes->sortLista("cdata", "watching");
         }
         else if(llistaAnimeAssistindo.compare("On Hold",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "onhold");
+            listaTemp = cleitorListaAnimes->sortLista("cdata", "onhold");
         }
         else if(llistaAnimeAssistindo.compare("Dropped",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "dropped");
+            listaTemp = cleitorListaAnimes->sortLista("cdata", "dropped");
         }
         else if(llistaAnimeAssistindo.compare("Plan to Watch",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista("cdata", "plantowatch");
+            listaTemp = cleitorListaAnimes->sortLista("cdata", "plantowatch");
         }
     }
     if(lposicao != -1){
-        if(vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt() < repisodioAnime.toInt()){
+        if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < repisodioAnime.toInt()){
             for(int i = 0; i < repisodioAnime.toInt()-vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt(); i++){
                 int lepisodiosTotais = 0;
                 //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
-                if(vlistaSelecionada[lposicao]->vnumEpisodiosTotais != "?")
-                    lepisodiosTotais = vlistaSelecionada[lposicao]->vnumEpisodiosTotais.toInt();
+                if(listaTemp[lposicao]->vnumEpisodiosTotais != "?")
+                    lepisodiosTotais = listaTemp[lposicao]->vnumEpisodiosTotais.toInt();
                 else
                     lepisodiosTotais = INT_MAX;
-                if(vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
-                    vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos =
-                            QString::number(vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt()+1);
+                if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
+                    listaTemp[lposicao]->vnumEpisodiosAssistidos =
+                            QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()+1);
+                    cleitorListaAnimes->fmudaProgresso(listaTemp[i]->vid,
+                                                   listaTemp[i]->vnumEpisodiosAssistidos);
                     finfoAnimeSelecionado();
-                    QString lacao = "progresso:" + vlistaSelecionada[lposicao]->vid;
+                    QString lacao = "progresso:" + listaTemp[lposicao]->vid;
                     QStringList lstringListAcao = lacao.split(':');
                     vlistaAcoes.insert(lstringListAcao,
-                                       QString::number(vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt()));
-                    if(vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt() ==
-                            vlistaSelecionada[lposicao]->vnumEpisodiosTotais.toInt()){
+                                       QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()));
+                    if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() ==
+                            listaTemp[lposicao]->vnumEpisodiosTotais.toInt()){
                         ui->boxMudarPraLista->setCurrentIndex(1);
                         on_botaoMudarPraLista_clicked();
                     }
@@ -1966,22 +2018,24 @@ void MainWindow::fAumentaProgressoID(QString ridAnime, QString repisodioAnime)
         }
     }
     else{
-        for (int i = 0; i < vlistaSelecionada.size(); i++) {
-            if(vlistaSelecionada[i]->vid == ridAnime){
+        for (int i = 0; i < listaTemp.size(); i++) {
+            if(listaTemp[i]->vid == ridAnime){
                 int lepisodiosTotais = 0;
                 //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
-                if(vlistaSelecionada[i]->vnumEpisodiosTotais != "?")
-                    lepisodiosTotais = vlistaSelecionada[i]->vnumEpisodiosTotais.toInt();
+                if(listaTemp[i]->vnumEpisodiosTotais != "?")
+                    lepisodiosTotais = listaTemp[i]->vnumEpisodiosTotais.toInt();
                 else
                     lepisodiosTotais = INT_MAX;
-                if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
-                    vlistaSelecionada[i]->vnumEpisodiosAssistidos =
-                            QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()+1);
+                if(listaTemp[i]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
+                    listaTemp[i]->vnumEpisodiosAssistidos =
+                            QString::number(listaTemp[i]->vnumEpisodiosAssistidos.toInt()+1);
+                    cleitorListaAnimes->fmudaProgresso(listaTemp[i]->vid,
+                                                   listaTemp[i]->vnumEpisodiosAssistidos);
                     finfoAnimeSelecionado();
-                    QString lacao = "progresso:" + vlistaSelecionada[i]->vid;
+                    QString lacao = "progresso:" + listaTemp[i]->vid;
                     QStringList lstringListAcao = lacao.split(':');
-                    vlistaAcoes.insert(lstringListAcao, QString::number(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt()));
-                    if(vlistaSelecionada[i]->vnumEpisodiosAssistidos.toInt() == vlistaSelecionada[i]->vnumEpisodiosTotais.toInt()){
+                    vlistaAcoes.insert(lstringListAcao, QString::number(listaTemp[i]->vnumEpisodiosAssistidos.toInt()));
+                    if(listaTemp[i]->vnumEpisodiosAssistidos.toInt() == listaTemp[i]->vnumEpisodiosTotais.toInt()){
                         ui->boxMudarPraLista->setCurrentIndex(1);
                         on_botaoMudarPraLista_clicked();
                     }
@@ -1989,25 +2043,25 @@ void MainWindow::fAumentaProgressoID(QString ridAnime, QString repisodioAnime)
             }
         }
     }
-    if(llistaAnimeAssistindo != llistaAtual){
-        if(llistaAtual.compare("watching",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
-        }
-        else if(llistaAnimeAssistindo.compare("onhold",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
-        }
-        else if(llistaAnimeAssistindo.compare("dropped",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
-        }
-        else if(llistaAnimeAssistindo.compare("plantowatch",Qt::CaseInsensitive) == 0){
-            vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
-        }
+    //Aqui rola o refresh depois de ter mudado a lista temporária
+    if(llistaAtual.compare("watching",Qt::CaseInsensitive) == 0){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
+    }
+    else if(llistaAnimeAssistindo.compare("onhold",Qt::CaseInsensitive) == 0){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
+    }
+    else if(llistaAnimeAssistindo.compare("dropped",Qt::CaseInsensitive) == 0){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
+    }
+    else if(llistaAnimeAssistindo.compare("plantowatch",Qt::CaseInsensitive) == 0){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
     }
     fliberaSinaisBotoes();
 }
 
 void MainWindow::fgetConfigurations()
 {
+    fgetStreamLanguages();
     fgetMediaPlayersFromList();
     if(jconfig.fretornaBaixaQualidade().contains("yes"))
         vusarImagensBaixaQualidade = true;
@@ -2019,6 +2073,9 @@ void MainWindow::fgetConfigurations()
 
 void MainWindow::fsetDownloadImagensAnimesPorAno()
 {
+    vprogressoLoadingBar = 0;
+    vtotalAnimesLoadingBar = vlistaSelecionada.size();
+    ui->labelMensagem->setText("Downloading and updating images. It can take a few minutes to download every image");
     if(vdownloadImagensAcabou && !vbaixandoImagensAno){
         if(canilist->fgetListasAnoSeason()){
             if(!vdownloadImagensAnos.isEmpty())
@@ -2034,7 +2091,7 @@ void MainWindow::fsetDownloadImagensAnimesPorAno()
     }
     else{
         if(!timerChecaDownloadPorAno->isActive())
-            timerChecaDownloadPorAno->start(10000);
+            timerChecaDownloadPorAno->start(5000);
         if(!vdownloadImagensAnos.contains(vanoBuscaAnimes))
             vdownloadImagensAnos.append(vanoBuscaAnimes);
     }
@@ -2045,6 +2102,7 @@ void MainWindow::fsalvaNomesAlternativos()
     QFile larquivo("Configurações/nomesAlternativosAnimes.txt");
     if(larquivo.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivo);
+        lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vcustomNomesAlternativos.keys()){
             lstreamTexto << key << ";" << vcustomNomesAlternativos[key].join(";").trimmed() << endl;
         }
@@ -2075,10 +2133,18 @@ void MainWindow::fgetMediaPlayersFromList()
     vPlayers = jconfig.fretornaPlayers();
 }
 
+void MainWindow::fgetStreamLanguages()
+{
+    vStreamLanguages = jconfig.fretornaStreamLanguages();
+}
+
 void MainWindow::on_botaoProgressoMenos_clicked()
 {
     if(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt() > 0){
-        vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos = QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()-1);
+        vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos =
+                QString::number(vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos.toInt()-1);
+        cleitorListaAnimes->fmudaProgresso(vlistaSelecionada[vanimeSelecionado]->vid,
+                                       vlistaSelecionada[vanimeSelecionado]->vnumEpisodiosAssistidos);
         finfoAnimeSelecionado();
         QString lacao = "progresso:" + vlistaSelecionada[vanimeSelecionado]->vid;
         QStringList lstringListAcao = lacao.split(':');
@@ -2093,7 +2159,10 @@ void MainWindow::fatualizaAnilist(){
     foreach (QStringList key, vlistaAcoes.keys()) {
         if(i == 90)
             return;
-        if(key.at(0) == "nota"){
+        ///TESTANDO ISSO PRA REMOVER ENTRADAS INVÁLIDAS DA LISTA
+        if(vlistaAcoes[key].compare("null", Qt::CaseInsensitive))
+            vlistaAcoes.remove(key);
+        else if(key.at(0) == "nota"){
             if(canilist->fmudaNota(key.at(1).toInt(), vlistaAcoes[key].toInt())){
                 vlistaAcoes.remove(key);
             }
@@ -2713,8 +2782,12 @@ void MainWindow::on_botaoSeason_clicked()
 
 void MainWindow::on_botaoDownloadListImages_clicked()
 {
-    ui->labelMensagem->setText("Downloading and updating images. It can take a few minutes to download every image");
+    vcontadorBotaoLoadImages++;
     fsetDownloadImagensAnimesPorAno();
+    if(vcontadorBotaoLoadImages != 2)
+        QTimer::singleShot(5000, this, SLOT(on_botaoDownloadListImages_clicked()));
+    else if(vcontadorBotaoLoadImages == 2)
+        vcontadorBotaoLoadImages = 0;
 }
 
 void MainWindow::on_botaoAddAlternativeTitle_clicked()
@@ -2734,4 +2807,18 @@ void MainWindow::on_botaoAddAlternativeTitle_clicked()
 void MainWindow::on_botaoAjuda_clicked()
 {
     ui->janelaRotativa->setCurrentIndex(3);
+}
+
+void MainWindow::on_botaoAnimeCerto_clicked()
+{
+    if(!vnomeAnimeAberto.isEmpty()){
+        QStringList tempAnimeList;
+        tempAnimeList.append(vnomeAnimeAberto);
+        if(!vcustomNomesAlternativos.contains(vlistaSelecionada[vanimeSelecionado]->vid))
+            vcustomNomesAlternativos.insert(vlistaSelecionada[vanimeSelecionado]->vid, tempAnimeList);
+        else
+            vcustomNomesAlternativos[vlistaSelecionada[vanimeSelecionado]->vid].append(vnomeAnimeAberto);
+        cleitorListaAnimes->finsereNomeAlternativo(vlistaSelecionada[vanimeSelecionado]->vid,tempAnimeList);
+        ui->barraAddNomeAlternativo->clear();
+    }
 }

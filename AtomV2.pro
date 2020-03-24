@@ -28,6 +28,7 @@ SOURCES += \
     anitomy/token.cpp \
     anitomy/tokenizer.cpp \
     arquivos.cpp \
+    checainfoplayer.cpp \
     confbase.cpp \
     confusuario.cpp \
     filedownloader.cpp \
@@ -70,6 +71,7 @@ HEADERS += \
     anitomy/token.h \
     anitomy/tokenizer.h \
     arquivos.h \
+    checainfoplayer.h \
     confbase.h \
     confusuario.h \
     filedownloader.h \

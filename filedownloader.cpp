@@ -245,7 +245,6 @@ void filedownloader::fdownloadPorAno(int rano)
                 QNetworkRequest lrequest;
                 lrequest.setUrl(QUrl(vlink));
                 vreply = vmanager->get(lrequest);
-                qDebug() << vsaveFilePath;
                 vfile = new QFile;
                 vfile->setFileName(vsaveFilePath);
                 vfile->open(QIODevice::WriteOnly);

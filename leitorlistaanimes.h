@@ -24,6 +24,8 @@ public:
     ~leitorlistaanimes();
     bool fleJson();
     bool fmudaLista(QString, QString, QString);
+    bool fmudaNota(QString, QString);
+    bool fmudaProgresso(QString, QString);
     bool fdeletedaLista(QString);
     void fdeletaListaAnimes();
     void finsereNomeAlternativo(QString,QStringList);
@@ -95,7 +97,6 @@ private:
     QHash<QString,QStringList> vHashNomeMangasPorId;
     QHash<QString,QStringList> vHashNomeNovelsPorId;
     QHash<int,QString> vHashSizeListasPorAno;
-
 };
 
 #endif // LEITORLISTAANIMES_H

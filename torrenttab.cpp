@@ -106,8 +106,8 @@ void TorrentTab::fleXML()
                 if(vHashDeNomeEId.contains(lnomeAnime))
                     lid = vHashDeNomeEId[lnomeAnime];
                 else
-                    lid = cleitor->fprocuraAnimeNasListas(lnomeAnime);
-//                lid = cleitor->fprocuraIdNasListasRapido(lnomeAnime);
+//                    lid = cleitor->fprocuraAnimeNasListas(lnomeAnime);
+                    lid = cleitor->fprocuraIdNasListasRapido(lnomeAnime);
                 if(!vHashDeNomeEId.contains(lnomeAnime))
                     vHashDeNomeEId.insert(lnomeAnime,lid);
 
@@ -859,7 +859,8 @@ void TorrentTab::fmostraTorrent()
     vnomeSubs.clear();
     ui->labelInfoNomeAnime->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(0)]->vnomeAnime);
     for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].size(); i++){
-        if(!vnomeSubs.contains(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(i)]->vfansub)){
+        if(!vnomeSubs.contains(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(i)]->vfansub)
+                && !torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(i)]->vfansub.isEmpty()){
             vnomeSubs.append(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(i)]->vfansub);
             ui->listaSubs->addItem(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(i)]->vfansub);
         }

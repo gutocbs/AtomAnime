@@ -107,6 +107,7 @@ void confUsuario::fsalvaPastasArquivos()
     QFile t("Configurações/Temp/animeFoldersTemp.txt");
     if(t.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&t);
+        lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vdiretorioEspecificoAnime.keys()){
 //            qDebug() << vdiretorioEspecificoAnime[key];
             lstreamTexto << key << ";" << vdiretorioEspecificoAnime[key] << endl;
@@ -125,6 +126,7 @@ void confUsuario::flePastasArquivos()
 {
     QFile t("Configurações/Temp/animeFolders.txt");
     QTextStream lstreamTexto(&t);
+    lstreamTexto.setCodec("UTF-8");
     if(t.open(QIODevice::ReadOnly)){
         while(!lstreamTexto.atEnd()){
             QStringList llinha = lstreamTexto.readLine().split(";");

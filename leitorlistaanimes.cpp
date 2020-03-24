@@ -372,6 +372,8 @@ bool leitorlistaanimes::fleJson(){
                     sAnimeAdicionadoNaLista(lnovoAnime->vid);
                     if(!vHashListaAnimesPorId.contains(lnovoAnime->vid))
                         vHashListaAnimesPorId.insert(lnovoAnime->vid, lnovoAnime->vlista);
+                    else if(vHashListaAnimesPorId[lnovoAnime->vid] != lnovoAnime->vlista)
+                        vHashListaAnimesPorId.insert(lnovoAnime->vid, lnovoAnime->vlista);
                 }
                 else if(lformato == "MANGA" || lformato == "ONE SHOT"){
                     if(lnovoAnime->vstatus.contains("Air", Qt::CaseInsensitive))
@@ -1485,7 +1487,6 @@ void leitorlistaanimes::fleListaIdsNomesAnos()
             larquivo.close();
         }
     }
-    qDebug() << "Ele entra com " << vHashNomeAnimesPorId.size();
     QFile larquivoManga("Configurações/idListaNomeManga.txt");
     if(larquivoManga.size() != 0){
         if(larquivoManga.open(QIODevice::ReadOnly)){
@@ -1541,6 +1542,7 @@ void leitorlistaanimes::fsalvaListaIdsNomesAnos()
     QFile larquivo("Configurações/idListaNome.txt");
     if(larquivo.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivo);
+        lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vHashNomeAnimesPorId.keys()){
             lstreamTexto << key << ";" << vHashListaAnimesPorId[key] << ";" << vHashPosicaoAnimesPorId[key] << ";" <<
                             vHashNomeAnimesPorId[key].join(";").trimmed() << endl;
@@ -1550,6 +1552,7 @@ void leitorlistaanimes::fsalvaListaIdsNomesAnos()
     QFile larquivoManga("Configurações/idListaNomeManga.txt");
     if(larquivoManga.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivoManga);
+        lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vHashNomeMangasPorId.keys()){
             lstreamTexto << key << ";" << vHashListaMangasPorId[key] << ";" << vHashPosicaoMangasPorId[key] << ";" <<
                             vHashNomeMangasPorId[key].join(";").trimmed() << endl;
@@ -1559,6 +1562,7 @@ void leitorlistaanimes::fsalvaListaIdsNomesAnos()
     QFile larquivoNovel("Configurações/idListaNomeNovel.txt");
     if(larquivoNovel.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivoNovel);
+        lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vHashNomeNovelsPorId.keys()){
             lstreamTexto << key << ";" << vHashListaNovelsPorId[key] << ";" << vHashPosicaoNovelsPorId[key] << ";" <<
                             vHashNomeNovelsPorId[key].join(";").trimmed() << endl;
@@ -1568,6 +1572,7 @@ void leitorlistaanimes::fsalvaListaIdsNomesAnos()
     QFile larquivoSizePorAno("Configurações/Temp/sizePerYear.txt");
     if(larquivoSizePorAno.open(QIODevice::WriteOnly)){
         QTextStream lstreamTexto(&larquivoSizePorAno);
+        lstreamTexto.setCodec("UTF-8");
         foreach(int key, vHashSizeListasPorAno.keys()){
             lstreamTexto << QString::number(key) << ";" << vHashSizeListasPorAno[key] << endl;
         }
@@ -2618,6 +2623,82 @@ QVector<anime *> leitorlistaanimes::retornaListaNovelDropped()
 
 QVector<anime *> leitorlistaanimes::retornaListaNovelPlanToRead(){
     return vlistaNovelPlanToRead;
+}
+
+bool leitorlistaanimes::fmudaNota(QString rid, QString rnota){
+    QString llista = fbuscaAnimePorIDERetornaLista(rid);
+    int lposicao = fbuscaAnimePorIDERetornaPosicao(rid);
+    if(lposicao == -1)
+        return false;
+    bool ok;
+    //Checa se a lista é um número válido
+    llista.toInt(&ok);
+
+    if(llista.compare("Watching", Qt::CaseInsensitive) == 0){
+        vlistaWatching[lposicao]->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    else if(llista.compare("Completed", Qt::CaseInsensitive) == 0){
+        vlistaCompleted[lposicao]->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    else if(llista.compare("On Hold", Qt::CaseInsensitive) == 0){
+        vlistaOnHold[lposicao]->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    else if(llista.compare("Dropped", Qt::CaseInsensitive) == 0){
+        vlistaDropped[lposicao]->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    else if(llista.compare("Plan to Watch", Qt::CaseInsensitive) == 0){
+        vlistaPlanToWatch[lposicao]->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    else if(ok){
+        QPointer<anime> lnovoAnime(new anime);
+        lnovoAnime = fbuscaAnimeNoAno(llista.toInt(), rid);
+        lnovoAnime->vnotaMediaPessoal = rnota;
+        return true;
+    }
+    return false;
+}
+
+bool leitorlistaanimes::fmudaProgresso(QString rid, QString rprogresso){
+    QString llista = fbuscaAnimePorIDERetornaLista(rid);
+    int lposicao = fbuscaAnimePorIDERetornaPosicao(rid);
+    if(lposicao == -1)
+        return false;
+    bool ok;
+    //Checa se a lista é um número válido
+    llista.toInt(&ok);
+
+    if(llista.compare("Watching", Qt::CaseInsensitive) == 0){
+        vlistaWatching[lposicao]->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    else if(llista.compare("Completed", Qt::CaseInsensitive) == 0){
+        vlistaCompleted[lposicao]->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    else if(llista.compare("On Hold", Qt::CaseInsensitive) == 0){
+        vlistaOnHold[lposicao]->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    else if(llista.compare("Dropped", Qt::CaseInsensitive) == 0){
+        vlistaDropped[lposicao]->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    else if(llista.compare("Plan to Watch", Qt::CaseInsensitive) == 0){
+        vlistaPlanToWatch[lposicao]->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    else if(ok){
+        QPointer<anime> lnovoAnime(new anime);
+        lnovoAnime = fbuscaAnimeNoAno(llista.toInt(), rid);
+        lnovoAnime->vnumEpisodiosAssistidos = rprogresso;
+        return true;
+    }
+    return false;
 }
 
 bool leitorlistaanimes::fmudaLista(QString rid, QString rlista, QString rtipo){
