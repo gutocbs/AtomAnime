@@ -36,6 +36,12 @@ bool FormataPalavras::fcomparaNomes(QString rnome1, QString rnome2)
     if(fmudaNumeracaoRomanaPraArabe(rnome1).compare(fmudaNumeracaoRomanaPraArabe(rnome2)) == 0)
         return true;
 
+    if(fmudaNumeracaoRomanaPraSX(rnome1).compare(fmudaNumeracaoRomanaPraSX(rnome2)) == 0)
+        return true;
+
+    if(fmudaNumeracaoRomanaPraSeason(rnome1).compare(fmudaNumeracaoRomanaPraSeason(rnome2)) == 0)
+        return true;
+
     if(fremoveNumeracaoRomana(rnome1).compare(fremoveNumeracaoRomana(rnome2)) == 0)
         return true;
 
@@ -53,6 +59,9 @@ bool FormataPalavras::fcomparaNomes(QString rnome1, QString rnome2)
             return true;
     }
 
+    if(fremoveOVAEspecial(rnome1).compare(fremoveOVAEspecial(rnome2)) == 0)
+        return true;
+
     if(fremoveTudo(rnome1).compare(fremoveTudo(rnome2)) == 0)
         return true;
 
@@ -67,6 +76,7 @@ QString FormataPalavras::fremoveTudo(QString rpalavra)
     rpalavra = fremoveNumeracao(rpalavra);
     rpalavra = fremoveNumeracaoRomana(rpalavra);
     rpalavra = fremoveCaracteresExtras(rpalavra);
+    rpalavra = fremoveOVAEspecial(rpalavra);
     return rpalavra;
 }
 
@@ -144,16 +154,16 @@ QString FormataPalavras::fremoveSeason(QString rpalavra)
 QString FormataPalavras::fmudaNumeracaoArabePraRomana(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.replace(" 1", " I");
-    rpalavra.replace(" 2", " II");
-    rpalavra.replace(" 3", " III");
-    rpalavra.replace(" 4", " IV");
-    rpalavra.replace(" 5", " V");
-    rpalavra.replace(" 6", " VI");
-    rpalavra.replace(" 7", " VII");
-    rpalavra.replace(" 8", " VIII");
-    rpalavra.replace(" 9", " IX");
-    rpalavra.replace(" 10", " X");
+    rpalavra.replace(" 1", " i");
+    rpalavra.replace(" 2", " ii");
+    rpalavra.replace(" 3", " iii");
+    rpalavra.replace(" 4", " iv");
+    rpalavra.replace(" 5", " v");
+    rpalavra.replace(" 6", " vi");
+    rpalavra.replace(" 7", " vii");
+    rpalavra.replace(" 8", " viii");
+    rpalavra.replace(" 9", " ix");
+    rpalavra.replace(" 10", " x");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -178,35 +188,74 @@ QString FormataPalavras::fremoveNumeracao(QString rpalavra)
 
 QString FormataPalavras::fmudaNumeracaoRomanaPraArabe(QString rpalavra)
 {
+    //Os números com mais caracteres tem que ser testados antes, ou vai ficar 1X, 1V, 2I
     rpalavra = rpalavra.toLower();
-    rpalavra.replace(" I", " 1");
-    rpalavra.replace(" II", " 2");
-    rpalavra.replace(" III", " 3");
-    rpalavra.replace(" IV", " 4");
-    rpalavra.replace(" V", " 5");
-    rpalavra.replace(" VI", " 6");
-    rpalavra.replace(" VII", " 7");
-    rpalavra.replace(" VIII", " 8");
-    rpalavra.replace(" IX", " 9");
-    rpalavra.replace(" X", " 10");
+    rpalavra.replace(" viii", " 8");
+    rpalavra.replace(" iii", " 3");
+    rpalavra.replace(" vii", " 7");
+    rpalavra.replace(" iv", " 4");
+    rpalavra.replace(" ii", " 2");
+    rpalavra.replace(" vi", " 6");
+    rpalavra.replace(" ix", " 9");
+    rpalavra.replace(" v", " 5");
+    rpalavra.replace(" x", " 10");
+    rpalavra.replace(" i", " 1");
     rpalavra = rpalavra.simplified();
     return rpalavra;
+}
 
+QString FormataPalavras::fmudaNumeracaoRomanaPraSX(QString rpalavra)
+{
+    //A ORDEM IMPORTA MUITO
+    rpalavra = rpalavra.toLower();
+    rpalavra.replace(" viii", " s8");
+    rpalavra.replace(" iii", " s3");
+    rpalavra.replace(" vii", " s7");
+    rpalavra.replace(" ix", " s9");
+    rpalavra.replace(" ii", " s2");
+    rpalavra.replace(" vi", " s6");
+    rpalavra.replace(" iv", " s4");
+    rpalavra.replace(" v", " s5");
+    rpalavra.replace(" x", " s10");
+    rpalavra.replace(" i", " s1");
+    rpalavra = rpalavra.simplified();
+
+    if(rpalavra.contains("Hachimitsu to Clover", Qt::CaseInsensitive)){
+        qDebug() << rpalavra;
+    }
+    return rpalavra;
+}
+
+QString FormataPalavras::fmudaNumeracaoRomanaPraSeason(QString rpalavra)
+{
+    rpalavra = rpalavra.toLower();
+    rpalavra.replace(" viii", " season 8");
+    rpalavra.replace(" iii", " season 3");
+    rpalavra.replace(" vii", " season 7");
+    rpalavra.replace(" ii", " season 2");
+    rpalavra.replace(" iv", " season 4");
+    rpalavra.replace(" vi", " season 6");
+    rpalavra.replace(" ix", " season 9");
+    rpalavra.replace(" v", " season 5");
+    rpalavra.replace(" x", " season 10");
+    rpalavra.replace(" i", " season 1");
+    rpalavra = rpalavra.simplified();
+    return rpalavra;
 }
 
 QString FormataPalavras::fremoveNumeracaoRomana(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.remove(" I");
-    rpalavra.remove(" II");
-    rpalavra.remove(" III");
-    rpalavra.remove(" IV");
-    rpalavra.remove(" V");
-    rpalavra.remove(" VI");
-    rpalavra.remove(" VII");
-    rpalavra.remove(" VIII");
-    rpalavra.remove(" IX");
-    rpalavra.remove(" X");
+    rpalavra.remove(" viii");
+    rpalavra.remove(" iii");
+    rpalavra.remove(" vii");
+    rpalavra.remove(" ii");
+    rpalavra.remove(" iv");
+    rpalavra.remove(" ix");
+    rpalavra.remove(" vi");
+    rpalavra.remove(" v");
+    rpalavra.remove(" x");
+    rpalavra.remove(" i");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -239,7 +288,7 @@ QString FormataPalavras::fremoveCaracteresExtras(QString rpalavra)
 QString FormataPalavras::fmudaOVAPraSpecials(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.replace("OVA", "Specials");
+    rpalavra.replace("ova", "specials");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -247,7 +296,7 @@ QString FormataPalavras::fmudaOVAPraSpecials(QString rpalavra)
 QString FormataPalavras::fmudaSpecialsPraOVA(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.replace("Specials", "OVA");
+    rpalavra.replace("specials", "ova");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -255,7 +304,7 @@ QString FormataPalavras::fmudaSpecialsPraOVA(QString rpalavra)
 QString FormataPalavras::fmudaOVAPraSpecial(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.replace("OVA", "Special");
+    rpalavra.replace("ova", "special");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -263,7 +312,16 @@ QString FormataPalavras::fmudaOVAPraSpecial(QString rpalavra)
 QString FormataPalavras::fmudaSpecialPraOVA(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
-    rpalavra.replace("Special", "OVA");
+    rpalavra.replace("special", "ova");
     rpalavra = rpalavra.simplified();
+    return rpalavra;
+}
+
+QString FormataPalavras::fremoveOVAEspecial(QString rpalavra)
+{
+    rpalavra = rpalavra.toLower();
+    rpalavra.remove("specials");
+    rpalavra.remove("special");
+    rpalavra.remove("ova");
     return rpalavra;
 }

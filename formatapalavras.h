@@ -20,12 +20,15 @@ public:
     QString fmudaNumeracaoArabePraRomana(QString);
     QString fremoveNumeracao(QString);
     QString fmudaNumeracaoRomanaPraArabe(QString);
+    QString fmudaNumeracaoRomanaPraSX(QString);
+    QString fmudaNumeracaoRomanaPraSeason(QString);
     QString fremoveNumeracaoRomana(QString);
     QString fremoveCaracteresExtras(QString);
     QString fmudaOVAPraSpecials(QString);
     QString fmudaSpecialsPraOVA(QString);
     QString fmudaOVAPraSpecial(QString);
     QString fmudaSpecialPraOVA(QString);
+    QString fremoveOVAEspecial(QString);
 
     //Tentar fazer meu próprio anitomy?
 
