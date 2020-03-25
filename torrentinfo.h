@@ -19,7 +19,7 @@ public:
     QString vsize;
     QString vtorrentInfoLink;
     QString vlista;
-    QCheckBox vbox;
+//    QCheckBox vbox;
     bool vbaixar;
 signals:
 

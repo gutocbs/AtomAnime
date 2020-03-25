@@ -220,9 +220,6 @@ QString FormataPalavras::fmudaNumeracaoRomanaPraSX(QString rpalavra)
     rpalavra.replace(" i", " s1");
     rpalavra = rpalavra.simplified();
 
-    if(rpalavra.contains("Hachimitsu to Clover", Qt::CaseInsensitive)){
-        qDebug() << rpalavra;
-    }
     return rpalavra;
 }
 

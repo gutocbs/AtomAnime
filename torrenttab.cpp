@@ -30,7 +30,7 @@ TorrentTab::~TorrentTab()
 void TorrentTab::fautoDownload()
 {
     on_carregaLista_clicked();
-    on_botaoBaixar_clicked();
+    QTimer::singleShot(10000, this, SLOT(on_botaoBaixar_clicked()));
 }
 
 void TorrentTab::fleXML()
@@ -168,6 +168,7 @@ void TorrentTab::fleXML()
                 ltorrentAux->vepisodioAnime = lepisodioAnime;
                 ltorrentAux->vtorrentInfoLink = llinkInfoTorrent;
                 ltorrentAux->vlista = lista;
+                qDebug() << lprioridade << lnomeAnime << lfansub << lresolucao << lepisodioAnime;
 
                 //Checamos se já existe um anime na lista de downloads com esse nome e episódio
                 if(vbaixar.contains(lnomeAnime+lepisodioAnime)){
@@ -191,25 +192,12 @@ void TorrentTab::fleXML()
                 //Caso não exista nenhum torrent na lista de downloads com o anime certo, é colocado um, mesmo que
                 //Não esteja nas condições ideiais.
                 //Filtros com NOT não deixam chegar aqui.
-                else if(lprioridade >= 14){
+                else if(lprioridade >= 12){
                     QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                     vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                 }
                 if(!ltorrentAux->vnomeTorrent.contains("Torrent File RSS")){
                     torrent.append(ltorrentAux);
-                    if(!vHashDeIdEPosicaoDoTorrent.contains(lid)){
-                        QVector<int> posicaoTorrent;
-                        posicaoTorrent.append(torrent.size()-1);
-                        vHashDeIdEPosicaoDoTorrent.insert(lid, posicaoTorrent);
-                        if(lprioridade >= 14)
-                            vlistaDeIDs.prepend(lid);
-                        else if(lprioridade >= 12)
-                            vlistaDeIDs.insert(vlistaDeIDs.size()/2,lid);
-                        else
-                            vlistaDeIDs.append(lid);
-                    }
-                    else
-                        vHashDeIdEPosicaoDoTorrent[lid].append(torrent.size()-1);
                 }
                 lprioridade = 0;
             }
@@ -327,13 +315,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime00Progresso->setAlignment(Qt::AlignCenter);
         ui->labelAnime00Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
         ui->labelAnime00Nota->setAlignment(Qt::AlignCenter);
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime00Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime00Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime00Progresso->setText("Not selected for download.");
-            ui->labelAnime00Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime00Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime00Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[0+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime00Progresso->setText("Not selected for download.");
+                ui->labelAnime00Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[0+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime00->setPixmap(pix);
@@ -361,13 +352,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime01Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Titulo->setWordWrap(true);
         ui->labelAnime01Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime01Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime01Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime01Progresso->setText("Not selected for download.");
-            ui->labelAnime01Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime01Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime01Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[1+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime01Progresso->setText("Not selected for download.");
+                ui->labelAnime01Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[1+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime01->setPixmap(pix);
@@ -407,13 +401,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime02Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime02Titulo->setWordWrap(true);
         ui->labelAnime02Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime02Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime02Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime02Progresso->setText("Not selected for download.");
-            ui->labelAnime02Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime02Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime02Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[2+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime02Progresso->setText("Not selected for download.");
+                ui->labelAnime02Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[2+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime02->setPixmap(pix);
@@ -453,13 +450,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime03Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime03Titulo->setWordWrap(true);
         ui->labelAnime03Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime03Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime03Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime03Progresso->setText("Not selected for download.");
-            ui->labelAnime03Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime03Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime03Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[3+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime03Progresso->setText("Not selected for download.");
+                ui->labelAnime03Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[3+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime03->setPixmap(pix);
@@ -499,13 +499,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime04Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime04Titulo->setWordWrap(true);
         ui->labelAnime04Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime04Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime04Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime04Progresso->setText("Not selected for download.");
-            ui->labelAnime04Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime04Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime04Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[4+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime04Progresso->setText("Not selected for download.");
+                ui->labelAnime04Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[4+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime04->setPixmap(pix);
@@ -544,14 +547,18 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime05Titulo->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(0)]->vnomeAnime);
         ui->labelAnime05Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime05Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime05Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime05Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(0)]->vresolucao);
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime05Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime05Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[5+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime05Progresso->setText("Not selected for download.");
+                ui->labelAnime05Nota->clear();
+            }
         }
-        else{
-            ui->labelAnime05Progresso->setText("Not selected for download.");
-            ui->labelAnime05Nota->clear();
-        }
+
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[5+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime05->setPixmap(pix);
         }
@@ -590,13 +597,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime06Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime06Titulo->setWordWrap(true);
         ui->labelAnime06Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime06Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime06Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime06Progresso->setText("Not selected for download.");
-            ui->labelAnime06Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime06Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime06Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[6+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime06Progresso->setText("Not selected for download.");
+                ui->labelAnime06Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[6+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime06->setPixmap(pix);
@@ -636,13 +646,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime07Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime07Titulo->setWordWrap(true);
         ui->labelAnime07Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime07Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime07Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime07Progresso->setText("Not selected for download.");
-            ui->labelAnime07Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime07Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime07Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[7+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime07Progresso->setText("Not selected for download.");
+                ui->labelAnime07Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[7+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime07->setPixmap(pix);
@@ -682,13 +695,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime08Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime08Titulo->setWordWrap(true);
         ui->labelAnime08Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime08Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime08Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime08Progresso->setText("Not selected for download.");
-            ui->labelAnime08Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime08Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime08Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[8+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime08Progresso->setText("Not selected for download.");
+                ui->labelAnime08Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[8+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime08->setPixmap(pix);
@@ -728,13 +744,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime09Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime09Titulo->setWordWrap(true);
         ui->labelAnime09Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime09Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime09Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime09Progresso->setText("Not selected for download.");
-            ui->labelAnime09Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime09Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime09Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[9+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime09Progresso->setText("Not selected for download.");
+                ui->labelAnime09Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[9+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime09->setPixmap(pix);
@@ -774,13 +793,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime10Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime10Titulo->setWordWrap(true);
         ui->labelAnime10Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime10Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime10Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime10Progresso->setText("Not selected for download.");
-            ui->labelAnime10Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime10Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime10Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[10+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime10Progresso->setText("Not selected for download.");
+                ui->labelAnime10Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[10+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime10->setPixmap(pix);
@@ -820,13 +842,16 @@ void TorrentTab::fConstroiListaTorrents()
         ui->labelAnime11Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime11Titulo->setWordWrap(true);
         ui->labelAnime11Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-        if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(0)]->vbaixar){
-            ui->labelAnime11Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(0)]->vfansub);
-            ui->labelAnime11Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(0)]->vresolucao);
-        }
-        else{
-            ui->labelAnime11Progresso->setText("Not selected for download.");
-            ui->labelAnime11Nota->clear();
+        for(int i = 0; i < vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].size(); i++){
+            if(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(i)]->vbaixar){
+                ui->labelAnime11Progresso->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(i)]->vfansub);
+                ui->labelAnime11Nota->setText(torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[11+(12*(vpagina-1))]].at(i)]->vresolucao);
+                break;
+            }
+            else{
+                ui->labelAnime11Progresso->setText("Not selected for download.");
+                ui->labelAnime11Nota->clear();
+            }
         }
         if(pix.load(cconfbase->vdiretorioImagensMedio+vlistaDeIDs[11+(12*(vpagina-1))]+".jpg", "jpg")){
             ui->imagemAnime11->setPixmap(pix);
@@ -1388,6 +1413,11 @@ int TorrentTab::fcalculaPrioridadeFiltros(QString description, QString rid)
 
 void TorrentTab::on_carregaLista_clicked()
 {
+    vbaixar.clear();
+    vHashDeNomeEId.clear();
+    vHashDeIdEPosicaoDoTorrent.clear();
+    vlistaDeIDs.clear();
+    vlistaDownload.clear();
     fbaixaLista();
 }
 
@@ -1489,22 +1519,26 @@ void TorrentTab::on_botaoAnime11_clicked()
 
 void TorrentTab::on_botaoBaixar_clicked()
 {
-    QProcess lprocesso;
-    if(cconfig->fretornaTorrentEscolhido() == "uTorrent")
-        lprocesso.setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
-    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent")
-        lprocesso.setProgram(QDir::rootPath() + "/Program Files/qBittorrent/qbittorrent.exe");
-
-    lprocesso.startDetached();
+    bool achouPraDownload = false;
 
     for(int i = 0; i < torrent.size(); i++){
         if(torrent[i]->vbaixar == true){
             vlistaDownload.append(i);
             QPointer<filedownloader> qdown(new filedownloader);
             qdown->fdownloadTorrent(torrent[i]->vlinkTorrent, torrent[i]->vnomeTorrent);
-            torrent[i]->vbox.setCheckState(Qt::Unchecked);
+            torrent[i]->vbaixar  = false;
+            achouPraDownload = true;
             connect(qdown, &filedownloader::storrent, this, &TorrentTab::fesperaTorrent);
         }
+    }
+    if(achouPraDownload){
+        QProcess lprocesso;
+        if(cconfig->fretornaTorrentEscolhido() == "uTorrent")
+            lprocesso.setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
+        else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent")
+            lprocesso.setProgram(QDir::rootPath() + "/Program Files/qBittorrent/qbittorrent.exe");
+
+        lprocesso.startDetached();
     }
 }
 
@@ -1567,6 +1601,11 @@ void TorrentTab::on_botaoLinkTorrent_clicked()
 void TorrentTab::on_botaoSearchThisanime_clicked()
 {
     QString lnome = torrent[vHashDeIdEPosicaoDoTorrent[vlistaDeIDs[vtorrentSelecionado]].at(0)]->vnomeAnime;
+    vbaixar.clear();
+    vHashDeNomeEId.clear();
+    vHashDeIdEPosicaoDoTorrent.clear();
+    vlistaDeIDs.clear();
+    vlistaDownload.clear();
     fprocuraAnimeEspecifico(lnome);
 }
 

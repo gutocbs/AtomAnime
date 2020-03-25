@@ -2855,7 +2855,7 @@ color: rgb(53, 68, 120);</string>
     </rect>
    </property>
    <property name="text">
-    <string>fleXML</string>
+    <string>download</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botaoSelectSubForTorrent">
@@ -2868,7 +2868,7 @@ color: rgb(53, 68, 120);</string>
     </rect>
    </property>
    <property name="text">
-    <string>fleXML</string>
+    <string>sub</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botaoInfoAnime">
@@ -2881,7 +2881,7 @@ color: rgb(53, 68, 120);</string>
     </rect>
    </property>
    <property name="text">
-    <string>fleXML</string>
+    <string>info</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botaoLinkTorrent">
@@ -2894,7 +2894,7 @@ color: rgb(53, 68, 120);</string>
     </rect>
    </property>
    <property name="text">
-    <string>fleXML</string>
+    <string>link</string>
    </property>
   </widget>
   <widget class="QPushButton" name="botaoSearchThisanime">
@@ -2907,7 +2907,7 @@ color: rgb(53, 68, 120);</string>
     </rect>
    </property>
    <property name="text">
-    <string>fleXML</string>
+    <string>search</string>
    </property>
   </widget>
   <widget class="QComboBox" name="listaSubs">

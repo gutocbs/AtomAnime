@@ -27,6 +27,11 @@
    </property>
    <column>
     <property name="text">
+     <string>lista</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
      <string/>
     </property>
    </column>
@@ -68,11 +73,6 @@
    <column>
     <property name="text">
      <string>prioridade</string>
-    </property>
-   </column>
-   <column>
-    <property name="text">
-     <string>index</string>
     </property>
    </column>
   </widget>
@@ -170,6 +170,19 @@
    </property>
    <property name="text">
     <string>Procurar mais desse anime</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelMensagem">
+   <property name="geometry">
+    <rect>
+     <x>650</x>
+     <y>30</y>
+     <width>551</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>TextLabel</string>
    </property>
   </widget>
  </widget>

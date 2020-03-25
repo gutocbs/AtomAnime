@@ -10,8 +10,6 @@
 #include <QDateTime> //Data que lança o episódio
 #include <QHash> //Pra procurar o anime com rapidez
 #include <QDir>
-#include <QFuture>
-#include <QtConcurrent>
 
 #include "anime.h"
 #include "formatapalavras.h"

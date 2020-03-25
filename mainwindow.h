@@ -210,6 +210,7 @@ private:
 
     //Janelas
     janeladeconfig jconfig;
-    TorrentTab ttorrent;
+    janelatorrent jtorrent;
+//    TorrentTab ttorrent;
 };
 #endif // MAINWINDOW_H
