@@ -9,6 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     ui->botaoDownloadListImages->hide();
     ui->boxSelecionaAno->hide();
+    ui->botaoAnimeCerto->hide();
     if(ui->boxSelecionaAno->count() != QDate::currentDate().year()-2000){
         int date = QDate::currentDate().year()-1999;
         for(int i = 0; i < date; i++){
@@ -337,8 +338,6 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QStrin
     }
     ui->labelAnimeAssistindoTitulo->setText(rnomeAnime);
     ui->labelAnimeAssistindoEpisodio->setText("Episode " + repisodioAnime);
-
-
     if(vcontadorAssistindoEpisodio == 12){
         fAumentaProgressoID(ridAnime, repisodioAnime);
         vcontadorAssistindoEpisodio++;
@@ -352,7 +351,7 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, QString rnomeAnime, QStrin
 
 ///ASSIM QUE O DESIGN ESTIVER PRONTO, CHECAR TAMBÉM SE A SINOPSE É MAIOR QUE O LABEL E AJEITAR ISSO
 void MainWindow::finfoAnimeSelecionado(){
-    fVerificaAnimeAberto();
+//    fVerificaAnimeAberto();
     if(!vlistaSelecionada.isEmpty() || vanimeSelecionado != -1){
         ui->labelInfoNomeAnime->setText(vlistaSelecionada[vanimeSelecionado]->vnome);
         ui->labelInfoNomeAnimeIngles->setText(vlistaSelecionada[vanimeSelecionado]->vnomeIngles);
@@ -1975,86 +1974,81 @@ void MainWindow::fAumentaProgressoID(QString ridAnime, QString repisodioAnime)
     QVector<anime*> listaTemp;
     if(llistaAnimeAssistindo.isEmpty())
         return;
-    else if(llistaAnimeAssistindo != vlistaSelecionada[vanimeSelecionado]->vlista){
+    else{
+        //Olha todas as listas, exceto completed. Não tem sentido aumentar o progresso de algo já completo.
         if(llistaAnimeAssistindo.compare("Watching",Qt::CaseInsensitive) == 0){
-            listaTemp = cleitorListaAnimes->sortLista("cdata", "watching");
+            listaTemp = cleitorListaAnimes->retornaListaWatching();
         }
         else if(llistaAnimeAssistindo.compare("On Hold",Qt::CaseInsensitive) == 0){
-            listaTemp = cleitorListaAnimes->sortLista("cdata", "onhold");
+            listaTemp = cleitorListaAnimes->retornaListaOnHold();
         }
         else if(llistaAnimeAssistindo.compare("Dropped",Qt::CaseInsensitive) == 0){
-            listaTemp = cleitorListaAnimes->sortLista("cdata", "dropped");
+            listaTemp = cleitorListaAnimes->retornaListaDropped();
         }
         else if(llistaAnimeAssistindo.compare("Plan to Watch",Qt::CaseInsensitive) == 0){
-            listaTemp = cleitorListaAnimes->sortLista("cdata", "plantowatch");
+            listaTemp = cleitorListaAnimes->retornaListaPlanToWatch();
         }
-    }
-    if(lposicao != -1){
-        if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < repisodioAnime.toInt()){
-            for(int i = 0; i < repisodioAnime.toInt()-vlistaSelecionada[lposicao]->vnumEpisodiosAssistidos.toInt(); i++){
-                int lepisodiosTotais = 0;
-                //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
-                if(listaTemp[lposicao]->vnumEpisodiosTotais != "?")
-                    lepisodiosTotais = listaTemp[lposicao]->vnumEpisodiosTotais.toInt();
-                else
-                    lepisodiosTotais = INT_MAX;
-                if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
-                    listaTemp[lposicao]->vnumEpisodiosAssistidos =
-                            QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()+1);
-                    cleitorListaAnimes->fmudaProgresso(listaTemp[i]->vid,
-                                                   listaTemp[i]->vnumEpisodiosAssistidos);
-                    finfoAnimeSelecionado();
-                    QString lacao = "progresso:" + listaTemp[lposicao]->vid;
-                    QStringList lstringListAcao = lacao.split(':');
-                    vlistaAcoes.insert(lstringListAcao,
-                                       QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()));
-                    if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() ==
-                            listaTemp[lposicao]->vnumEpisodiosTotais.toInt()){
-                        ui->boxMudarPraLista->setCurrentIndex(1);
-                        on_botaoMudarPraLista_clicked();
-                    }
-                }
+        else{
+            bool ok;
+            //Checa se a lista é um número válido
+            llistaAnimeAssistindo.toInt(&ok);
+            if(ok){
+                listaTemp = cleitorListaAnimes->fleListaAno(llistaAnimeAssistindo.toInt());
             }
         }
     }
-    else{
-        for (int i = 0; i < listaTemp.size(); i++) {
-            if(listaTemp[i]->vid == ridAnime){
-                int lepisodiosTotais = 0;
-                //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
-                if(listaTemp[i]->vnumEpisodiosTotais != "?")
-                    lepisodiosTotais = listaTemp[i]->vnumEpisodiosTotais.toInt();
-                else
-                    lepisodiosTotais = INT_MAX;
-                if(listaTemp[i]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
-                    listaTemp[i]->vnumEpisodiosAssistidos =
-                            QString::number(listaTemp[i]->vnumEpisodiosAssistidos.toInt()+1);
-                    cleitorListaAnimes->fmudaProgresso(listaTemp[i]->vid,
-                                                   listaTemp[i]->vnumEpisodiosAssistidos);
-                    finfoAnimeSelecionado();
-                    QString lacao = "progresso:" + listaTemp[i]->vid;
-                    QStringList lstringListAcao = lacao.split(':');
-                    vlistaAcoes.insert(lstringListAcao, QString::number(listaTemp[i]->vnumEpisodiosAssistidos.toInt()));
-                    if(listaTemp[i]->vnumEpisodiosAssistidos.toInt() == listaTemp[i]->vnumEpisodiosTotais.toInt()){
-                        ui->boxMudarPraLista->setCurrentIndex(1);
-                        on_botaoMudarPraLista_clicked();
-                    }
+    if(lposicao != -1 && listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < repisodioAnime.toInt()){
+        for(int i = 0; i < repisodioAnime.toInt()-listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt(); i++){
+            int lepisodiosTotais = 0;
+            //Caso o número máximo de episódios não seja conhecido, não deve existir um limite;
+            if(listaTemp[lposicao]->vnumEpisodiosTotais != "?")
+                lepisodiosTotais = listaTemp[lposicao]->vnumEpisodiosTotais.toInt();
+            else
+                lepisodiosTotais = INT_MAX;
+            if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() < lepisodiosTotais){
+                listaTemp[lposicao]->vnumEpisodiosAssistidos =
+                        QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()+1);
+                cleitorListaAnimes->fmudaProgresso(listaTemp[i]->vid,
+                                               listaTemp[i]->vnumEpisodiosAssistidos);
+                finfoAnimeSelecionado();
+                QString lacao = "progresso:" + listaTemp[lposicao]->vid;
+                QStringList lstringListAcao = lacao.split(':');
+                vlistaAcoes.insert(lstringListAcao,
+                                   QString::number(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt()));
+                if(listaTemp[lposicao]->vnumEpisodiosAssistidos.toInt() ==
+                        listaTemp[lposicao]->vnumEpisodiosTotais.toInt()){
+                    vlistaSelecionada[vanimeSelecionado]->vlista = "Completed";
+                    canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "COMPLETED");
+                    cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid,
+                                                   vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
+                }
+                //Caso esteja vendo um anime de, por exemplo, plan to watch, manda pra lista watching
+                //Se estiver vendo um anime que não está na lista, ele é adicionado em Watching também.
+                else if((llistaAnimeAssistindo.compare("Completed",Qt::CaseInsensitive) != 0)){
+
+                    vlistaSelecionada[vanimeSelecionado]->vlista = "Watchig";
+                    canilist->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid.toInt(), "CURRENT");
+                    cleitorListaAnimes->fmudaLista(vlistaSelecionada[vanimeSelecionado]->vid,
+                                                   vlistaSelecionada[vanimeSelecionado]->vlista, vtipoAtual);
                 }
             }
         }
     }
     //Aqui rola o refresh depois de ter mudado a lista temporária
-    if(llistaAtual.compare("watching",Qt::CaseInsensitive) == 0){
+    if(llistaAtual.compare("Watching",Qt::CaseInsensitive) == 0){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "watching");
     }
-    else if(llistaAnimeAssistindo.compare("onhold",Qt::CaseInsensitive) == 0){
+    else if(llistaAnimeAssistindo.compare("On Hold",Qt::CaseInsensitive) == 0){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "onhold");
     }
-    else if(llistaAnimeAssistindo.compare("dropped",Qt::CaseInsensitive) == 0){
+    else if(llistaAnimeAssistindo.compare("Dropped",Qt::CaseInsensitive) == 0){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "dropped");
     }
-    else if(llistaAnimeAssistindo.compare("plantowatch",Qt::CaseInsensitive) == 0){
+    else if(llistaAnimeAssistindo.compare("Plan to Watch",Qt::CaseInsensitive) == 0){
         vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "plantowatch");
+    }
+    else if(llistaAnimeAssistindo.compare("Completed",Qt::CaseInsensitive) == 0){
+        vlistaSelecionada = cleitorListaAnimes->sortLista(vordem, "completed");
     }
     fliberaSinaisBotoes();
 }
