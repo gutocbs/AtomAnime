@@ -1809,48 +1809,63 @@ void leitorlistaanimes::finsereNomeAlternativo(QString rid, QStringList rlistaNo
 
     if(llista.compare("Watching", Qt::CaseInsensitive) == 0){
         vlistaWatching[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Plan to Watch", Qt::CaseInsensitive) == 0){
         vlistaPlanToWatch[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("On Hold", Qt::CaseInsensitive) == 0){
         vlistaOnHold[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Dropped", Qt::CaseInsensitive) == 0){
         vlistaDropped[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Completed", Qt::CaseInsensitive) == 0){
         vlistaCompleted[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     if(llista.compare("Reading(Manga)", Qt::CaseInsensitive) == 0){
         vlistaMangaReading[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Plan to Read(Manga)", Qt::CaseInsensitive) == 0){
         vlistaMangaPlanToRead[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("On Hold(Manga)", Qt::CaseInsensitive) == 0){
         vlistaMangaOnHold[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Dropped(Manga)", Qt::CaseInsensitive) == 0){
         vlistaMangaDropped[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Completed(Manga)", Qt::CaseInsensitive) == 0){
         vlistaMangaCompleted[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     if(llista.compare("Reading(Novel)", Qt::CaseInsensitive) == 0){
         vlistaNovelReading[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Plan to Read(Novel)", Qt::CaseInsensitive) == 0){
         vlistaNovelPlanToRead[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("On Hold(Novel)", Qt::CaseInsensitive) == 0){
         vlistaNovelOnHold[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Dropped(Novel)", Qt::CaseInsensitive) == 0){
         vlistaNovelDropped[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
     else if(llista.compare("Completed(Novel)", Qt::CaseInsensitive) == 0){
         vlistaNovelCompleted[lposicao]->vnomeAlternativo.append(rlistaNomesAlternativos);
+        vHashNomeAnimesPorId[rid].append(rlistaNomesAlternativos);
     }
 }
 

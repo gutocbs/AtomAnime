@@ -17,6 +17,9 @@
 #include <QPointer>
 #include <QDesktopServices> //Abre o site do torrent
 #include <QUrl>
+#include <QFuture>
+#include <QtConcurrent>
+#include <QMutexLocker> //Pra lidar com os mapas nas threads
 
 #include <anitomy/anitomy.h>
 #include "torrentinfo.h"
@@ -38,7 +41,6 @@ public:
     explicit janelatorrent(QWidget *parent = nullptr);
     ~janelatorrent();
 
-    void fpreencheTabela();
     void fpassaPonteiros(leitorlistaanimes*, janeladeconfig*, arquivos*);
     void fprocuraAnimeEspecifico(QString);
     void fautoDownload();
@@ -49,20 +51,29 @@ public:
     QString fchecaFiltroHasKeyword(QString);
 
 private slots:
-    void fesperaTorrent();
-    void fleXML();
-    void fbaixaTorrent();
     void on_botaoDownload_clicked();
     void on_botaoAtualizaLista_clicked();
     void on_botaoInfoAnime_clicked();
     void on_botaoLinkTorrent_clicked();
     void on_botaoSearchThisanime_clicked();
     void on_botaoSelectSubForTorrent_clicked();
+
+    void fpreparaLeituraArquivoTorrent();
+    void fpreencheTabela();
+    void fesperaTorrent();
+    void fleXML();
+    void fbaixaTorrent();
     void fchecaEstado(int);
+
+    int fcalculaPrioridadeNome(QString, QString, QString,QString, int);
+    int fcalculaPrioridadeSub(QString, QString);
+    int fcalculaPrioridadeQualidade(QString, QString);
+    int fcalculaPrioridadeFiltros(QString, QString);
 
 signals:
     void error(QString);
     void infoAnime(QString);
+    void fimDownloadTorrent();
 
 private:
     Ui::janelatorrent *ui;
@@ -71,7 +82,9 @@ private:
     leitorlistaanimes *cleitor;
     janeladeconfig *cconfig;
     arquivos *carquivos;
-    filedownloader *qdown;
+
+    QFuture<void> vleArquivo;
+    QMutex vmutex;
 
     QMap<int,QCheckBox*> vcontroladorCheckbox;
     QVector<torrentinfo*> torrent;

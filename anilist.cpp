@@ -37,6 +37,10 @@ bool anilist::fgetList(){
     //Espera uma resposta
     while (!vreply->isFinished())
     {
+        if(this->thread()->isInterruptionRequested()){
+            this->thread()->exit(0);
+            return false;
+        }
         qApp->processEvents();
     }
 

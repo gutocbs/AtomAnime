@@ -67,10 +67,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(timerChecaDownloadPorAno, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fsetDownloadImagensAnimesPorAno));
     timerTorrent = new QTimer(this);
     ui->janelaRotativa->addWidget(&jconfig);
-    ui->janelaRotativa->addWidget(&ttorrent);
-    ttorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos, cconfBase);
+    ui->janelaRotativa->addWidget(&jtorrent);
+    jtorrent.fpassaPonteiros(cleitorListaAnimes, &jconfig, carquivos);
     jconfig.frecebeListasAnimes(cleitorListaAnimes);
-    connect(&ttorrent, &TorrentTab::error, this, &MainWindow::favisoErro);
+    connect(&jtorrent, &janelatorrent::error, this, &MainWindow::favisoErro);
 
     vordem = "";
     vdownloadImagensAcabou = true;
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&jconfig, &janeladeconfig::sauthcodesave, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fretryAnilist);
     connect(&jconfig, &janeladeconfig::ssavebutton, this, &MainWindow::fgetConfigurations);
-    connect(&ttorrent, &TorrentTab::infoAnime, this, &MainWindow::fInfoAnimeTorrent, Qt::QueuedConnection);
+    connect(&jtorrent, &janelatorrent::infoAnime, this, &MainWindow::fInfoAnimeTorrent, Qt::QueuedConnection);
 
     //Quando baixa todas as imagens, carrega as imagens na página
     connect(cfiledownloader,&filedownloader::sterminouLista,this,&MainWindow::fcarregaImagensBackground, Qt::QueuedConnection);
@@ -107,6 +107,10 @@ MainWindow::MainWindow(QWidget *parent)
     cfiledownloader->fsetConfBase(cconfBase);
     cfiledownloader->fsetLeitorListaAnimes(cleitorListaAnimes);
 //    connect(cfiledownloader, &filedownloader::savatar, this, &MainWindow::fcarregaImagensLista, Qt::QueuedConnection);
+
+    vanimeSelecionado = 0;
+    vpagina = 1;
+    fleNomesAlternativos();
     fcarregouListaTeste(false);
 
     //Caso haja algum erro onde não foi possível atualizar o anilist, as ações não atualizadas são salvas em um bloco de
@@ -213,8 +217,10 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
     //Posso por o recebe configs em uma função própria com sinal de qunado salvar as configs
     cconfUsuario->frecebeConfigs(jconfig.fretornaDiretorios());
     carquivos->frecebeAnimes(cleitorListaAnimes);
-    vanimeSelecionado = 0;
-    vpagina = 1;
+    if(vlistaSelecionada.size() < vanimeSelecionado){
+        vanimeSelecionado = 0;
+        vpagina = 1;
+    }
 
     ui->NumPagina->setText("Watching - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
 
@@ -1751,7 +1757,7 @@ void MainWindow::on_botaoBusca_clicked()
         }
     }
     else if(ui->janelaRotativa->currentIndex() == 2)
-        ttorrent.fprocuraAnimeEspecifico(ui->barraBusca->toPlainText());
+        jtorrent.fprocuraAnimeEspecifico(ui->barraBusca->toPlainText());
 }
 
 void MainWindow::on_botaoRefresh_clicked()
@@ -2060,8 +2066,8 @@ void MainWindow::fgetConfigurations()
     if(jconfig.fretornaBaixaQualidade().contains("yes"))
         vusarImagensBaixaQualidade = true;
     if(jconfig.fretornaDownloadAutomatico().contains("yes")){
-        timerTorrent->start(jconfig.fretornaTempoDownload().toInt());
-        connect(timerTorrent, &QTimer::timeout, &ttorrent, QOverload<>::of(&TorrentTab::fautoDownload));
+        timerTorrent->start(jconfig.fretornaTempoDownload().toInt()*10000);
+        connect(timerTorrent, &QTimer::timeout, &jtorrent, QOverload<>::of(&janelatorrent::fautoDownload));
     }
 }
 
@@ -2315,8 +2321,10 @@ void MainWindow::on_botaoRemoverdaLista_clicked()
 
 void MainWindow::fretryAnilist()
 {
-    dThread.requestInterruption();
-    dThread.wait();
+    if(dThread.isRunning()){
+        dThread.requestInterruption();
+        dThread.wait();
+    }
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
 //    canilist->fbaixaListaThread(cThread);
 //    canilist->moveToThread(&cThread);
@@ -2722,7 +2730,7 @@ void MainWindow::on_botaoLN_clicked()
 
 void MainWindow::on_botaoDownloadAnime_clicked()
 {
-    ttorrent.fprocuraAnimeEspecifico(vlistaSelecionada[vanimeSelecionado]->vnome);
+    jtorrent.fprocuraAnimeEspecifico(vlistaSelecionada[vanimeSelecionado]->vnome);
     ui->janelaRotativa->setCurrentIndex(2);
 }
 

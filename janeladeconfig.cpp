@@ -732,7 +732,6 @@ void janeladeconfig::on_botaoCheck_clicked()
     ui->tabelaAnimes->selectRow(0);
     for(int w = 0; w < vfiltrosAnimes[index]->idAnimesAfetados.size(); w++){
         for(int i = 0; i < ui->tabelaAnimes->rowCount(); i++){
-           qDebug() << ui->tabelaAnimes->item(i,1)->text();
            if(ui->tabelaAnimes->item(i,1)->text().compare(vfiltrosAnimes[index]->idAnimesAfetados[w]) == 0){
                ui->tabelaAnimes->selectRow(i);
                on_botaoInserirAnime_clicked();
@@ -780,6 +779,8 @@ void janeladeconfig::on_botaoRemoverAnime_clicked()
 
 void janeladeconfig::on_botaoEnableDisable_clicked()
 {
+    if(ui->tabelaAnimesSelecionados->selectionModel()->selectedRows().isEmpty())
+        return;
     QModelIndexList select = ui->tabelaFiltros->selectionModel()->selectedRows();
     int index = ui->tabelaFiltros->item(select.at(0).row(),0)->text().toInt();
     if(vfiltrosAnimes[index]->Ativo){
