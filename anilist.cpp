@@ -1,4 +1,5 @@
 #include "anilist.h"
+#include <utility>
 
 const QUrl graphqlUrl("https://graphql.anilist.co");
 
@@ -59,7 +60,7 @@ bool anilist::fgetList(){
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
     //Verificamos se é uma mensagem de erro
-    if(lastpage.contains("errors") == true){
+    if(lastpage.contains("errors")){
         this->thread()->exit(0);
         emit sterminouDownload(false);
         vreply->deleteLater();
@@ -105,24 +106,22 @@ bool anilist::fgetList(){
         t.close();
     }
     QString lreplyString = jsond.toJson();
-    if(lreplyString.contains("errors") == true){
+    if(lreplyString.contains("errors")){
         emit sterminouDownload(false);
         this->thread()->exit(0);
         vreply->deleteLater();
         return false;
     }
-    else{
-        if(QFile::exists("Configurações/Temp/animeList.txt")){
-            if(QFile::remove("Configurações/Temp/animeList.txt"))
-                t.rename("Configurações/Temp/animeList.txt");
-        }
-        else
+    if(QFile::exists("Configurações/Temp/animeList.txt")){
+        if(QFile::remove("Configurações/Temp/animeList.txt"))
             t.rename("Configurações/Temp/animeList.txt");
-        emit sterminouDownload(true);
-        this->thread()->exit(0);
-        vreply->deleteLater();
-        return true;
     }
+    else
+        t.rename("Configurações/Temp/animeList.txt");
+    emit sterminouDownload(true);
+    this->thread()->exit(0);
+    vreply->deleteLater();
+    return true;
 }
 
 bool anilist::fgetListasAnoSeason()
@@ -133,7 +132,7 @@ bool anilist::fgetListasAnoSeason()
     return true;
 }
 
-bool anilist::fgetListaAno(QString rano){
+bool anilist::fgetListaAno(const QString &rano){
     if(QFile::exists("Configurações/Temp/Lists/animeList"+rano+".txt") && rano != QString::number(QDate::currentDate().year())){
         return true;
     }
@@ -179,7 +178,7 @@ bool anilist::fgetListaAno(QString rano){
     QJsonDocument jsond = QJsonDocument::fromJson(response_data);
     QString lastpage = jsond.toJson();
     //Verificamos se é uma mensagem de erro
-    if(lastpage.contains("errors") == true){
+    if(lastpage.contains("errors")){
         this->thread()->exit(0);
         vreply->deleteLater();
         return false;
@@ -213,24 +212,22 @@ bool anilist::fgetListaAno(QString rano){
         t.close();
     }
     QString lreplyString = jsond.toJson();
-    if(lreplyString.contains("errors") == true){
+    if(lreplyString.contains("errors")){
         vreply->deleteLater();
         return false;
     }
-    else{
-        if(QFile::exists("Configurações/Temp/Lists/animeList"+rano+".txt")){
-            if(QFile::remove("Configurações/Temp/Lists/animeList"+rano+".txt"))
-                t.rename("Configurações/Temp/Lists/animeList"+rano+".txt");
-        }
-        else
+    if(QFile::exists("Configurações/Temp/Lists/animeList"+rano+".txt")){
+        if(QFile::remove("Configurações/Temp/Lists/animeList"+rano+".txt"))
             t.rename("Configurações/Temp/Lists/animeList"+rano+".txt");
-        vreply->deleteLater();
-        return true;
     }
+    else
+        t.rename("Configurações/Temp/Lists/animeList"+rano+".txt");
+    vreply->deleteLater();
+    return true;
 }
 
 
-bool anilist::fmudaLista(int rid, QString rNovaLista){
+bool anilist::fmudaLista(int rid, const QString &rNovaLista){
     ///Preciso por o token em um arquvio de configuração criptografado
     QByteArray auth = "Bearer ";
     auth.append(vtoken);
@@ -270,8 +267,7 @@ bool anilist::fmudaLista(int rid, QString rNovaLista){
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
         return false;
-    else
-        return true;
+    return true;
 }
 
 ///fmudaNota(id, nova nota)
@@ -319,8 +315,7 @@ bool anilist::fmudaNota(int rid, int rnovaNota){
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
         return false;
-    else
-        return true;
+    return true;
 }
 
 bool anilist::fmudaProgresso(int rid, int rnovoProgresso){
@@ -366,8 +361,7 @@ bool anilist::fmudaProgresso(int rid, int rnovoProgresso){
     QString lreplyString = jsond.toJson();
     if(lreplyString.contains("error"))
         return false;
-    else
-        return true;
+    return true;
 }
 
 QString anilist::fretornaAvatar(){
@@ -379,10 +373,10 @@ void anilist::fbaixaListaThread(QThread &cThread)
     connect(&cThread, SIGNAL(started()), this, SLOT(fgetList()), Qt::QueuedConnection);
 }
 
-void anilist::frecebeAutorizacao(QString ruser, QString rauthcode)
+void anilist::frecebeAutorizacao(const QString &ruser, QString rauthcode)
 {
     vusername = "\"" + ruser + "\"";
-    vtoken = rauthcode;
+    vtoken = std::move(rauthcode);
 }
 
 bool anilist::fexcluiAnime(int rid){
@@ -449,6 +443,5 @@ bool anilist::fexcluiAnime(int rid){
     lreplyString = jsond.toJson();
     if(lreplyString.contains("error") || lreplyString.contains("errors"))
         return false;
-    else
-        return true;
+    return true;
 }

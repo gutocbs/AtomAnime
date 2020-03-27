@@ -10,7 +10,7 @@ class ChecaInfoPlayer : public QObject
 public:
     explicit ChecaInfoPlayer(QObject *parent = nullptr);
     void fgetStreamLanguages();
-    void fchecaStream(QString, QString);
+    void fchecaStream(const QString &player, const QString &janela);
 
     void fchecaCrunchyroll();
     void fchecaAnimeLab();

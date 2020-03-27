@@ -42,13 +42,13 @@ public:
     ~janelatorrent();
 
     void fpassaPonteiros(leitorlistaanimes*, janeladeconfig*, arquivos*);
-    void fprocuraAnimeEspecifico(QString);
+    void fprocuraAnimeEspecifico(const QString &rnomeAnimeBuscado);
     void fautoDownload();
-    QString fchecaFiltroFansub(QString);
-    QString fchecaFiltroDownloadFromList(QString);
-    QString fchecaFiltroResolution(QString);
-    QString fchecaFiltroLaguage(QString);
-    QString fchecaFiltroHasKeyword(QString);
+    QString fchecaFiltroFansub(const QString &lid);
+    QString fchecaFiltroDownloadFromList(const QString &lid);
+    QString fchecaFiltroResolution(const QString &lid);
+    QString fchecaFiltroLaguage(const QString &lid);
+    QString fchecaFiltroHasKeyword(const QString &lid);
 
 private slots:
     void on_botaoDownload_clicked();
@@ -65,10 +65,11 @@ private slots:
     void fbaixaTorrent();
     void fchecaEstado(int);
 
-    int fcalculaPrioridadeNome(QString, QString, QString,QString, int);
-    int fcalculaPrioridadeSub(QString, QString);
-    int fcalculaPrioridadeQualidade(QString, QString);
-    int fcalculaPrioridadeFiltros(QString, QString);
+    int fcalculaPrioridadeNome(QString ridAnime, const QString &repisodioAime, const QString &repisodiosAssistidos,
+                               const QString &rlista, int);
+    int fcalculaPrioridadeSub(const QString &rfansub, const QString &rid);
+    int fcalculaPrioridadeQualidade(const QString &resolucao, const QString &id);
+    int fcalculaPrioridadeFiltros(const QString &description, const QString &rid);
 
 signals:
     void error(QString);

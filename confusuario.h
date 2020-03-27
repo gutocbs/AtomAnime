@@ -24,12 +24,11 @@ public:
     QVector<QString> fretornaDiretoriosAnimes();
     void fbuscaDiretoriosAnimes();
     void frecebeListaAnime(leitorlistaanimes*);
-    void frecebeConfigs(QStringList);
-    void fmostraPastas();
+    void frecebeConfigs(const QStringList &ldiretorios);
     void fbuscaPastasThread(QThread &dThread);
     void fsalvaPastasArquivos();
     void flePastasArquivos();
-    void fselecionaPastaEspecificaAnime(QString, QString);
+    void fselecionaPastaEspecificaAnime(const QString &ridAnime, const QString &rdirAnime);
 
 public slots:
     void fsetupListasPraBusca();

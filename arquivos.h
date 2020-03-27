@@ -25,8 +25,8 @@ public:
     explicit arquivos(QObject *parent = nullptr);
     QString fprocuraEpisodio(anime*);
     QString fprocuraEpisodioEspecifico(anime*, int);
-    bool fcomparaDadosAnime(QString, QString, QString, QStringList, int, int);
-    bool fabreEpisodio(QByteArray);
+    bool fcomparaDadosAnime(QString, const QString &rnomeAnime, QString, const QStringList &rnomesAlternativosAnime, int, int);
+    bool fabreEpisodio(const QByteArray &rcaminhoArquivo);
     void frecebeDiretorios(confUsuario*);
     void frecebeAnimes(leitorlistaanimes*);
     int fcomparaSeasons(QString, int, int);

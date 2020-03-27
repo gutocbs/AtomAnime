@@ -22,9 +22,9 @@ public:
     ~filedownloader();
     void fsetLeitorListaAnimes(leitorlistaanimes*);
     void fsetConfBase(confBase*);
-    void fdownloadAvatarUsuario(QString);
-    void fdownloadTorrent(QString, QString);
-    void fdownloadXMLTorrentList(QString);
+    void fdownloadAvatarUsuario(const QString &fileURL);
+    void fdownloadTorrent(const QString &fileURL, const QString &torrentName);
+    void fdownloadXMLTorrentList(const QString &fileURL);
 
 signals:
     void slistaMensagem(QString);

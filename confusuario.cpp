@@ -10,10 +10,9 @@ confUsuario::confUsuario(QObject *parent) : QObject(parent)
 
 
 QString confUsuario::fretornaDiretorioEspecifico(int id){
-    if(vterminouChecagem == true)
+    if(vterminouChecagem)
         return vdiretorioEspecificoAnime[QString::number(id)];
-    else
-        return "";
+    return "";
 }
 
 QVector<QString> confUsuario::fretornaDiretoriosAnimes(){
@@ -73,7 +72,7 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 else{
                     //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
                     //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
-                    if(vlistaAnimes[w]->vnomeAlternativo.size() != 0){
+                    if(!vlistaAnimes[w]->vnomeAlternativo.isEmpty()){
                         for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
                             if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeAlternativo.at(z))){
                                 vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
@@ -89,13 +88,6 @@ void confUsuario::fbuscaDiretoriosAnimes(){
     fsetupListasPraBusca();
 }
 
-///POSSO REMOVER ESSA FUNÇÃO CASO NECESSÁRIO, SERVE APENAS PARA DEBUG
-void confUsuario::fmostraPastas(){
-    foreach (QString key, vdiretorioEspecificoAnime.keys()) {
-        qDebug() << key << " - " << vdiretorioEspecificoAnime.value(key);
-    }
-}
-
 void confUsuario::fbuscaPastasThread(QThread &dThread)
 {
     vlista = 0;
@@ -109,7 +101,6 @@ void confUsuario::fsalvaPastasArquivos()
         QTextStream lstreamTexto(&t);
         lstreamTexto.setCodec("UTF-8");
         foreach(QString key, vdiretorioEspecificoAnime.keys()){
-//            qDebug() << vdiretorioEspecificoAnime[key];
             lstreamTexto << key << ";" << vdiretorioEspecificoAnime[key] << endl;
         }
         t.close();
@@ -137,7 +128,7 @@ void confUsuario::flePastasArquivos()
     }
 }
 
-void confUsuario::fselecionaPastaEspecificaAnime(QString ridAnime, QString rdirAnime)
+void confUsuario::fselecionaPastaEspecificaAnime(const QString &ridAnime, const QString &rdirAnime)
 {
     if(vdiretorioEspecificoAnime.contains(ridAnime))
         vdiretorioEspecificoAnime.remove(ridAnime);
@@ -209,7 +200,7 @@ void confUsuario::frecebeListaAnime(leitorlistaanimes *rlistaAnime)
     cleitorlistaanimes = rlistaAnime;
 }
 
-void confUsuario::frecebeConfigs(QStringList ldiretorios)
+void confUsuario::frecebeConfigs(const QStringList &ldiretorios)
 {
     vdiretorioAnimes = ldiretorios.toVector();
 }

@@ -1,5 +1,6 @@
 #include "janelatorrent.h"
 #include "ui_janelatorrent.h"
+#include <utility>
 
 janelatorrent::janelatorrent(QWidget *parent) :
     QWidget(parent),
@@ -20,6 +21,9 @@ janelatorrent::janelatorrent(QWidget *parent) :
 //            - ui->listaTorrents->columnWidth(4) - ui->listaTorrents->columnWidth(5) - ui->listaTorrents->columnWidth(6);
 //    qDebug() << hhh;
     ui->listaTorrents->setSortingEnabled(true);
+    cconfig = nullptr;
+    cleitor = nullptr;
+    carquivos = nullptr;
     connect(this, &janelatorrent::fimDownloadTorrent, this, &janelatorrent::fpreencheTabela, Qt::QueuedConnection);
 }
 
@@ -54,8 +58,6 @@ void janelatorrent::fleXML()
     QString llinkTorrent;
     QString ldescricaoTorrent;
     QString llinkInfoTorrent;
-    QString lfiltrocondicao;
-    QString lfiltroespecifico;
     int lprioridade = 0;
 
     QString lid;
@@ -220,9 +222,6 @@ void janelatorrent::fpreencheTabela()
     //Criamos o número de linhas necessário
     ui->listaTorrents->setRowCount(torrent.size());
     for(int i = 0; i < torrent.size(); i++){
-        torrent[i]->vlista.compare("Watching");
-//        ui->listaTorrents->verticalHeader()->setStyleSheet("color: red");
-//        ui->listaTorrents->verticalHeaderItem(i)->setTextColor("lightpink");
         ui->listaTorrents->verticalHeader()->hide();
         for(int w = 0; w < ui->listaTorrents->columnCount(); w++){
             QTableWidgetItem *litem = new QTableWidgetItem;
@@ -260,8 +259,9 @@ void janelatorrent::fpreencheTabela()
                     }
                 }
                 QModelIndex index = ui->listaTorrents->model()->index(i, w);
-                QWidget *centerdCheckBoxWidget = new QWidget();
-                QCheckBox *checkBox = new QCheckBox();
+                //Talvez isso faça crashar, não sei. Vamos testar
+                QWidget *centerdCheckBoxWidget = new QWidget(this);
+                QCheckBox *checkBox = new QCheckBox(this);
                 vcontroladorCheckbox.insert(i,checkBox);
                 QHBoxLayout *checkBoxLayout = new QHBoxLayout(centerdCheckBoxWidget);
                 if(torrent[i]->vbaixar)
@@ -383,8 +383,7 @@ void janelatorrent::on_botaoDownload_clicked()
 }
 
 void janelatorrent::fesperaTorrent(){
-    QTimer lespera5Segundos;
-    lespera5Segundos.singleShot(5000, this, &janelatorrent::fbaixaTorrent);
+    QTimer::singleShot(5000, this, &janelatorrent::fbaixaTorrent);
 }
 
 void janelatorrent::fbaixaTorrent()
@@ -424,15 +423,31 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
     ui->botaoAtualizaLista->blockSignals(true);
     if(!torrent.isEmpty())
         torrent.clear();
+
+    QList<QTableWidgetItem*> item;
+    for(int i = 0; i < ui->listaTorrents->rowCount(); i++){
+        item.append(ui->listaTorrents->takeItem(i,1));
+    }
+    ui->listaTorrents->clearContents();
+    qDeleteAll(item);
+
     QPointer<filedownloader> lbaixaXML(new filedownloader);
     lbaixaXML->fdownloadXMLTorrentList(cconfig->fretornaFeedAnime());
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fpreparaLeituraArquivoTorrent);
 }
 
-void janelatorrent::fprocuraAnimeEspecifico(QString rnomeAnimeBuscado){
+void janelatorrent::fprocuraAnimeEspecifico(const QString &rnomeAnimeBuscado){
     ui->botaoAtualizaLista->blockSignals(true);
     if(!torrent.isEmpty())
         torrent.clear();
+
+    QList<QTableWidgetItem*> item;
+    for(int i = 0; i < ui->listaTorrents->rowCount(); i++){
+        item.append(ui->listaTorrents->takeItem(i,1));
+    }
+    ui->listaTorrents->clearContents();
+    qDeleteAll(item);
+
     QPointer<filedownloader> lbaixaXML(new filedownloader);
     QString lfeedEspecifico = cconfig->fretornaFeedAnimeEspecifico();
     lfeedEspecifico.replace("%title%", rnomeAnimeBuscado);
@@ -446,7 +461,7 @@ void janelatorrent::fautoDownload()
     void on_botaoDownload_clicked();
 }
 
-QString janelatorrent::fchecaFiltroFansub(QString lid)
+QString janelatorrent::fchecaFiltroFansub(const QString &lid)
 {
     for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
         for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
@@ -459,7 +474,7 @@ QString janelatorrent::fchecaFiltroFansub(QString lid)
     return nullptr;
 }
 
-QString janelatorrent::fchecaFiltroDownloadFromList(QString lid)
+QString janelatorrent::fchecaFiltroDownloadFromList(const QString &lid)
 {
     for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
         for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
@@ -472,7 +487,7 @@ QString janelatorrent::fchecaFiltroDownloadFromList(QString lid)
     return nullptr;
 }
 
-QString janelatorrent::fchecaFiltroResolution(QString lid)
+QString janelatorrent::fchecaFiltroResolution(const QString &lid)
 {
     for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
         for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
@@ -485,7 +500,7 @@ QString janelatorrent::fchecaFiltroResolution(QString lid)
     return nullptr;
 }
 
-QString janelatorrent::fchecaFiltroLaguage(QString lid)
+QString janelatorrent::fchecaFiltroLaguage(const QString &lid)
 {
     for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
         for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
@@ -498,7 +513,7 @@ QString janelatorrent::fchecaFiltroLaguage(QString lid)
     return nullptr;
 }
 
-QString janelatorrent::fchecaFiltroHasKeyword(QString lid)
+QString janelatorrent::fchecaFiltroHasKeyword(const QString &lid)
 {
     for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
         for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
@@ -560,16 +575,17 @@ void janelatorrent::fchecaEstado(int estado)
 {
     Q_UNUSED(estado)
     for(int i = 0; i < vcontroladorCheckbox.size(); i++){
-        if(vcontroladorCheckbox[i]->isChecked()){
-            if(torrent.size() > i){
-                torrent[i]->vbaixar = true;
-            }
+        if(vcontroladorCheckbox[i]->isChecked() && torrent.size() > i){
+            torrent[i]->vbaixar = true;
+        }
+        else if(!vcontroladorCheckbox[i]->isChecked() && torrent.size() > i){
+            torrent[i]->vbaixar = false;
         }
     }
 }
 
-int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, QString repisodioAnime,
-                                          QString repisodiosAssistidos, QString rlista, int rposicaoNaLista)
+int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, const QString &repisodioAime,
+                                          const QString &repisodiosAssistidos, const QString &rlista, int rposicaoNaLista)
 {
     QStringList filtros = fchecaFiltroDownloadFromList(ridAnime).split(";");
     filtros.removeAll(QString(""));
@@ -596,22 +612,20 @@ int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, QString repisodioAni
             }
             else
                 vlistaAtual.clear();
-            if(repisodioAnime.toInt() > repisodiosAssistidos.toInt()){
+            if(repisodioAime.toInt() > repisodiosAssistidos.toInt()){
                 //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
                 //Se não estiver, o episódio já existe no computador.
                 if(rposicaoNaLista != -1 || vlistaAtual.isEmpty()){
                     QString lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
-                            (vlistaAtual[rposicaoNaLista],repisodioAnime.toInt());
+                            (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
                     //Caso não exista o episódio na pasta, a string retorna vazia.
                     lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
                     if(lultimoEpisodioBaixado.isEmpty())
                         return 10;
-                    else
-                        return -10;
+                    return -10;
                 }
             }
-            else
-                return -10;
+            return -10;
         }
     }
     else
@@ -634,14 +648,14 @@ int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, QString repisodioAni
         }
         else
             vlistaAtual.clear();
-        if(repisodioAnime.toInt() > repisodiosAssistidos.toInt()){
+        if(repisodioAime.toInt() > repisodiosAssistidos.toInt()){
             //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
             //Se não estiver, o episódio já existe no computador.
             if(rposicaoNaLista != -1){
                 QString lultimoEpisodioBaixado = "NotEmpty";
                 if(!vlistaAtual.isEmpty())
                     lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
-                            (vlistaAtual[rposicaoNaLista],repisodioAnime.toInt());
+                            (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
                 //Caso não exista o episódio na pasta, a string retorna vazia.
                 lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
                 if(lultimoEpisodioBaixado.isEmpty()){
@@ -649,18 +663,16 @@ int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, QString repisodioAni
                     return 10;
                 }
                 //Se já tiver baixado, sai da lista
-                else
-                    return -10;
+                return -10;
             }
         }
         //Caso já tenha sido assistido, sai da lista.
-        else
-            return -10;
+        return -10;
     }
     return 0;
 }
 
-int janelatorrent::fcalculaPrioridadeSub(QString rfansub, QString rid)
+int janelatorrent::fcalculaPrioridadeSub(const QString &rfansub, const QString &rid)
 {
     QStringList filtros = fchecaFiltroFansub(rid).split(";");
     filtros.removeAll(QString(""));
@@ -680,7 +692,7 @@ int janelatorrent::fcalculaPrioridadeSub(QString rfansub, QString rid)
     return 0;
 }
 
-int janelatorrent::fcalculaPrioridadeQualidade(QString resolucao, QString id)
+int janelatorrent::fcalculaPrioridadeQualidade(const QString &resolucao, const QString &id)
 {
     QStringList filtros = fchecaFiltroResolution(id).split(";");
     filtros.removeAll(QString(""));
@@ -700,7 +712,7 @@ int janelatorrent::fcalculaPrioridadeQualidade(QString resolucao, QString id)
     return 0;
 }
 
-int janelatorrent::fcalculaPrioridadeFiltros(QString description, QString rid)
+int janelatorrent::fcalculaPrioridadeFiltros(const QString &description, const QString &rid)
 {
     QStringList filtros = fchecaFiltroLaguage(rid).split(";");
     filtros.removeAll(QString(""));

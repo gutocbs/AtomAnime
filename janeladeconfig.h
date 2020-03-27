@@ -49,9 +49,11 @@ public:
     void frecebeListasAnimes(leitorlistaanimes*);
     void fgetAnimeLists();
     void flimpaFiltros();
-    void fselectSubFromTorrent(QString, QString);
+    void fselectSubFromTorrent(const QString &id, const QString &sub);
     void fsalvaFiltros();
     void fgetStreamLanguages();
+    void fsetHistorico(const QStringList &rhistorico);
+
     QVector<Filtros*> vfiltrosAnimes;
 signals:
     void sauthcodesave();
@@ -77,6 +79,10 @@ private slots:
     void on_botaoInserirAnime_clicked();
     void on_botaoRemoverAnime_clicked();
     void on_botaoEnableDisable_clicked();
+    void on_botaoHistorico_clicked();
+    void on_botaoprefTorrent_clicked();
+    void on_botaoprefDiretorios_clicked();
+    void on_botaoprefFiltros_clicked();
 
 private:
     Ui::janeladeconfig *ui;
@@ -94,6 +100,7 @@ private:
     QString vanimeTorrentFeed;
     QStringList vPlayers;
     QStringList vStreamLanguages;
+    QStringList vhistorico;
     bool vautoDownload;
     bool vlowQuality;
     QStringList vIdNovoFiltro;

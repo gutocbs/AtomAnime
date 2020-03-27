@@ -29,7 +29,6 @@
 
 #include "janeladeconfig.h"
 #include "janelatorrent.h"
-#include "torrenttab.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -43,7 +42,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool fcarregaImagensBackground(QString);
+    bool fcarregaImagensBackground(const QString &lista);
     bool fcarregaImagensSelecionadasBackground();
     void fcarregaImagensLista();
     void finfoAnimeSelecionado();
@@ -54,7 +53,7 @@ public:
     void fliberaSinaisBotoes();
     void frefreshListas(bool);
     void fmandaDiretoriosArquivos();
-    void favisoErro(QString);
+    void favisoErro(const QString &rerro);
     void fmudaResolucao();
     void fcarregouListaSucesso(bool);
     void fcarregouListaFalha();
@@ -115,24 +114,25 @@ private slots:
     void on_botaoDownloadListImages_clicked();
     void on_botaoAddAlternativeTitle_clicked();
     void on_botaoAjuda_clicked();
+    void on_botaoAnimeCerto_clicked();
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
-    void fsetIdAdicionado(QString);
-    void fsetIdBaixado(QString);
-    void fsetIdBaixadoGrande(QString);
-    void fInfoAnimeTorrent(QString);
+    void fsetIdAdicionado(const QString &lid);
+    void fsetIdBaixado(const QString &lid);
+    void fsetIdBaixadoGrande(const QString &lid);
+    void fInfoAnimeTorrent(const QString &lnomeAnime);
     void fVerificaAnimeAberto();
-    void fMostraAnimeAberto(QString, QString, QString);
-    void fAumentaProgressoID(QString, QString);
+    void fMostraAnimeAberto(QString, const QString &rnomeAnime, const QString &repisodioAnime);
+    void fAumentaProgressoID(const QString &ridAnime, const QString &episodioAnime);
     void fgetMediaPlayersFromList();
     void fgetStreamLanguages();
     void fgetConfigurations();
     void fsetDownloadImagensAnimesPorAno();
     void fsalvaNomesAlternativos();
     void fleNomesAlternativos();
-
-    void on_botaoAnimeCerto_clicked();
+    void fresetaRequestCounter();
+    void on_botaoDownloadNovaImagem_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -167,6 +167,7 @@ private:
     int vprogressoLoadingBar;
     int vtotalAnimesLoadingBar;
     int vcontadorBotaoLoadImages;
+    int vrateLimitRequestsAnilist;
     QString idAnimeAssistindo;
     QString vordem;
     QString vlistaAtual;
@@ -200,6 +201,7 @@ private:
     QTimer *timerTorrent;
     QTimer *timerChecaAnimes;
     QTimer *timerChecaDownloadPorAno;
+    QTimer timerMaxAnilistRequest;
 
     QMap<QStringList, QString> vlistaAcoes;
     QMap<QString,QStringList> vcustomNomesAlternativos;

@@ -19,7 +19,7 @@ class anilist : public QObject
 public:
     explicit anilist(QObject *parent = nullptr);
     ~anilist();
-    bool fmudaLista(int, QString);
+    bool fmudaLista(int, const QString &rNovaLista);
     bool fmudaNota(int, int);
     ///id, progresso
     bool fmudaProgresso(int, int);
@@ -29,7 +29,7 @@ public:
     QString fretornaAvatar();
 
     void fbaixaListaThread(QThread &cThread);
-    void frecebeAutorizacao(QString, QString);
+    void frecebeAutorizacao(const QString &ruser, QString);
 
 public slots:
     bool fgetList();
@@ -37,7 +37,7 @@ public slots:
 signals:
     void sterminouDownload(bool);
 private slots:
-    bool fgetListaAno(QString);
+    bool fgetListaAno(const QString &rano);
 private:
 //    QNetworkReply *vreply = nullptr;
     QString vtoken;
