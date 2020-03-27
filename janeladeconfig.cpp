@@ -57,6 +57,10 @@ janeladeconfig::janeladeconfig(QWidget *parent) :
     ui->tabelaAnimes->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tabelaAnimesSelecionados->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tabelaFiltros->setSelectionBehavior(QAbstractItemView::SelectRows);
+    vautoDownload = false;
+    vlowQuality = false;
+    cleitor = nullptr;
+
     fleArquivoConfig();
     fgetStreamLanguages();
 }
@@ -232,7 +236,7 @@ void janeladeconfig::flimpaFiltros()
     ui->boxListaFiltros->setCurrentIndex(0);
 }
 
-void janeladeconfig::fselectSubFromTorrent(QString id, QString sub)
+void janeladeconfig::fselectSubFromTorrent(const QString &id, const QString &sub)
 {
     flimpaFiltros();
     on_botaoFiltroAdd_clicked();
@@ -279,6 +283,12 @@ void janeladeconfig::fgetStreamLanguages()
     vStreamLanguages.append("Episodio");
     vStreamLanguages.append("Épisode");
     vStreamLanguages.append("Folge");
+}
+
+void janeladeconfig::fsetHistorico(const QStringList &rhistorico)
+{
+    vhistorico.append(rhistorico);
+    ui->tabelaHistorico->addItems(rhistorico);
 }
 
 QByteArray janeladeconfig::fretornaUsuario(){
@@ -791,4 +801,24 @@ void janeladeconfig::on_botaoEnableDisable_clicked()
         vfiltrosAnimes[index]->Ativo = true;
         ui->tabelaFiltros->item(index,1)->setTextColor("black");
     }
+}
+
+void janeladeconfig::on_botaoHistorico_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(1);
+}
+
+void janeladeconfig::on_botaoprefTorrent_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(0);
+}
+
+void janeladeconfig::on_botaoprefDiretorios_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(2);
+}
+
+void janeladeconfig::on_botaoprefFiltros_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(3);
 }

@@ -11,7 +11,7 @@ void ChecaInfoPlayer::fgetStreamLanguages()
 }
 
 ///fchecaStream(QString player, QString janela)
-void ChecaInfoPlayer::fchecaStream(QString player, QString janela)
+void ChecaInfoPlayer::fchecaStream(const QString &player, const QString &janela)
 {
     fgetStreamLanguages();
     if(!janela.isEmpty()){
@@ -27,7 +27,6 @@ void ChecaInfoPlayer::fchecaStream(QString player, QString janela)
         else
             fchecaLocalPlayer();
     }
-    qDebug() << vanime << vepisodio;
 }
 
 QString ChecaInfoPlayer::fretornaAnime()
@@ -78,9 +77,11 @@ void ChecaInfoPlayer::fchecaAnimeLab()
 
     vanime = nomeAnime.at(0);
     vanime = vanime.simplified();
-    vepisodio= nomeAnime.at(1);
-    vepisodio.remove("E");
-    vepisodio = vepisodio.simplified();
+    if(nomeAnime.size() > 1){
+        vepisodio= nomeAnime.at(1);
+        vepisodio.remove("E");
+        vepisodio = vepisodio.simplified();
+    }
 }
 
 void ChecaInfoPlayer::fchecaFunimation()

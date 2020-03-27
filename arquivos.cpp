@@ -1,5 +1,5 @@
 #include "arquivos.h"
-
+#include <utility>
 arquivos::arquivos(QObject *parent) : QObject(parent)
 {
 }
@@ -7,7 +7,7 @@ arquivos::arquivos(QObject *parent) : QObject(parent)
 ///fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString rnomeAnimeIngles, QStringList rnomesAlternativosAnime,int repisodioAnime, int rtemporada)
 ///Compara o arquivo com o anime a ser assistido. Caso for o episódio seguinte ao último assistido, retorna true.
 ///Caso seja um episódio inferior ou além do próximo que deve ser visto, retorna false.
-bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString rnomeAnimeIngles, QStringList rnomesAlternativosAnime,
+bool arquivos::fcomparaDadosAnime(QString rfileName, const QString &rnomeAnime, QString rnomeAnimeIngles, const QStringList &rnomesAlternativosAnime,
                                   int repisodioAnime, int rtemporada){
     //Anitomy é uma classe linda que separa os elementos de uma string
     anitomy::Anitomy lanitomy;
@@ -32,7 +32,7 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, QString rnomeAnime, QString
                                                                    lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
     }
-    else if(formatador.fcomparaNomes(rfileName, rnomeAnimeIngles) && (lepisodioAnime == repisodioAnime+1 ||
+    else if(formatador.fcomparaNomes(rfileName, std::move(rnomeAnimeIngles)) && (lepisodioAnime == repisodioAnime+1 ||
             lepisodioAnime - repisodiosTotais == repisodioAnime+1)){
         return true;
     }
@@ -127,7 +127,7 @@ QString arquivos::fprocuraEpisodioEspecifico(anime *ranimeBuscado, int rEpisodio
     return "";
 }
 
-bool arquivos::fabreEpisodio(QByteArray rcaminhoArquivo){
+bool arquivos::fabreEpisodio(const QByteArray &rcaminhoArquivo){
     if(!rcaminhoArquivo.isEmpty()){
         QDesktopServices::openUrl(QUrl("file:///"+rcaminhoArquivo,QUrl::TolerantMode));
         return true;

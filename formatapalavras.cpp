@@ -7,7 +7,7 @@ FormataPalavras::FormataPalavras(QObject *parent) : QObject(parent)
 
 //Vamos testar todas as combinações possíveis. Se for igual em alguma, retornamos true.
 //se não for igual em nenhuma, é false.
-bool FormataPalavras::fcomparaNomes(QString rnome1, QString rnome2)
+bool FormataPalavras::fcomparaNomes(const QString &rnome1, const QString &rnome2)
 {
     if(rnome1.isEmpty() || rnome2.isEmpty())
         return false;
@@ -100,6 +100,7 @@ QString FormataPalavras::fremoveCaracteresEspeciais(QString rpalavra)
     rpalavra.replace("☆", " ");
     rpalavra.replace("△", " ");
     rpalavra.replace("♥", " ");
+    rpalavra.replace("○", " ");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -110,6 +111,7 @@ QString FormataPalavras::fmudaCaracteresEspeciais(QString rpalavra)
     rpalavra.replace("☆", "-");
     rpalavra.replace("△", "-");
     rpalavra.replace("♥", "-");
+    rpalavra.replace("○", "-");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }

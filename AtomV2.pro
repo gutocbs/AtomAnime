@@ -57,7 +57,6 @@ SOURCES += \
 #    robotlib/Timer.cc \
     robotlib/Window.cc \
     torrentinfo.cpp \
-    torrenttab.cpp
 
 HEADERS += \
     anilist.h \
@@ -103,14 +102,11 @@ HEADERS += \
 #    robotlib/Types.h \
     robotlib/Window.h \
     torrentinfo.h \
-    torrenttab.h
 
 FORMS += \
     janeladeconfig.ui \
     janelatorrent.ui \
     mainwindow.ui \
-    mainwindow_copy.ui \
-    torrenttab.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

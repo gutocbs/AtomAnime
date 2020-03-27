@@ -10,7 +10,8 @@ filedownloader::filedownloader(QObject *parent) : QObject(parent)
     vdownloadAnoAcontecendo = false;
     vlista = 0;
     vindexLista = 0;
-//    vindexListaPequeno = 0;
+    vfile = nullptr;
+    ano = 0;
 }
 
 filedownloader::~filedownloader(){
@@ -69,7 +70,7 @@ void filedownloader::onReadyRead()
 }
 
 
-void filedownloader::fdownloadAvatarUsuario(QString fileURL){
+void filedownloader::fdownloadAvatarUsuario(const QString &fileURL){
     QString lsaveFilePath = "Configurações/Temp/Imagens/avatar";
     lsaveFilePath.append(fileURL.mid(fileURL.lastIndexOf(QChar('.'))));
 
@@ -90,7 +91,7 @@ void filedownloader::fdownloadAvatarUsuario(QString fileURL){
     connect(vreply,SIGNAL(finished()),this,SLOT(fterminouAvatar()));
 }
 
-void filedownloader::fdownloadTorrent(QString fileURL, QString torrentName)
+void filedownloader::fdownloadTorrent(const QString &fileURL, const QString &torrentName)
 {
     QString lsaveFilePath = "Configurações/Temp/Torrents/";
     lsaveFilePath.append(torrentName);
@@ -113,7 +114,7 @@ void filedownloader::fdownloadTorrent(QString fileURL, QString torrentName)
     connect(vreply,SIGNAL(finished()),this,SIGNAL(storrent()));
 }
 
-void filedownloader::fdownloadXMLTorrentList(QString fileURL)
+void filedownloader::fdownloadXMLTorrentList(const QString &fileURL)
 {
     QString lsaveFilePath = "Configurações/Temp/torrents.xml";
 

@@ -723,8 +723,8 @@ QPushButton#clickAnime1:hover:!pressed
      <widget class="QLabel" name="labelProgresso_5">
       <property name="geometry">
        <rect>
-        <x>1230</x>
-        <y>580</y>
+        <x>1160</x>
+        <y>470</y>
         <width>71</width>
         <height>41</height>
        </rect>
@@ -742,8 +742,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoNotaMais">
       <property name="geometry">
        <rect>
-        <x>1380</x>
-        <y>530</y>
+        <x>1340</x>
+        <y>440</y>
         <width>20</width>
         <height>21</height>
        </rect>
@@ -835,10 +835,10 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoAnilist">
       <property name="geometry">
        <rect>
-        <x>936</x>
-        <y>560</y>
-        <width>60</width>
-        <height>60</height>
+        <x>860</x>
+        <y>498</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -851,10 +851,10 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoDownloadAnime">
       <property name="geometry">
        <rect>
-        <x>1073</x>
-        <y>560</y>
-        <width>60</width>
-        <height>60</height>
+        <x>860</x>
+        <y>578</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -864,11 +864,11 @@ color: rgb(20, 20, 20);</string>
        <string>Download</string>
       </property>
      </widget>
-     <widget class="QLabel" name="labelProgresso">
+     <widget class="QLabel" name="labelInfoProgresso">
       <property name="geometry">
        <rect>
-        <x>1310</x>
-        <y>580</y>
+        <x>1240</x>
+        <y>470</y>
         <width>61</width>
         <height>41</height>
        </rect>
@@ -889,10 +889,10 @@ color: rgb(20, 20, 20);</string>
       </property>
       <property name="geometry">
        <rect>
-        <x>865</x>
-        <y>501</y>
+        <x>860</x>
+        <y>418</y>
         <width>201</width>
-        <height>46</height>
+        <height>40</height>
        </rect>
       </property>
       <property name="autoFillBackground">
@@ -961,10 +961,10 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoAbrePasta">
       <property name="geometry">
        <rect>
-        <x>1003</x>
-        <y>560</y>
-        <width>60</width>
-        <height>60</height>
+        <x>860</x>
+        <y>538</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1134,8 +1134,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoNotaMenos">
       <property name="geometry">
        <rect>
-        <x>1380</x>
-        <y>550</y>
+        <x>1320</x>
+        <y>440</y>
         <width>20</width>
         <height>20</height>
        </rect>
@@ -1150,8 +1150,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QLabel" name="NumPagina">
       <property name="geometry">
        <rect>
-        <x>429</x>
-        <y>740</y>
+        <x>450</x>
+        <y>670</y>
         <width>381</width>
         <height>70</height>
        </rect>
@@ -1213,11 +1213,11 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QLabel" name="Nota_10">
+     <widget class="QLabel" name="labelInfoNota2">
       <property name="geometry">
        <rect>
-        <x>1310</x>
-        <y>530</y>
+        <x>1240</x>
+        <y>430</y>
         <width>71</width>
         <height>41</height>
        </rect>
@@ -1234,8 +1234,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoProgressoMenos">
       <property name="geometry">
        <rect>
-        <x>1380</x>
-        <y>600</y>
+        <x>1320</x>
+        <y>480</y>
         <width>20</width>
         <height>20</height>
        </rect>
@@ -1250,8 +1250,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoProgressoMais">
       <property name="geometry">
        <rect>
-        <x>1380</x>
-        <y>580</y>
+        <x>1340</x>
+        <y>480</y>
         <width>20</width>
         <height>20</height>
        </rect>
@@ -1266,8 +1266,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QLabel" name="labelNota_10">
       <property name="geometry">
        <rect>
-        <x>1230</x>
-        <y>530</y>
+        <x>1160</x>
+        <y>430</y>
         <width>41</width>
         <height>41</height>
        </rect>
@@ -1285,8 +1285,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoPaginaAnterior">
       <property name="geometry">
        <rect>
-        <x>813</x>
-        <y>370</y>
+        <x>730</x>
+        <y>600</y>
         <width>41</width>
         <height>61</height>
        </rect>
@@ -1301,8 +1301,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoProximaPagina">
       <property name="geometry">
        <rect>
-        <x>800</x>
-        <y>230</y>
+        <x>780</x>
+        <y>600</y>
         <width>51</width>
         <height>71</height>
        </rect>
@@ -1779,10 +1779,10 @@ color: rgb(53, 68, 120);</string>
      <widget class="QPushButton" name="botaoCrunchyroll">
       <property name="geometry">
        <rect>
-        <x>866</x>
-        <y>560</y>
-        <width>60</width>
-        <height>60</height>
+        <x>860</x>
+        <y>458</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -1795,8 +1795,8 @@ color: rgb(53, 68, 120);</string>
      <widget class="QLabel" name="labelMensagem">
       <property name="geometry">
        <rect>
-        <x>880</x>
-        <y>660</y>
+        <x>860</x>
+        <y>630</y>
         <width>531</width>
         <height>71</height>
        </rect>
@@ -1807,7 +1807,7 @@ font: 75 10pt bold &quot;MS Shell Dlg 2&quot;;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
-       <string/>
+       <string>zzzzzzzzzzzzzzzzzzzzzzzz</string>
       </property>
       <property name="scaledContents">
        <bool>false</bool>
@@ -2714,9 +2714,9 @@ color: rgb(53, 68, 120);</string>
      <widget class="QComboBox" name="boxMudarPraLista">
       <property name="geometry">
        <rect>
-        <x>860</x>
-        <y>420</y>
-        <width>261</width>
+        <x>1230</x>
+        <y>570</y>
+        <width>161</width>
         <height>30</height>
        </rect>
       </property>
@@ -2752,8 +2752,8 @@ color: rgb(53, 68, 120);</string>
      <widget class="QPushButton" name="botaoMudarPraLista">
       <property name="geometry">
        <rect>
-        <x>1130</x>
-        <y>420</y>
+        <x>1400</x>
+        <y>570</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -2872,8 +2872,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoOrdemAlfabetica">
       <property name="geometry">
        <rect>
-        <x>840</x>
-        <y>440</y>
+        <x>410</x>
+        <y>610</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2888,8 +2888,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoOrdemProgresso">
       <property name="geometry">
        <rect>
-        <x>900</x>
-        <y>440</y>
+        <x>470</x>
+        <y>610</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2904,8 +2904,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoOrdemScore">
       <property name="geometry">
        <rect>
-        <x>960</x>
-        <y>440</y>
+        <x>530</x>
+        <y>610</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2920,8 +2920,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoOrdemRelease">
       <property name="geometry">
        <rect>
-        <x>1020</x>
-        <y>440</y>
+        <x>590</x>
+        <y>610</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2936,8 +2936,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoOrdemType">
       <property name="geometry">
        <rect>
-        <x>1080</x>
-        <y>440</y>
+        <x>650</x>
+        <y>610</y>
         <width>60</width>
         <height>60</height>
        </rect>
@@ -2952,8 +2952,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoRemoverdaLista">
       <property name="geometry">
        <rect>
-        <x>1500</x>
-        <y>680</y>
+        <x>1830</x>
+        <y>780</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -2969,7 +2969,7 @@ color: rgb(20, 20, 20);</string>
       <property name="geometry">
        <rect>
         <x>1080</x>
-        <y>510</y>
+        <y>430</y>
         <width>41</width>
         <height>41</height>
        </rect>
@@ -3097,8 +3097,8 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoSelecionarPastaAnime">
       <property name="geometry">
        <rect>
-        <x>1590</x>
-        <y>680</y>
+        <x>1500</x>
+        <y>710</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -3114,7 +3114,7 @@ color: rgb(20, 20, 20);</string>
       <property name="geometry">
        <rect>
         <x>1500</x>
-        <y>730</y>
+        <y>750</y>
         <width>81</width>
         <height>31</height>
        </rect>
@@ -3129,10 +3129,10 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPushButton" name="botaoAddAlternativeTitle">
       <property name="geometry">
        <rect>
-        <x>1500</x>
-        <y>630</y>
-        <width>81</width>
-        <height>31</height>
+        <x>1860</x>
+        <y>660</y>
+        <width>40</width>
+        <height>40</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -3145,9 +3145,9 @@ color: rgb(20, 20, 20);</string>
      <widget class="QPlainTextEdit" name="barraAddNomeAlternativo">
       <property name="geometry">
        <rect>
-        <x>1590</x>
-        <y>630</y>
-        <width>311</width>
+        <x>1500</x>
+        <y>670</y>
+        <width>351</width>
         <height>31</height>
        </rect>
       </property>
@@ -3162,7 +3162,7 @@ color: rgb(20, 20, 20);</string>
       <property name="geometry">
        <rect>
         <x>1590</x>
-        <y>730</y>
+        <y>710</y>
         <width>321</width>
         <height>31</height>
        </rect>
@@ -3209,6 +3209,95 @@ color: rgb(20, 20, 20);</string>
        <bool>true</bool>
       </property>
      </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>856</x>
+        <y>416</y>
+        <width>638</width>
+        <height>200</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: rgb(199,214,255);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoMudarPraLista_3">
+      <property name="geometry">
+       <rect>
+        <x>1160</x>
+        <y>530</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Mudar Lista</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelFundoAnimeAssistindoEpisodio">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>693</y>
+        <width>150</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+font: 75 8pt &quot;Calibri&quot;;
+font-weight: bold; 
+color: rgb(220, 220, 220);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="labelFundoAnimeAssistindoTitulo">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>640</y>
+        <width>150</width>
+        <height>50</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+font: 75 8pt &quot;Calibri&quot;;
+font-weight: bold; 
+color: rgb(20, 20, 20);</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="botaoDownloadNovaImagem">
+      <property name="geometry">
+       <rect>
+        <x>1830</x>
+        <y>740</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: white;</string>
+      </property>
+      <property name="text">
+       <string>Download new Image</string>
+      </property>
+     </widget>
+     <zorder>labelFundoAnimeAssistindoTitulo</zorder>
+     <zorder>labelFundoAnimeAssistindoEpisodio</zorder>
+     <zorder>label</zorder>
      <zorder>imagemAnimeAssistindo</zorder>
      <zorder>labelImagemBackgroundGrande</zorder>
      <zorder>labelImagemBackground</zorder>
@@ -3260,31 +3349,19 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelFundoAnime07Lista</zorder>
      <zorder>labelFundoAnime10Lista</zorder>
      <zorder>labelFundoAnime05Lista</zorder>
-     <zorder>labelProgresso_5</zorder>
-     <zorder>botaoNotaMais</zorder>
      <zorder>labelInfoNota</zorder>
      <zorder>labelInfoStatus</zorder>
      <zorder>labelInfoNomeAnimeIngles</zorder>
-     <zorder>botaoAnilist</zorder>
-     <zorder>botaoDownloadAnime</zorder>
-     <zorder>labelProgresso</zorder>
-     <zorder>botaoProximoEpisodio</zorder>
      <zorder>labelInfoSinopse</zorder>
      <zorder>labelInfoSeason</zorder>
-     <zorder>botaoAbrePasta</zorder>
      <zorder>labelInfoSeasonTop</zorder>
      <zorder>labelInfoMediaTop</zorder>
      <zorder>labelInfoNotaTop</zorder>
      <zorder>labelInfoMediaSite</zorder>
      <zorder>labelInfoStatusTop</zorder>
      <zorder>labelInfoSinopseTop</zorder>
-     <zorder>botaoNotaMenos</zorder>
      <zorder>imagemAnimeGrande</zorder>
      <zorder>labelInfoNomeAnime</zorder>
-     <zorder>Nota_10</zorder>
-     <zorder>botaoProgressoMenos</zorder>
-     <zorder>botaoProgressoMais</zorder>
-     <zorder>labelNota_10</zorder>
      <zorder>botaoPaginaAnterior</zorder>
      <zorder>botaoProximaPagina</zorder>
      <zorder>imagemAnime08</zorder>
@@ -3347,12 +3424,9 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelAnime06Nota</zorder>
      <zorder>labelAnime01Nota</zorder>
      <zorder>labelAnime02Nota</zorder>
-     <zorder>botaoCrunchyroll</zorder>
      <zorder>labelMensagem</zorder>
      <zorder>labelInfoAirTop</zorder>
      <zorder>labelInfoRelease</zorder>
-     <zorder>boxMudarPraLista</zorder>
-     <zorder>botaoMudarPraLista</zorder>
      <zorder>labelInfoEpisodiosLancados</zorder>
      <zorder>labelInfoReleasedTop</zorder>
      <zorder>labelInfoTipo</zorder>
@@ -3364,7 +3438,6 @@ color: rgb(20, 20, 20);</string>
      <zorder>botaoOrdemType</zorder>
      <zorder>botaoRemoverdaLista</zorder>
      <zorder>NumPagina</zorder>
-     <zorder>checkBox</zorder>
      <zorder>botaoAnimeAssistindo</zorder>
      <zorder>labelAnimeAssistindoTitulo</zorder>
      <zorder>labelAnimeAssistindoEpisodio</zorder>
@@ -3375,6 +3448,24 @@ color: rgb(20, 20, 20);</string>
      <zorder>labelLoading</zorder>
      <zorder>botaoAnimeCerto</zorder>
      <zorder>labelMensagemAnimeAssistindo</zorder>
+     <zorder>botaoProximoEpisodio</zorder>
+     <zorder>checkBox</zorder>
+     <zorder>botaoCrunchyroll</zorder>
+     <zorder>botaoNotaMenos</zorder>
+     <zorder>botaoProgressoMais</zorder>
+     <zorder>botaoNotaMais</zorder>
+     <zorder>labelInfoProgresso</zorder>
+     <zorder>labelNota_10</zorder>
+     <zorder>boxMudarPraLista</zorder>
+     <zorder>labelInfoNota2</zorder>
+     <zorder>botaoDownloadAnime</zorder>
+     <zorder>botaoAnilist</zorder>
+     <zorder>botaoProgressoMenos</zorder>
+     <zorder>labelProgresso_5</zorder>
+     <zorder>botaoMudarPraLista</zorder>
+     <zorder>botaoAbrePasta</zorder>
+     <zorder>botaoMudarPraLista_3</zorder>
+     <zorder>botaoDownloadNovaImagem</zorder>
     </widget>
    </widget>
    <widget class="QPushButton" name="Dropped">
