@@ -12,6 +12,7 @@
 
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QThread>
 
 class anilist : public QObject
 {

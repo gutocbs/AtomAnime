@@ -8,7 +8,7 @@ class Filtros : public QObject
 {
     Q_OBJECT
 public:
-    explicit Filtros(QObject *parent = nullptr);
+    explicit Filtros(QObject *parent = nullptr){Q_UNUSED(parent)}
     QString nome;
     QString filtroDeCondicao;
     QString filtroEspecifico;

@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#define thisWid this->findChild<QWidget *>(wid->objectName())
+
 //ROBOT_NS_USE_ALL;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -7,9 +9,35 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    fontName = "\"Tahoma\"";
+    fontSizeTitulo = "11";
+    fontSizeTituloAlternativo = "10";
+    fontSizeStatus = "14";
+    fontSizeInfo = "12";
+    fontSizeMensagem = "10";
+    fontSizeMensagemAnime = "8";
+    fatualizaFontes();
+    vtituloNormalMedio = "background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+    vtituloNormalPequeno = "background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteNormal = "background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteNormalNota = "background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 68, 120);";
+    vfonteNormalAnimeEncontrado = "background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);";
+    vfonteNormalAnimeNaoComecou = "background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);";
+    vfonteTitulo = "background: transparent;font: 75 "+fontSizeTitulo+"pt " + fontName +
+            ";font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteSubtitulo = "background: transparent;font: 75 "+fontSizeTituloAlternativo+"pt " + fontName +
+            "; color: rgb(20, 20, 20);";
+    vfonteStatus = "background: transparent;font: 75 "+fontSizeStatus+"pt " + fontName +
+            "; color: rgb(20, 20, 20);";
+    vfonteInfo = "background: transparent;font: 75 "+fontSizeInfo+"pt " + fontName +
+            ";font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteMensagem = "background: transparent;font: 75 "+fontSizeMensagem+"pt " + fontName +
+            ";color: rgb(20, 20, 20);";
+    vfonteMensagemAnime = "background: transparent;font: 75 "+fontSizeMensagemAnime+"pt " + fontName +
+            ";color: rgb(20, 20, 20);";
     ui->botaoDownloadListImages->hide();
     ui->boxSelecionaAno->hide();
-    ui->botaoAnimeCerto->hide();
+    ui->botaoAnimeAssistindoCerto->hide();
     if(ui->boxSelecionaAno->count() != QDate::currentDate().year()-2000){
         int date = QDate::currentDate().year()-1999;
         for(int i = 0; i < date; i++){
@@ -23,7 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->barraBusca->setMaximumBlockCount(1);
     ui->barraAddNomeAlternativo->setMaximumBlockCount(1);
     ///um dia ainda faço qml disso
-    //fmudaResolucao();
+    fmudaResolucao();
     logger::fattachLogger();
     qInfo() << QDateTime::currentDateTime().toString();
     vusarImagensBaixaQualidade = false;
@@ -129,12 +157,27 @@ MainWindow::MainWindow(QWidget *parent)
             lfile.close();
         }
     }
+    QFile lfileHistorico("Configurações/Temp/Historico.txt");
+    if(lfileHistorico.exists() && lfileHistorico.size() != 0){
+        if(lfileHistorico.open(QIODevice::ReadOnly)) {
+            QTextStream lstreamTexto(&lfileHistorico);
+            lstreamTexto.setCodec("UTF-8");
+            while(!lstreamTexto.atEnd()){
+                QString linha = lstreamTexto.readLine().simplified();
+                vhistoricoAnilist.append(linha);
+            }
+            lfileHistorico.close();
+        }
+    }
+    jconfig.fsetHistorico(vhistoricoAnilist);
+    vhistoricoAnilist.clear();
     cleitorListaAnimes->fleListaIdsNomesAnos();
     vprogressoLoadingBar = 0;
     vtotalAnimesLoadingBar = 0;
     vcontadorBotaoLoadImages = 0;
     vrateLimitRequestsAnilist = 0;
     vanoBuscaAnimes = 0;
+    ui->labelMensagemAnimeAssistindo->setStyleSheet(vfonteMensagemAnime);
     fresetaRequestCounter();
 }
 
@@ -148,6 +191,18 @@ MainWindow::~MainWindow()
             foreach (QStringList key, vlistaAcoes.keys()){
                 lstreamTexto << key.at(0) << "-" << key.at(1) << "-" << vlistaAcoes[key] << endl;
                 vlistaAcoes.remove(key);
+            }
+            lstreamTexto.flush();
+            lfile.close();
+        }
+    }
+    if(!vhistoricoAnilist.isEmpty()){
+        QFile lfile("Configurações/Temp/Historico.txt");
+        if(lfile.open(QIODevice::WriteOnly | QIODevice::Append)) {
+            QTextStream lstreamTexto(&lfile);
+            lstreamTexto.setCodec("UTF-8");
+            foreach (QString historico, vhistoricoAnilist){
+                lstreamTexto << historico << endl;
             }
             lstreamTexto.flush();
             lfile.close();
@@ -225,7 +280,9 @@ void MainWindow::fcarregouListaSucesso(bool ldownload){
         vpagina = 1;
     }
 
-    ui->NumPagina->setText("Watching - " + QString::number(vlistaSelecionada.size()) + " animes in the list - Page "+QString::number(vpagina)+"/"+QString::number(((vlistaSelecionada.size()-1)/12)+1));
+    ui->NumPagina->setText("Watching - " + QString::number(vlistaSelecionada.size()) +
+                           " animes in the list - Page "+QString::number(vpagina)+"/"+
+                           QString::number(((vlistaSelecionada.size()-1)/12)+1));
 
     if(ldownload){
         vrefreshAcontecendo = true;
@@ -257,7 +314,8 @@ void MainWindow::fsetIdAdicionado(const QString &lid)
 
 void MainWindow::fsetIdBaixado(const QString &lid)
 {
-    vprogressoLoadingBar++;
+    if(vprogressoLoadingBar != vtotalAnimesLoadingBar)
+        vprogressoLoadingBar++;
     ui->labelLoading->setText("Downloaded " + QString::number(vprogressoLoadingBar) + " of " +
                               QString::number(vtotalAnimesLoadingBar) + " images");
     vimagemBaixada[lid] = true;
@@ -277,18 +335,28 @@ void MainWindow::fInfoAnimeTorrent(const QString &lnomeAnime)
 
 void MainWindow::fVerificaAnimeAberto()
 {
+    //Se eu fizer um ponteiro disso, o ponteiro vai poder ser deletado sem fechar o programa na memória?
+    Robot::Window *llistaJanelas = new Robot::Window;
     QString nomejanela;
-    auto vlistaJanelas = Robot::Window::GetList();
+    auto vlistaJanelas = llistaJanelas->GetList();
     foreach (const auto& janela, vlistaJanelas) {
         if(vrefreshAcontecendo)
             return;
         if(!QString::fromStdString(janela.GetTitle()).isEmpty()){
+            nomejanela = QString::fromStdString(janela.GetTitle());
             foreach(QString player, vPlayers){
                 if(vrefreshAcontecendo)
                     return;
-                nomejanela = QString::fromStdString(janela.GetTitle());
                 if(nomejanela.contains("online in high quality - ") && player.compare("kissanime", Qt::CaseInsensitive) == 0)
                     nomejanela.replace("online in high quality", "kissanime"); //Sim, é uma gambiarra.
+                else if(nomejanela.contains(".mkv", Qt::CaseInsensitive) || nomejanela.contains(".mp4", Qt::CaseInsensitive)){
+                        if(player.compare("Media Player Classic", Qt::CaseInsensitive) == 0)
+                            nomejanela.append(" - Media Player Classic");
+                        else if(player.compare("WebTorrent Desktop", Qt::CaseInsensitive) == 0)
+                            nomejanela.append(" - WebTorrent Desktop");
+                        else if(player.compare("Baka MPlayer", Qt::CaseInsensitive) == 0)
+                            nomejanela.append(" - Baka MPlayer");
+                }
                 if(nomejanela.contains(player, Qt::CaseInsensitive)){
                     QPointer<ChecaInfoPlayer> c(new ChecaInfoPlayer);
                     c->fchecaStream(player, nomejanela);
@@ -298,15 +366,21 @@ void MainWindow::fVerificaAnimeAberto()
                     QString vidAnime = cleitorListaAnimes->fprocuraAnimeNasListas(nomeAnime);
                     if(!vidAnime.isEmpty()){
                         emit sanimeReconhecido(vidAnime, nomeAnime, episodio);
+                        delete llistaJanelas;
                         return;
                     }
                     else{
                         vnomeAnimeAberto = nomeAnime;
+                        ui->labelAnimeAssistindoTitulo->setAlignment(Qt::AlignCenter);
+                        ui->labelAnimeAssistindoEpisodio->setAlignment(Qt::AlignCenter);
+                        ui->labelAnimeAssistindoTitulo->setWordWrap(true);
                         ui->labelAnimeAssistindoTitulo->setText(nomeAnime);
-                        ui->labelAnimeAssistindoEpisodio->setText("Not recognized.");
+                        ui->labelAnimeAssistindoEpisodio->setStyleSheet(vfonteNormal);
+                        ui->labelAnimeAssistindoEpisodio->setText("Episode not recognized.");
                         ui->labelMensagemAnimeAssistindo->setText("If the anime wasn't recognized correctly, search for the right"
                         " anime and click here to change!");
-                        ui->botaoAnimeCerto->show();
+                        ui->botaoAnimeAssistindoCerto->show();
+                        delete llistaJanelas;
                         return;
                     }
                 }
@@ -322,14 +396,15 @@ void MainWindow::fVerificaAnimeAberto()
     vcontadorAssistindoEpisodio = 0;
     vnomeAnimeAberto = "";
     ui->labelMensagemAnimeAssistindo->clear();
-    ui->botaoAnimeCerto->hide();
+    ui->botaoAnimeAssistindoCerto->hide();
+    delete llistaJanelas;
 }
 
 void MainWindow::fMostraAnimeAberto(QString ridAnime, const QString &rnomeAnime, const QString &repisodioAnime)
 {
     vnomeAnimeAberto = rnomeAnime;
     idAnimeAssistindo = ridAnime;
-    ui->botaoAnimeCerto->show();
+    ui->botaoAnimeAssistindoCerto->show();
     ui->labelMensagemAnimeAssistindo->setText("If the anime wasn't recognized correctly, search for the right"
     " anime and click here to change!");
     ui->imagemAnimeAssistindo->setScaledContents(true);
@@ -348,12 +423,12 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, const QString &rnomeAnime,
         }
     }
     if(rnomeAnime.size() < 47)
-        ui->labelAnimeAssistindoTitulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+        ui->labelAnimeAssistindoTitulo->setStyleSheet(vfonteNormal);
     else if(rnomeAnime.size() < 58)
-        ui->labelAnimeAssistindoTitulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+        ui->labelAnimeAssistindoTitulo->setStyleSheet(vtituloNormalMedio);
     else
-        ui->labelAnimeAssistindoTitulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
-    ui->labelAnimeAssistindoEpisodio->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+        ui->labelAnimeAssistindoTitulo->setStyleSheet(vtituloNormalPequeno);
+    ui->labelAnimeAssistindoEpisodio->setStyleSheet(vfonteNormal);
     ui->labelAnimeAssistindoTitulo->setText(rnomeAnime);
     ui->labelAnimeAssistindoEpisodio->setText("Episode " + repisodioAnime);
     ui->labelFundoAnimeAssistindoTitulo->setStyleSheet("background: rgb(185,201,250);");
@@ -362,12 +437,13 @@ void MainWindow::fMostraAnimeAberto(QString ridAnime, const QString &rnomeAnime,
     ui->labelAnimeAssistindoEpisodio->setAlignment(Qt::AlignCenter);
     ui->labelAnimeAssistindoTitulo->setWordWrap(true);
 
-
-    if(vcontadorAssistindoEpisodio == 12){
+    //Vai checar a cada 10 segundos, então tem que assistir dois minutos de anime pra contar. Assim, atualiza os curtas ao mesmo
+    //tempo que não atualiza se você mal assistir
+    if(vcontadorAssistindoEpisodio == 20){
         vcontadorAssistindoEpisodio++;
         fAumentaProgressoID(ridAnime, repisodioAnime);
     }
-    else if(vcontadorAssistindoEpisodio == 13)
+    else if(vcontadorAssistindoEpisodio == 21)
         return;
     else
         vcontadorAssistindoEpisodio++;
@@ -447,11 +523,11 @@ void MainWindow::fcarregaImagensLista(){
                 ui->imagemAnimeGrande->setPixmap(pix);
         }
         if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[0+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime00Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelFundoAnime00Nota->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime00Titulo->setStyleSheet("background: rgb(185,201,250);");
@@ -459,12 +535,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime00Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime00Titulo->setWordWrap(true);
         ui->labelAnime00Progresso->setAlignment(Qt::AlignCenter);
+        ui->labelAnime00Nota->setStyleSheet(vfonteNormalNota);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[0+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime00Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime00Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[0+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime00Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime00Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime00Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime00Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime00Progresso->setText("Progresso: " + vlistaSelecionada[0+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[0+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime00Nota->setAlignment(Qt::AlignCenter);
@@ -525,24 +602,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime01Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime01Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[1+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime01Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime01Titulo->setText(vlistaSelecionada[1+(12*(vpagina-1))]->vnome);
         ui->labelAnime01Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Titulo->setWordWrap(true);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[1+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime01Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime01Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[1+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime01Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime01Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime01Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime01Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime01Progresso->setAlignment(Qt::AlignCenter);
         ui->labelAnime01Progresso->setText("Progresso: " + vlistaSelecionada[1+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[1+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime01Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime01Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime01Nota->setText("Nota: " + vlistaSelecionada[1+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime01Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -593,24 +671,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime02Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime02Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[2+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime02Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime02Titulo->setText(vlistaSelecionada[2+(12*(vpagina-1))]->vnome);
         ui->labelAnime02Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime02Titulo->setWordWrap(true);
         ui->labelAnime02Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[2+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime02Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime02Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[2+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime02Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime02Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime02Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime02Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime02Progresso->setText("Progresso: " + vlistaSelecionada[2+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[2+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime02Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime02Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime02Nota->setText("Nota: " + vlistaSelecionada[2+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime02Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -661,24 +740,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime03Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime03Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[3+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime03Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime03Titulo->setText(vlistaSelecionada[3+(12*(vpagina-1))]->vnome);
         ui->labelAnime03Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime03Titulo->setWordWrap(true);
         ui->labelAnime03Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[3+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime03Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime03Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[3+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime03Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime03Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime03Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime03Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime03Progresso->setText("Progresso: " + vlistaSelecionada[3+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[3+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime03Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime03Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime03Nota->setText("Nota: " + vlistaSelecionada[3+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime03Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -729,24 +809,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime04Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime04Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[4+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime04Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime04Titulo->setText(vlistaSelecionada[4+(12*(vpagina-1))]->vnome);
         ui->labelAnime04Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime04Titulo->setWordWrap(true);
         ui->labelAnime04Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[4+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime04Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime04Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[4+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime04Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime04Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime04Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime04Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime04Progresso->setText("Progresso: " + vlistaSelecionada[4+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[4+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime04Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime04Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime04Nota->setText("Nota: " + vlistaSelecionada[4+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime04Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -797,11 +878,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime05Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime05Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[5+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime05Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime05Titulo->setText(vlistaSelecionada[5+(12*(vpagina-1))]->vnome);
         ui->labelAnime05Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime05Titulo->setWordWrap(true);
@@ -809,12 +890,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime05Progresso->setText("Progresso: " + vlistaSelecionada[5+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[5+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime05Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime05Nota->setStyleSheet(vfonteNormalNota);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[5+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime05Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime05Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[5+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime05Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime05Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime05Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime05Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime05Nota->setText("Nota: " + vlistaSelecionada[5+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime05Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -865,11 +947,11 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime06Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime06Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[6+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime06Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime06Titulo->setText(vlistaSelecionada[6+(12*(vpagina-1))]->vnome);
         ui->labelAnime06Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime06Titulo->setWordWrap(true);
@@ -877,12 +959,13 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelAnime06Progresso->setText("Progresso: " + vlistaSelecionada[6+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[6+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime06Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime06Nota->setStyleSheet(vfonteNormalNota);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[6+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime06Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime06Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[6+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime06Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime06Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime06Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime06Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime06Nota->setText("Nota: " + vlistaSelecionada[6+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime06Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -933,24 +1016,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime07Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime07Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[7+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime07Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime07Titulo->setText(vlistaSelecionada[7+(12*(vpagina-1))]->vnome);
         ui->labelAnime07Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime07Titulo->setWordWrap(true);
         ui->labelAnime07Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[7+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime07Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime07Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[7+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime07Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime07Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime07Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime07Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime07Progresso->setText("Progresso: " + vlistaSelecionada[7+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[7+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime07Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime07Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime07Nota->setText("Nota: " + vlistaSelecionada[7+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime07Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -1001,24 +1085,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime08Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime08Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[8+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime08Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime08Titulo->setText(vlistaSelecionada[8+(12*(vpagina-1))]->vnome);
         ui->labelAnime08Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime08Titulo->setWordWrap(true);
         ui->labelAnime08Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[8+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime08Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime08Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[8+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime08Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime08Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime08Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime08Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime08Progresso->setText("Progresso: " + vlistaSelecionada[8+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[8+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime08Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime08Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime08Nota->setText("Nota: " + vlistaSelecionada[8+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime08Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -1069,24 +1154,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime09Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime09Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[9+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime09Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime09Titulo->setText(vlistaSelecionada[9+(12*(vpagina-1))]->vnome);
         ui->labelAnime09Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime09Titulo->setWordWrap(true);
         ui->labelAnime09Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[9+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime09Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime09Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[9+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime09Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime09Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime09Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime09Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime09Progresso->setText("Progresso: " + vlistaSelecionada[9+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[9+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime09Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime09Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime09Nota->setText("Nota: " + vlistaSelecionada[9+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime09Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -1137,24 +1223,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime10Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime10Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[10+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime10Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime10Titulo->setText(vlistaSelecionada[10+(12*(vpagina-1))]->vnome);
         ui->labelAnime10Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime10Titulo->setWordWrap(true);
         ui->labelAnime10Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[10+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime10Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime10Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[10+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime10Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime10Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime10Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime10Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime10Progresso->setText("Progresso: " + vlistaSelecionada[10+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[10+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime10Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime10Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime10Nota->setText("Nota: " + vlistaSelecionada[10+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime10Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -1205,24 +1292,25 @@ void MainWindow::fcarregaImagensLista(){
         ui->labelFundoAnime11Progresso->setStyleSheet("background: rgb(185,201,250);");
         ui->labelFundoAnime11Titulo->setStyleSheet("background: rgb(185,201,250);");
         if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 47)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet(vfonteNormal);
         else if(vlistaSelecionada[11+(12*(vpagina-1))]->vnome.size() < 58)
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 7pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet(vtituloNormalMedio);
         else
-            ui->labelAnime11Titulo->setStyleSheet("background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Titulo->setStyleSheet(vtituloNormalPequeno);
         ui->labelAnime11Titulo->setText(vlistaSelecionada[11+(12*(vpagina-1))]->vnome);
         ui->labelAnime11Titulo->setAlignment(Qt::AlignCenter);
         ui->labelAnime11Titulo->setWordWrap(true);
         ui->labelAnime11Progresso->setAlignment(Qt::AlignCenter);
         if(!carquivos->fprocuraEpisodio(vlistaSelecionada[11+(12*(vpagina-1))]).isEmpty() && vtipoAtual == "anime")
-            ui->labelAnime11Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);");
+            ui->labelAnime11Progresso->setStyleSheet(vfonteNormalAnimeEncontrado);
         else if(vlistaSelecionada[11+(12*(vpagina-1))]->vstatus.compare("Not Aired Yet", Qt::CaseInsensitive) == 0)
-            ui->labelAnime11Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);");
+            ui->labelAnime11Progresso->setStyleSheet(vfonteNormalAnimeNaoComecou);
         else
-            ui->labelAnime11Progresso->setStyleSheet("background: transparent; font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
+            ui->labelAnime11Progresso->setStyleSheet(vfonteNormal);
         ui->labelAnime11Progresso->setText("Progresso: " + vlistaSelecionada[11+(12*(vpagina-1))]->vnumEpisodiosAssistidos +
                     "/" + vlistaSelecionada[11+(12*(vpagina-1))]->vnumEpisodiosTotais);
         ui->labelAnime11Nota->setAlignment(Qt::AlignCenter);
+        ui->labelAnime11Nota->setStyleSheet(vfonteNormalNota);
         ui->labelAnime11Nota->setText("Nota: " + vlistaSelecionada[11+(12*(vpagina-1))]->vnotaMediaPessoal + "/10");
         if(vlistaAtual == "busca" || vlistaAtual.contains("season")){
             ui->labelFundoAnime11Lista->setStyleSheet("background: rgb(185, 202, 250); font: 75 8pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);");
@@ -1351,7 +1439,8 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                             vimagemCarregada[id] = true;
                         }
                     }
-                    vprogressoLoadingBar++;
+                    if(vprogressoLoadingBar != vtotalAnimesLoadingBar)
+                        vprogressoLoadingBar++;
                     ui->labelLoading->setText("Loaded " + QString::number(vprogressoLoadingBar) + " of " +
                                               QString::number(vtotalAnimesLoadingBar) + " images");
                 }
@@ -1424,7 +1513,8 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
                         vimagemCarregada[id] = true;
                     }
                 }
-                vprogressoLoadingBar++;
+                if(vprogressoLoadingBar != vtotalAnimesLoadingBar)
+                    vprogressoLoadingBar++;
                 ui->labelLoading->setText("Loaded " + QString::number(vprogressoLoadingBar) + " of " +
                                           QString::number(vtotalAnimesLoadingBar) + " images");
             }
@@ -1446,6 +1536,7 @@ bool MainWindow::fcarregaImagensSelecionadasBackground(){
 
 void MainWindow::on_botaoAnime00_clicked()
 {
+    qDebug() << "oi";
     if(vlistaSelecionada.size() > 0+(12*(vpagina-1))){
         vanimeSelecionado = 0+(12*(vpagina-1));
         finfoAnimeSelecionado();
@@ -1875,6 +1966,7 @@ void MainWindow::frefreshListas(bool rcheckDownload){
     cconfUsuario->frecebeListaAnime(cleitorListaAnimes);
     if(dThread.isRunning()){
         dThread.requestInterruption();
+        dThread.wait();
         dThread.start();
     }
     else
@@ -2141,6 +2233,7 @@ void MainWindow::fgetConfigurations()
         timerTorrent->start(jconfig.fretornaTempoDownload().toInt()*10000);
         connect(timerTorrent, &QTimer::timeout, &jtorrent, QOverload<>::of(&janelatorrent::fautoDownload));
     }
+    fatualizaFontes();
 }
 
 void MainWindow::fsetDownloadImagensAnimesPorAno()
@@ -2206,6 +2299,52 @@ void MainWindow::fresetaRequestCounter()
     timerMaxAnilistRequest.singleShot(61000, this, &MainWindow::fresetaRequestCounter);
 }
 
+void MainWindow::fatualizaFontes()
+{
+    QStringList fontes = jconfig.fretornaFontes().split(";");
+    fontName = "\""+fontes.takeFirst()+"\"";
+    fontSizeTitulo = fontes.takeFirst();
+    fontSizeTituloAlternativo = fontes.takeFirst();
+    fontSizeStatus = fontes.takeFirst();
+    fontSizeInfo = fontes.takeFirst();
+    fontSizeMensagem = fontes.takeFirst();
+    vfonteTitulo = "background: transparent;font: 75 "+fontSizeTitulo+"pt " + fontName +
+            ";font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteSubtitulo = "background: transparent;font: 75 "+fontSizeTituloAlternativo+"pt " + fontName +
+            "; color: rgb(20, 20, 20);";
+    vfonteStatus = "background: transparent;font: 75 "+fontSizeStatus+"pt " + fontName +
+            "; color: rgb(20, 20, 20);";
+    vfonteInfo = "background: transparent;font: 75 "+fontSizeInfo+"pt " + fontName +
+            ";font-weight: bold; color: rgb(20, 20, 20);";
+    vfonteMensagem = "background: transparent;font: 75 "+fontSizeMensagem+"pt " + fontName +
+            ";color: rgb(20, 20, 20);";
+
+
+    ui->labelInfoNomeAnime->setStyleSheet(vfonteTitulo);
+    ui->labelInfoNomeAnimeIngles->setStyleSheet(vfonteSubtitulo);
+    ui->labelInfoStatusTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoNotaTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoMediaTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoSeasonTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoAirTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoReleasedTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoTypeTop->setStyleSheet(vfonteStatus);
+    ui->labelInfoStatus->setStyleSheet(vfonteInfo);
+    ui->labelInfoNota->setStyleSheet(vfonteInfo);
+    ui->labelInfoMediaSite->setStyleSheet(vfonteInfo);
+    ui->labelInfoSeason->setStyleSheet(vfonteInfo);
+    ui->labelInfoRelease->setStyleSheet(vfonteInfo);
+    ui->labelInfoEpisodiosLancados->setStyleSheet(vfonteInfo);
+    ui->labelInfoTipo->setStyleSheet(vfonteInfo);
+    ui->labelInfoSinopseTop->setStyleSheet(vfonteStatus);
+    ui->labelLoading->setStyleSheet(vfonteMensagem);
+    ui->labelRefreshTimer->setStyleSheet(vfonteMensagem);
+    ui->labelMensagem->setStyleSheet(vfonteMensagem);
+    ui->labelMensagemAnimeAssistindo->setStyleSheet(vfonteMensagemAnime);
+    //Falta o nick e a mensagem do anime, apenas.
+}
+
+
 void MainWindow::fgetMediaPlayersFromList()
 {
     vPlayers = jconfig.fretornaPlayers();
@@ -2234,15 +2373,16 @@ void MainWindow::fatualizaAnilist(){
     if(vlistaAcoes.isEmpty())
         return;
     QString nome;
-    QStringList vhistoricoAnilist;
     foreach (QStringList key, vlistaAcoes.keys()) {
         nome = cleitorListaAnimes->fbuscaAnimePorIDERetornaTitulo(key.at(1));
         if(vrateLimitRequestsAnilist == 90)
             return;
         else if(key.at(0) == "nota"){
             if(canilist->fmudaNota(key.at(1).toInt(), vlistaAcoes[key].toInt())){
-                qDebug() << QString("Change: Score - " + nome + " - " + vlistaAcoes[key]);
-                vhistoricoAnilist.append(QString("Change: Score - " + nome + " - " + vlistaAcoes[key]));
+                qDebug() << QString("Change: Score - " + nome + " - " + vlistaAcoes[key]
+                                     + " - " + QDateTime::currentDateTime().toString());
+                vhistoricoAnilist.append(QString("Change: Score - " + nome + " - " + vlistaAcoes[key]
+                                                 + " - " + QDateTime::currentDateTime().toString()));
                 vlistaAcoes.remove(key);
             }
             else
@@ -2251,9 +2391,9 @@ void MainWindow::fatualizaAnilist(){
         else if(key.at(0) == "progresso"){
             if(canilist->fmudaProgresso(key.at(1).toInt(), vlistaAcoes[key].toInt())){
                 qDebug() << QString("Change: Progress - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                    " - " + vlistaAcoes[key]);
+                                    " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString());
                 vhistoricoAnilist.append(QString("Change: Progress - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                                 " - " + vlistaAcoes[key]));
+                                                 " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString()));
                 vlistaAcoes.remove(key);
             }
             else
@@ -2262,9 +2402,9 @@ void MainWindow::fatualizaAnilist(){
         else if(key.at(0) == "lista"){
             if(canilist->fmudaLista(key.at(1).toInt(), vlistaAcoes[key])){
                 qDebug() << QString("Change: List - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                    " - " + vlistaAcoes[key]);
+                                    " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString());
                 vhistoricoAnilist.append(QString("Change: List - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                                 " - " + vlistaAcoes[key]));
+                                                 " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString()));
                 vlistaAcoes.remove(key);
             }
             else
@@ -2273,9 +2413,9 @@ void MainWindow::fatualizaAnilist(){
         else if(key.at(0) == "remove"){
             if(canilist->fexcluiAnime(key.at(1).toInt())){
                 qDebug() << QString("Change: Remove - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                    " - " + vlistaAcoes[key]);
+                                    " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString());
                 vhistoricoAnilist.append(QString("Change: Remove - " + vlistaSelecionada[vanimeSelecionado]->vnome +
-                                                 " - " + vlistaAcoes[key]));
+                                                 " - " + vlistaAcoes[key] + " - " + QDateTime::currentDateTime().toString()));
                 vlistaAcoes.remove(key);
             }
             else
@@ -2284,7 +2424,6 @@ void MainWindow::fatualizaAnilist(){
         vrateLimitRequestsAnilist++;
     }
     jconfig.fsetHistorico(vhistoricoAnilist);
-    vhistoricoAnilist.clear();
 }
 
 void MainWindow::on_botaoMudarPraLista_clicked()
@@ -2422,9 +2561,10 @@ void MainWindow::on_botaoRemoverdaLista_clicked()
 
 void MainWindow::fretryAnilist()
 {
-    if(dThread.isRunning()){
-        dThread.requestInterruption();
-        dThread.wait();
+    ///Aqui era dthread, mudei 2/4 - 13h
+    if(cThread.isRunning()){
+        cThread.requestInterruption();
+        cThread.wait();
     }
     canilist->frecebeAutorizacao(jconfig.fretornaUsuario(),jconfig.fretornaCodigoAutorizacao());
 //    canilist->fbaixaListaThread(cThread);
@@ -2514,56 +2654,39 @@ void MainWindow::on_botaoOrdemType_clicked()
 }
 
 
-//Eu sei que seria muito melhor usar qml pra fazer isso. Seria 10x mais fácil e mais prático de programar.
-//Mas ainda não aprendi QML e estou para aprender num futuro próximo. Assim que começar a aprender, isso vai sumir
-//e iriei mudar o visual do programa
+//Estou recriando isso em QML, mas vai levar um tempo
 void MainWindow::fmudaResolucao(){
     QPointer<QScreen> screen = QGuiApplication::primaryScreen();
     QRect  screenGeometry = screen->geometry();
     int height = screenGeometry.height();
     int width = screenGeometry.width();
+//    width = 1360;
+//    height = 768;
     QObjectList objectList = ui->centralwidget->children();
     //1000 é a altura da janela e 1080 a altura do monitor, em pixels. Preciso fazer isso para não deixar a janela ficar atrás do menu
     //iniciar. O windows aceita a janela ficar atrás, mas imagino que terão OS que não irão aceitar.
     int objheight = qCeil(static_cast<int>(height*(static_cast<double>(1000)/1080)));
     //Comparamos o tamanho da página original com a nova resolução, para definir em quantos % deveremos aumentar ou diminuir os
     //widgets
-    double compHeight = static_cast<double>(objheight)/1000;
-    double compWidth = static_cast<double>(width)/1920;
+    compHeight = static_cast<double>(objheight)/1000;
+    compWidth = static_cast<double>(width)/1920;
     foreach(QObject *wid, objectList){
         //Pego a posição relativa dos objetos
-        double a = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->pos().rx())/1920;
-        double b = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->pos().ry())/1000;
+        double a = static_cast<double>(thisWid->pos().rx())/1920;
+        double b = static_cast<double>(thisWid->pos().ry())/1000;
         //Variáveis que não precisavam existir. Posso não usar elas, mas deixaria o código mais difícil de se ler
         double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
         double objHei = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->height());
         //Multiplico o tamanho real do objeto pelo tamanho relativo do objeto.
         //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
         //Nova resolução
-        this->findChild<QWidget *>(wid->objectName())->resize(qCeil(static_cast<int>(compWidth*objWid)),
+        thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
                                                               qCeil(static_cast<int>(compHeight*objHei)));
         //Faço os objetos entrarem na posição certa;
-        this->findChild<QWidget *>(wid->objectName())->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
+        thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
     }
     //Essa função funciona muito bem, mas algumas coisas ficam com 1 ou 2 pixels fora do lugar
     int widheight = qCeil(static_cast<int>(height*(static_cast<double>(821)/1080)));
-//    QWidgetList widgetList = ui->listaAnimes->findChildren<QWidget *>();
-//    QObjectList widgetList = ui->listaAnimes->findChildren();
-//    foreach(QObject *wid, widgetList){
-//        double a = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->pos().rx())/1920;
-//        double b = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->pos().ry())/821;
-//        double compHeight = static_cast<double>(widheight)/821;
-//        double compWidth = static_cast<double>(width)/1920;
-//        double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
-//        double objHei = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->height());
-//        qDebug() << wid->objectName() << this->findChild<QWidget *>(wid->objectName())->pos().rx()
-//                 << this->findChild<QWidget *>(wid->objectName())->pos().ry()
-//                 << a*width << b*widheight;
-//        this->findChild<QWidget *>(wid->objectName())->resize(qCeil(static_cast<int>(compWidth*objWid)),
-//                                                              qCeil(static_cast<int>(compHeight*objHei)));
-//        this->findChild<QWidget *>(wid->objectName())->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*widheight)));
-
-//    }
     //Dou resize na janela
     double comprimentoJanela = static_cast<double>(width)/1920;
     double alturaJanela = static_cast<double>(widheight)/821;
@@ -2597,53 +2720,54 @@ void MainWindow::fmudaResolucao(){
         //E ver qual label é qual, pra saber como mudá-los
         //No caso, se eles forem labeis da mesma categoria que o que escolhi pra referência, eles devem ter sempre o mesmo tamanho
         //Mas diferentes posições
-        if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("botaoAnime", Qt::CaseInsensitive)
-                || (this->findChild<QWidget *>(wid->objectName())->objectName().contains("imagemAnime", Qt::CaseInsensitive)
-                && !this->findChild<QWidget *>(wid->objectName())->objectName().contains("grande", Qt::CaseInsensitive))){
+        if((thisWid->objectName().contains("botaoAnime", Qt::CaseInsensitive)
+                || (thisWid->objectName().contains("imagemAnime", Qt::CaseInsensitive)
+                && !thisWid->objectName().contains("grande", Qt::CaseInsensitive)))
+                && !thisWid->objectName().contains("assistindo", Qt::CaseInsensitive)){
             this->findChild<QWidget *>(wid->objectName())->resize(static_cast<int>(comprimentoJanela*larguraLabelAnime),
                                                                   static_cast<int>(alturaJanela*alturaLabelAnime));
             QString vposicaoGrade;
-            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("botaoAnime", Qt::CaseInsensitive))
-                vposicaoGrade = this->findChild<QWidget *>(wid->objectName())->objectName().remove("botaoAnime");
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("imagemAnime", Qt::CaseInsensitive))
-                vposicaoGrade = this->findChild<QWidget *>(wid->objectName())->objectName().remove("imagemAnime");
+            if(thisWid->objectName().contains("botaoAnime", Qt::CaseInsensitive))
+                vposicaoGrade = thisWid->objectName().remove("botaoAnime");
+            else if(thisWid->objectName().contains("imagemAnime", Qt::CaseInsensitive))
+                vposicaoGrade = thisWid->objectName().remove("imagemAnime");
             //Se for um múltiplo de 3, fica na primeira coluna
             if(vposicaoGrade.toInt()%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->imagemAnime00->x(),
+                thisWid->move(ui->imagemAnime00->x(),
                     static_cast<int>(ui->imagemAnime00->y()+((ui->imagemAnime00->height()+2)*vposicaoGrade.toInt()/3)));
             else if((vposicaoGrade.toInt()-1)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelFundoAnime00Titulo->x()
+                thisWid->move(ui->labelFundoAnime00Titulo->x()
                                                                     +ui->labelFundoAnime00Titulo->width()+10,
                     static_cast<int>(ui->imagemAnime00->y()+((ui->imagemAnime00->height()+2)*(vposicaoGrade.toInt()-1)/3)));
             else if((vposicaoGrade.toInt()-2)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move((ui->labelFundoAnime00Titulo->x() + ui->imagemAnime00->width()
+                thisWid->move((ui->labelFundoAnime00Titulo->x() + ui->imagemAnime00->width()
                                                                     +(ui->labelFundoAnime00Titulo->width()+10)*2),
                     static_cast<int>(ui->imagemAnime00->y()+((ui->imagemAnime00->height()+2)*(vposicaoGrade.toInt()-2)/3)));
         }
         //Labelfundo e label anime são separados por motivos de tamanho do label
-        else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("labelFundoAnime", Qt::CaseInsensitive)){
-            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("titulo", Qt::CaseInsensitive))
-                this->findChild<QWidget *>(wid->objectName())->resize(ui->labelFundoAnime00Titulo->width(),
+        else if(thisWid->objectName().contains("labelFundoAnime", Qt::CaseInsensitive)){
+            if(thisWid->objectName().contains("titulo", Qt::CaseInsensitive))
+                thisWid->resize(ui->labelFundoAnime00Titulo->width(),
                                                                       ui->labelFundoAnime00Titulo->height());
             else
-                this->findChild<QWidget *>(wid->objectName())->resize(ui->labelFundoAnime00Titulo->width(),
+                thisWid->resize(ui->labelFundoAnime00Titulo->width(),
                                                                       ui->labelFundoAnime00Titulo->height()/2);
 
             QString vposicaoGrade = this->findChild<QWidget *>(wid->objectName())->objectName().remove("labelFundoAnime");
             int ypos = 0;
-            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("titulo", Qt::CaseInsensitive)){
+            if(thisWid->objectName().contains("titulo", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("titulo", Qt::CaseInsensitive);
                 ypos = ui->labelFundoAnime00Titulo->y();
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("progresso", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("progresso", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("progresso", Qt::CaseInsensitive);
                 ypos = ui->labelFundoAnime00Titulo->y()+ui->labelFundoAnime00Titulo->height()+1;
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("nota", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("nota", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("nota", Qt::CaseInsensitive);
                 ypos = static_cast<int>(ui->labelFundoAnime00Titulo->y()+(ui->labelFundoAnime00Titulo->height()*1.5)+2);
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("lista", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("lista", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("lista", Qt::CaseInsensitive);
                 ypos = ui->labelFundoAnime00Titulo->y()+ui->labelFundoAnime00Titulo->height()+
                         ((ui->labelFundoAnime00Progresso->height())*2)+3;
@@ -2652,47 +2776,44 @@ void MainWindow::fmudaResolucao(){
                 ypos = ui->labelFundoAnime00Titulo->y();
             }
             if(vposicaoGrade.toInt()%3 == 0){
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelFundoAnime00Titulo->x(),
+                thisWid->move(ui->labelFundoAnime00Titulo->x(),
                     static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
                         (vposicaoGrade.toInt()/3))));
             }
             else if((vposicaoGrade.toInt()-1)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelFundoAnime00Titulo->x()
-                                                                    +ui->labelFundoAnime00Titulo->width()+10
-                                                                    +ui->imagemAnime00->width(),
-                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-                                           (vposicaoGrade.toInt()/3))));
+                thisWid->move(ui->labelFundoAnime00Titulo->x()
+                    +ui->labelFundoAnime00Titulo->width()+10
+                    +ui->imagemAnime00->width(),
+                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*(vposicaoGrade.toInt()/3))));
             else if((vposicaoGrade.toInt()-2)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelFundoAnime00Titulo->x()
-                                                                    +((ui->labelFundoAnime00Titulo->width()+10
-                                                                    +ui->imagemAnime00->width())*2),
-                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-                                           (vposicaoGrade.toInt()/3))));
+               thisWid->move(ui->labelFundoAnime00Titulo->x()
+                    +((ui->labelFundoAnime00Titulo->width()+10
+                    +ui->imagemAnime00->width())*2),
+                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*(vposicaoGrade.toInt()/3))));
         }
         //Agora começa a mudar os textos
-        else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("labelAnime", Qt::CaseInsensitive)){
-            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("titulo", Qt::CaseInsensitive))
-                this->findChild<QWidget *>(wid->objectName())->resize(ui->labelAnime00Titulo->width(),
-                                                                      ui->labelAnime00Titulo->height());
+        else if(thisWid->objectName().contains("labelAnime", Qt::CaseInsensitive) &&
+                !thisWid->objectName().contains("assistindo", Qt::CaseInsensitive)){
+            if(thisWid->objectName().contains("titulo", Qt::CaseInsensitive))
+                thisWid->resize(ui->labelAnime00Titulo->width(),ui->labelAnime00Titulo->height());
             else
-                this->findChild<QWidget *>(wid->objectName())->resize(ui->labelAnime00Titulo->width(),
-                                                                      ui->labelAnime00Titulo->height()/2);
+                thisWid->resize(ui->labelAnime00Titulo->width(),ui->labelAnime00Titulo->height()/2);
 
-            QString vposicaoGrade = this->findChild<QWidget *>(wid->objectName())->objectName().remove("labelAnime");
+            QString vposicaoGrade = thisWid->objectName().remove("labelAnime");
             int ypos = 0;
-            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("titulo", Qt::CaseInsensitive)){
+            if(thisWid->objectName().contains("titulo", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("titulo", Qt::CaseInsensitive);
                 ypos = ui->labelAnime00Titulo->y();
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("progresso", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("progresso", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("progresso", Qt::CaseInsensitive);
                 ypos = ui->labelAnime00Titulo->y()+ui->labelAnime00Titulo->height()+2;
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("nota", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("nota", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("nota", Qt::CaseInsensitive);
                 ypos = static_cast<int>(ui->labelAnime00Titulo->y()+(ui->labelAnime00Titulo->height()*1.5)+4);
             }
-            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("lista", Qt::CaseInsensitive)){
+            else if(thisWid->objectName().contains("lista", Qt::CaseInsensitive)){
                 vposicaoGrade = vposicaoGrade.remove("lista", Qt::CaseInsensitive);
                 ypos = ui->labelAnime00Titulo->y()+ui->labelAnime00Titulo->height()+
                         ((ui->labelAnime00Progresso->height())*2)+3;
@@ -2701,74 +2822,54 @@ void MainWindow::fmudaResolucao(){
                 ypos = ui->labelAnime00Titulo->y();
             }
             if(vposicaoGrade.toInt()%3 == 0){
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x(),
-                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-                        (vposicaoGrade.toInt()/3))));
+                thisWid->move(ui->labelAnime00Titulo->x(),
+                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*(vposicaoGrade.toInt()/3))));
             }
             else if((vposicaoGrade.toInt()-1)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x()
-                                                                    +ui->labelAnime00Titulo->width()+13
-                                                                    +ui->imagemAnime00->width(),
-                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-                                           (vposicaoGrade.toInt()/3))));
+                thisWid->move(ui->labelAnime00Titulo->x()
+                    +ui->labelAnime00Titulo->width()+13
+                    +ui->imagemAnime00->width(),
+                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*(vposicaoGrade.toInt()/3))));
             else if((vposicaoGrade.toInt()-2)%3 == 0)
-                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x()
-                                                                    +((ui->labelAnime00Titulo->width()+13
-                                                                    +ui->imagemAnime00->width())*2),
+                thisWid->move(ui->labelAnime00Titulo->x()
+                    +((ui->labelAnime00Titulo->width()+13
+                    +ui->imagemAnime00->width())*2),
                     static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
                                            (vposicaoGrade.toInt()/3))));
         }
         //Muda as informações do anime
         //Tenho que mudar manualmente mas isso quebra o galho por enquanto
 //        else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("labelInfo", Qt::CaseInsensitive)){
-        else if(!this->findChild<QWidget *>(wid->objectName())->objectName().contains("imagemanimegrande", Qt::CaseInsensitive)){
-            qDebug() << this->findChild<QWidget *>(wid->objectName())->size();
-            this->findChild<QWidget *>(wid->objectName())->resize(
-                        static_cast<int>(comprimentoJanela*this->findChild<QWidget *>(wid->objectName())->width()),
-                        static_cast<int>(alturaJanela*this->findChild<QWidget *>(wid->objectName())->height())+3);
-            qDebug() << this->findChild<QWidget *>(wid->objectName())->size();
-            this->findChild<QWidget *>(wid->objectName())->move(
-                        static_cast<int>((static_cast<double>(this->findChild<QWidget *>(wid->objectName())->x())/1920)*width),
-                        static_cast<int>((static_cast<double>(this->findChild<QWidget *>(wid->objectName())->y())/821)*widheight));
-//            int ypos = 0;
-//            if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("titulo", Qt::CaseInsensitive)){
-//                vposicaoGrade = vposicaoGrade.remove("titulo", Qt::CaseInsensitive);
-//                ypos = ui->labelAnime00Titulo->y();
-//            }
-//            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("progresso", Qt::CaseInsensitive)){
-//                vposicaoGrade = vposicaoGrade.remove("progresso", Qt::CaseInsensitive);
-//                ypos = ui->labelAnime00Titulo->y()+ui->labelAnime00Titulo->height()+2;
-//            }
-//            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("nota", Qt::CaseInsensitive)){
-//                vposicaoGrade = vposicaoGrade.remove("nota", Qt::CaseInsensitive);
-//                ypos = static_cast<int>(ui->labelAnime00Titulo->y()+(ui->labelAnime00Titulo->height()*1.5)+4);
-//            }
-//            else if(this->findChild<QWidget *>(wid->objectName())->objectName().contains("lista", Qt::CaseInsensitive)){
-//                vposicaoGrade = vposicaoGrade.remove("lista", Qt::CaseInsensitive);
-//                ypos = ui->labelAnime00Titulo->y()+ui->labelAnime00Titulo->height()+
-//                        ((ui->labelAnime00Progresso->height())*2)+3;
-//            }
-//            else{
-//                ypos = ui->labelAnime00Titulo->y();
-//            }
-//            if(vposicaoGrade.toInt()%3 == 0){
-//                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x(),
-//                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-//                        (vposicaoGrade.toInt()/3))));
-//            }
-//            else if((vposicaoGrade.toInt()-1)%3 == 0)
-//                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x()
-//                                                                    +ui->labelAnime00Titulo->width()+13
-//                                                                    +ui->imagemAnime00->width(),
-//                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-//                                           (vposicaoGrade.toInt()/3))));
-//            else if((vposicaoGrade.toInt()-2)%3 == 0)
-//                this->findChild<QWidget *>(wid->objectName())->move(ui->labelAnime00Titulo->x()
-//                                                                    +((ui->labelAnime00Titulo->width()+13
-//                                                                    +ui->imagemAnime00->width())*2),
-//                    static_cast<int>(ypos+((2+ui->imagemAnime00->height())*
-//                                           (vposicaoGrade.toInt()/3))));
+        else if(!thisWid->objectName().contains("imagemanimegrande", Qt::CaseInsensitive)){
+            thisWid->resize(
+                        static_cast<int>(comprimentoJanela*thisWid->width()),
+                        static_cast<int>(alturaJanela*thisWid->height()));
+            thisWid->move(
+                        static_cast<int>((static_cast<double>(thisWid->x())/1920)*width),
+                        static_cast<int>((static_cast<double>(thisWid->y())/821)*widheight));
+            if(thisWid->objectName().contains("labelDireitoFundoControles", Qt::CaseInsensitive) &&
+                    (thisWid->y() == ui->labelDireitoFundoSinopse->y()+ui->labelDireitoFundoSinopse->height())){
+                    thisWid->resize(thisWid->width(),thisWid->height()-1);
+                    thisWid->move(thisWid->x(),thisWid->y()+1);
+            }
         }
+    }
+    if(width <= 1366){
+        vtituloNormalMedio = "background: transparent; font: 75 5pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+        vtituloNormalPequeno = "background: transparent; font: 75 4pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+        vfonteNormal = "background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(20, 20, 20);";
+        vfonteNormalNota = "background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(53, 68, 120);";
+        vfonteNormalAnimeEncontrado = "background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(53, 120, 56);";
+        vfonteNormalAnimeNaoComecou = "background: transparent; font: 75 6pt \"Calibri\"; font-weight: bold; color: rgb(120, 60, 53);";
+        fontSizeTitulo = "8";
+        fontSizeTituloAlternativo = "8";
+        fontSizeStatus = "10";
+        fontSizeInfo = "9";
+        fontSizeMensagem = "7";
+        fatualizaFontes();
+        //Atualizar resolução da janela de torrents e da janela de configurações
+        jtorrent.fmudaResolucao();
+        jconfig.fmudaResolucao();
     }
 }
 
@@ -2912,7 +3013,7 @@ void MainWindow::on_botaoAjuda_clicked()
     ui->janelaRotativa->setCurrentIndex(3);
 }
 
-void MainWindow::on_botaoAnimeCerto_clicked()
+void MainWindow::on_botaoAnimeAssistindoCerto_clicked()
 {
     if(!vnomeAnimeAberto.isEmpty()){
         QStringList tempAnimeList;

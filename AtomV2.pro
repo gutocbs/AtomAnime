@@ -17,7 +17,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     anilist.cpp \
-    anime.cpp \
     anitomy/anitomy.cpp \
     anitomy/element.cpp \
     anitomy/keyword.cpp \
@@ -32,7 +31,6 @@ SOURCES += \
     confbase.cpp \
     confusuario.cpp \
     filedownloader.cpp \
-    filtros.cpp \
     formatapalavras.cpp \
     janeladeconfig.cpp \
     janelatorrent.cpp \
@@ -56,7 +54,6 @@ SOURCES += \
     robotlib/Size.cc \
 #    robotlib/Timer.cc \
     robotlib/Window.cc \
-    torrentinfo.cpp \
 
 HEADERS += \
     anilist.h \
@@ -106,7 +103,7 @@ HEADERS += \
 FORMS += \
     janeladeconfig.ui \
     janelatorrent.ui \
-    mainwindow.ui \
+    mainwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

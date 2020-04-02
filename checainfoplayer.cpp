@@ -16,6 +16,11 @@ void ChecaInfoPlayer::fchecaStream(const QString &player, const QString &janela)
     fgetStreamLanguages();
     if(!janela.isEmpty()){
         vnomeDaJanela = janela;
+        if(vnomeDaJanela.contains(player, Qt::CaseInsensitive)){
+            int indexPrograma = vnomeDaJanela.lastIndexOf("-");
+            vnomeDaJanela.remove(indexPrograma,vnomeDaJanela.size() - indexPrograma);
+            vnomeDaJanela = vnomeDaJanela.simplified();
+        }
         if(player.compare("Crunchyroll", Qt::CaseInsensitive) == 0)
             fchecaCrunchyroll();
         else if(player.compare("AnimeLab", Qt::CaseInsensitive) == 0)
@@ -24,9 +29,15 @@ void ChecaInfoPlayer::fchecaStream(const QString &player, const QString &janela)
             fchecaFunimation();
         else if(player.compare("KissAnime", Qt::CaseInsensitive) == 0)
             fchecaKissAnime();
+        else if(player.compare("Winamp", Qt::CaseInsensitive) == 0)
+            fchecaKissAnime();
         else
             fchecaLocalPlayer();
     }
+}
+
+void ChecaInfoPlayer::fremoveReprodutor()
+{
 }
 
 QString ChecaInfoPlayer::fretornaAnime()
@@ -125,6 +136,22 @@ void ChecaInfoPlayer::fchecaKissAnime()
     vanime = vanime.simplified();
 }
 
+void ChecaInfoPlayer::fchecaWinamp()
+{
+    QStringList removeDot = vnomeDaJanela.split(".");
+    removeDot.takeFirst();
+    vnomeDaJanela = removeDot.join(".");
+    vnomeDaJanela = vnomeDaJanela.simplified();
+    anitomy::Anitomy lanitomy;
+    lanitomy.Parse(vnomeDaJanela.toStdWString());
+    const auto& lelements = lanitomy.elements();
+    vanime = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
+    vepisodio = QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber));
+    QString vtemporada = QString::fromStdWString(lelements.get(anitomy::kElementAnimeSeason));
+    if(!vtemporada.isEmpty())
+        vanime.append(QString(" " + vtemporada));
+}
+
 void ChecaInfoPlayer::fchecaLocalPlayer()
 {
     anitomy::Anitomy lanitomy;
@@ -132,5 +159,8 @@ void ChecaInfoPlayer::fchecaLocalPlayer()
     const auto& lelements = lanitomy.elements();
     vanime = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
     vepisodio = QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber));
+    QString vtemporada = QString::fromStdWString(lelements.get(anitomy::kElementAnimeSeason));
+    if(!vtemporada.isEmpty())
+        vanime.append(QString(" " + vtemporada));
 }
 

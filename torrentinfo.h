@@ -8,7 +8,10 @@ class torrentinfo : public QObject
 {
     Q_OBJECT
 public:
-    explicit torrentinfo(QObject *parent = nullptr);
+    explicit torrentinfo(QObject *parent = nullptr){
+        Q_UNUSED(parent)
+        vbaixar = false;
+    }
     QString vnomeTorrent;
     QString vnomeAnime;
     QString vlinkTorrent;
@@ -20,7 +23,7 @@ public:
     QString vtorrentInfoLink;
     QString vlista;
 //    QCheckBox vbox;
-    bool vbaixar;
+    bool vbaixar = false;
 signals:
 
 public slots:

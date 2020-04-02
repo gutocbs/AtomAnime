@@ -15,6 +15,9 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, const QString &rnomeAnime, 
     const auto& lelements = lanitomy.elements();
     //Usamos isso para pegar o número do episódio e o nome do anime a partir do nome do arquivo
     rfileName = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
+    QString vtemporada = QString::fromStdWString(lelements.get(anitomy::kElementAnimeSeason));
+    if(!vtemporada.isEmpty())
+        rfileName.append(QString(" " + vtemporada));
     int lepisodioAnime = QString::fromStdWString(lelements.get(anitomy::kElementEpisodeNumber)).toInt();
 
     int repisodiosTotais = 0;
@@ -24,7 +27,6 @@ bool arquivos::fcomparaDadosAnime(QString rfileName, const QString &rnomeAnime, 
     //Por esse motivo, é dado o número 1 como número de episódio, assim o programa consegue reconhecer como episódio não visto
     if(lepisodioAnime == 0)
         lepisodioAnime++;
-
 
     //Episódios totais é a variável que conta todos os episódios do anime, em todas as seasons. Caso algum sub coloque, por exemplo
     //One Piece episódio 201, ele ainda vai ser lido e saberemos qual o episódio/temporada certa.
@@ -128,8 +130,10 @@ QString arquivos::fprocuraEpisodioEspecifico(anime *ranimeBuscado, int rEpisodio
 }
 
 bool arquivos::fabreEpisodio(const QByteArray &rcaminhoArquivo){
+    QDesktopServices *abreEpisodio = new QDesktopServices;
     if(!rcaminhoArquivo.isEmpty()){
-        QDesktopServices::openUrl(QUrl("file:///"+rcaminhoArquivo,QUrl::TolerantMode));
+        abreEpisodio->openUrl(QUrl("file:///"+rcaminhoArquivo,QUrl::TolerantMode));
+        delete abreEpisodio;
         return true;
     }
     return false;

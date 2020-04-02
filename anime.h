@@ -9,7 +9,11 @@ class anime : public QObject
 {
     Q_OBJECT
 public:
-    explicit anime(QObject *parent = nullptr);
+    explicit anime(QObject *parent = nullptr){
+        Q_UNUSED(parent)
+        vfinalizado = false;
+        vtemporada = 0;
+    }
     QString vnome;
     QString vnomeIngles;
     QString vnomeJapones;

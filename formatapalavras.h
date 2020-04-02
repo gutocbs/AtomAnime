@@ -29,6 +29,7 @@ public:
     QString fmudaOVAPraSpecial(QString);
     QString fmudaSpecialPraOVA(QString);
     QString fremoveOVAEspecial(QString);
+    QString fremoveTV(QString);
 
     //Tentar fazer meu próprio anitomy?
 

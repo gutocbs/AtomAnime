@@ -36,6 +36,9 @@ void confUsuario::fbuscaDiretoriosAnimes(){
             const auto& lelements = lanitomy.elements();
             //Usamos isso para pegar o número do episódio e o nome do anime a partir do nome do arquivo
             QString lfileName = QString::fromStdWString(lelements.get(anitomy::kElementAnimeTitle));
+            QString vtemporada = QString::fromStdWString(lelements.get(anitomy::kElementAnimeSeason));
+            if(!vtemporada.isEmpty())
+                lfileName.append(QString(" " + vtemporada));
             //Pega o nome de cada diretorio e divide, pegando apenas o nome do anime
             //Compara o nome do anime com os animes da lista
             for(int w = 0; w < vlistaAnimes.size(); w++){

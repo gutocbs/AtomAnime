@@ -1,6 +1,7 @@
 #include "janelatorrent.h"
 #include "ui_janelatorrent.h"
 #include <utility>
+#define thisWid this->findChild<QWidget *>(wid->objectName())
 
 janelatorrent::janelatorrent(QWidget *parent) :
     QWidget(parent),
@@ -100,6 +101,9 @@ void janelatorrent::fleXML()
 
                 lepisodioAnime = QString::fromStdWString(elements.get(anitomy::kElementEpisodeNumber));
                 lnomeAnime = QString::fromStdWString(elements.get(anitomy::kElementAnimeTitle));
+                QString vtemporada = QString::fromStdWString(elements.get(anitomy::kElementAnimeSeason));
+                if(!vtemporada.isEmpty())
+                    lnomeAnime.append(QString(" " + vtemporada));
                 lfansub = QString::fromStdWString(elements.get(anitomy::kElementReleaseGroup));
                 lresolucao = QString::fromStdWString(elements.get(anitomy::kElementVideoResolution));
 
@@ -221,8 +225,8 @@ void janelatorrent::fpreencheTabela()
     vcontroladorCheckbox.clear();
     //Criamos o número de linhas necessário
     ui->listaTorrents->setRowCount(torrent.size());
+    ui->listaTorrents->verticalHeader()->hide();
     for(int i = 0; i < torrent.size(); i++){
-        ui->listaTorrents->verticalHeader()->hide();
         for(int w = 0; w < ui->listaTorrents->columnCount(); w++){
             QTableWidgetItem *litem = new QTableWidgetItem;
             switch (w) {
@@ -293,6 +297,8 @@ void janelatorrent::fpreencheTabela()
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 5:
+                if(torrent[i]->vepisodioAnime.toInt() < 10 && !torrent[i]->vepisodioAnime.contains("0"))
+                    torrent[i]->vepisodioAnime.insert(0,"0");
                 litem->setText(torrent[i]->vepisodioAnime);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
@@ -393,25 +399,25 @@ void janelatorrent::fbaixaTorrent()
         emit error("No download folder");
         return;
     }
-    QProcess lprocesso;
+    QPointer<QProcess> lprocesso(new QProcess);
     QStringList argumentos;
     if(cconfig->fretornaTorrentEscolhido() == "uTorrent"){
-        lprocesso.setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
+        lprocesso->setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
         argumentos.append("/DIRECTORY");
         argumentos.append(cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime);
         argumentos.append(QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent +
                 ".torrent");
     }
     else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent"){
-        lprocesso.setProgram(QDir::rootPath() + "/Program Files/qBittorrent/qbittorrent.exe");
+        lprocesso->setProgram(QDir::rootPath() + "/Program Files/qBittorrent/qbittorrent.exe");
         argumentos.append("--add-paused=false");
         argumentos.append("--skip-dialog=true");
         argumentos.append("--save-path=" + cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime);
         argumentos.append(QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent
                 + ".torrent");
     }
-    lprocesso.setArguments(argumentos);
-    if(lprocesso.startDetached())
+    lprocesso->setArguments(argumentos);
+    if(lprocesso->startDetached())
         qDebug() << "Download started successfully!";
 
     torrent[vlistaDownload[0]]->vbaixar = false;
@@ -460,6 +466,7 @@ void janelatorrent::fautoDownload()
     void on_botaoAtualizaLista_clicked();
     void on_botaoDownload_clicked();
 }
+
 
 QString janelatorrent::fchecaFiltroFansub(const QString &lid)
 {
@@ -737,4 +744,38 @@ int janelatorrent::fcalculaPrioridadeFiltros(const QString &description, const Q
             return 1;
     }
     return 0;
+}
+void janelatorrent::fmudaResolucao()
+{
+    QPointer<QScreen> screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    double compHeight;
+    double compWidth;
+    int height = screenGeometry.height();
+    int width = screenGeometry.width();
+    width = 1360;
+    height = 768;
+    QObjectList objectList = this->children();
+    //1000 é a altura da janela e 1080 a altura do monitor, em pixels. Preciso fazer isso para não deixar a janela ficar atrás do menu
+    //iniciar. O windows aceita a janela ficar atrás, mas imagino que terão OS que não irão aceitar.
+    int objheight = qCeil(static_cast<int>(height*(static_cast<double>(1000)/1080)));
+    //Comparamos o tamanho da página original com a nova resolução, para definir em quantos % deveremos aumentar ou diminuir os
+    //widgets
+    compHeight = static_cast<double>(objheight)/1000;
+    compWidth = static_cast<double>(width)/1920;
+    foreach(QObject *wid, objectList){
+        //Pego a posição relativa dos objetos
+        double a = static_cast<double>(thisWid->pos().rx())/1920;
+        double b = static_cast<double>(thisWid->pos().ry())/1000;
+        //Variáveis que não precisavam existir. Posso não usar elas, mas deixaria o código mais difícil de se ler
+        double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
+        double objHei = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->height());
+        //Multiplico o tamanho real do objeto pelo tamanho relativo do objeto.
+        //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
+        //Nova resolução
+        thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
+                                                              qCeil(static_cast<int>(compHeight*objHei)));
+        //Faço os objetos entrarem na posição certa;
+        thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
+    }
 }
