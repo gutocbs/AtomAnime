@@ -9,3 +9,5 @@ media.h
 MediaList.gql
 medialist.h
 user.h
+AtomV3.pro
+qml/animeSlot.qml
