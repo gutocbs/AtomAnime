@@ -324,3 +324,10 @@ QString FormataPalavras::fremoveOVAEspecial(QString rpalavra)
     rpalavra.remove("ova");
     return rpalavra;
 }
+
+QString FormataPalavras::fremoveTV(QString rpalavra)
+{
+    rpalavra = rpalavra.toLower();
+    rpalavra.remove("(tv)");
+    return rpalavra;
+}

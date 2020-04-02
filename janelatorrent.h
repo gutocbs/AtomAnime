@@ -20,6 +20,9 @@
 #include <QFuture>
 #include <QtConcurrent>
 #include <QMutexLocker> //Pra lidar com os mapas nas threads
+#include <QDesktopWidget> //Pra resolução
+#include <QScreen> //Resolução também
+#include <QtMath> //Também resolução
 
 #include <anitomy/anitomy.h>
 #include "torrentinfo.h"
@@ -44,6 +47,7 @@ public:
     void fpassaPonteiros(leitorlistaanimes*, janeladeconfig*, arquivos*);
     void fprocuraAnimeEspecifico(const QString &rnomeAnimeBuscado);
     void fautoDownload();
+    void fmudaResolucao();
     QString fchecaFiltroFansub(const QString &lid);
     QString fchecaFiltroDownloadFromList(const QString &lid);
     QString fchecaFiltroResolution(const QString &lid);

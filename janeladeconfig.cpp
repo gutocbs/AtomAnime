@@ -1,5 +1,6 @@
 #include "janeladeconfig.h"
 #include "ui_janeladeconfig.h"
+#define thisWid this->findChild<QWidget *>(wid->objectName())
 
 janeladeconfig::janeladeconfig(QWidget *parent) :
     QWidget(parent),
@@ -60,7 +61,25 @@ janeladeconfig::janeladeconfig(QWidget *parent) :
     vautoDownload = false;
     vlowQuality = false;
     cleitor = nullptr;
-
+    fontName = "Tahoma";
+    fontSizeTitulo = "11";
+    fontSizeTituloAlternativo = "10";
+    fontSizeStatus = "14";
+    fontSizeInfo = "12";
+    fontSizeMensagem = "10";
+    ui->boxFonte->setCurrentFont(QFont(fontName));
+    ui->boxSizeTitulo->setValue(fontSizeTitulo.toInt());
+    ui->boxSizeTituloAlternativo->setValue(fontSizeTituloAlternativo.toInt());
+    ui->boxSizeStatus->setValue(fontSizeStatus.toInt());
+    ui->boxSizeInfo->setValue(fontSizeInfo.toInt());
+    ui->boxSizeAvisos->setValue(fontSizeMensagem.toInt());
+    ui->janelaRotativa->setCurrentIndex(5);
+    ui->tabelaAnimes->verticalHeader()->hide();
+    ui->tabelaAnimesSelecionados->verticalHeader()->hide();
+    ui->tabelaAnimes->setColumnWidth(0,ui->tabelaAnimes->width());
+    ui->tabelaAnimesSelecionados->setColumnWidth(0,ui->tabelaAnimesSelecionados->width());
+    ui->tabelaFiltros->verticalHeader()->hide();
+    ui->tabelaFiltros->setColumnWidth(1,ui->tabelaFiltros->width());
     fleArquivoConfig();
     fgetStreamLanguages();
 }
@@ -197,10 +216,27 @@ void janeladeconfig::fleArquivoConfig(){
                     ui->boxReconhecimento15->setCheckState(Qt::Checked);
                 if(vPlayers.contains("KissAnime"))
                     ui->boxReconhecimento16->setCheckState(Qt::Checked);
-                if(vPlayers.contains("CRUnchyyyrolll"))
+                if(vPlayers.contains("Media Player Classic"))
                     ui->boxReconhecimento17->setCheckState(Qt::Checked);
                 if(vPlayers.contains("whatisthisthing"))
                     ui->boxReconhecimento18->setCheckState(Qt::Checked);
+            }
+            else if(lstreamTexto.contains("Font")){
+                lstreamTexto.remove("Font:");
+                QStringList fonts = lstreamTexto.split(";");
+                fontName = fonts.takeFirst();
+                fontSizeTitulo = fonts.takeFirst();
+                fontSizeTituloAlternativo = fonts.takeFirst();
+                fontSizeStatus = fonts.takeFirst();
+                fontSizeInfo = fonts.takeFirst();
+                fontSizeMensagem = fonts.takeFirst();
+                ui->boxFonte->setCurrentFont(QFont(fontName));
+                ui->boxSizeTitulo->setValue(fontSizeTitulo.toInt());
+                ui->boxSizeTituloAlternativo->setValue(fontSizeTituloAlternativo.toInt());
+                ui->boxSizeStatus->setValue(fontSizeStatus.toInt());
+                ui->boxSizeInfo->setValue(fontSizeInfo.toInt());
+                ui->boxSizeAvisos->setValue(fontSizeMensagem.toInt());
+
             }
         }
         larquivo.close();
@@ -432,6 +468,13 @@ QStringList janeladeconfig::fretornaStreamLanguages()
     return vStreamLanguages;
 }
 
+QString janeladeconfig::fretornaFontes()
+{
+
+    return fontName +";"+ fontSizeTitulo +";"+ fontSizeTituloAlternativo +";"+ fontSizeStatus +";"+ fontSizeInfo
+             +";"+ fontSizeMensagem;
+}
+
 void janeladeconfig::on_botaoSalvar_clicked()
 {
 //        qEncode(fretornaUsuario());///Encode de alguma maneira
@@ -461,6 +504,7 @@ void janeladeconfig::on_botaoSalvar_clicked()
             if(!vPlayers.at(i).isEmpty())
                 lstreamTexto << ";" << vPlayers.at(i);
         }
+        lstreamTexto << "Font:";
         larquivo.close();
     }
     emit ssavebutton();
@@ -494,7 +538,8 @@ void janeladeconfig::on_botaoSelecionarPastaDownload_clicked()
 
 void janeladeconfig::on_botaoAutorizarUser_clicked()
 {
-    QDesktopServices::openUrl(QUrl("https://anilist.co/api/v2/oauth/authorize?client_id=2620&response_type=token",QUrl::TolerantMode));
+    QDesktopServices::openUrl(QUrl("https://anilist.co/api/v2/oauth/authorize?client_id=2620&response_type=token",
+                                   QUrl::TolerantMode));
     vuser = ui->textoUser->toPlainText();
     ui->textoCodigoAutorizacao->show();
     ui->labelCodigoAutenticar->show();
@@ -821,4 +866,177 @@ void janeladeconfig::on_botaoprefDiretorios_clicked()
 void janeladeconfig::on_botaoprefFiltros_clicked()
 {
     ui->janelaRotativa->setCurrentIndex(3);
+}
+
+void janeladeconfig::on_botaoprefFontes_clicked()
+{
+    ui->janelaRotativa->setCurrentIndex(4);
+}
+
+void janeladeconfig::fmudaResolucao()
+{
+    QPointer<QScreen> screen = QGuiApplication::primaryScreen();
+    QRect  screenGeometry = screen->geometry();
+    double compHeight;
+    double compWidth;
+    int height = screenGeometry.height();
+    int width = screenGeometry.width();
+    width = 1360;
+    height = 768;
+    QObjectList objectList = this->children();
+    //1000 é a altura da janela e 1080 a altura do monitor, em pixels. Preciso fazer isso para não deixar a janela
+//    ficar atrás do menu
+    //iniciar. O windows aceita a janela ficar atrás, mas imagino que terão OS que não irão aceitar.
+    int objheight = qCeil(static_cast<int>(height*(static_cast<double>(1000)/1080)));
+    //Comparamos o tamanho da página original com a nova resolução, para definir em quantos % deveremos aumentar ou diminuir os
+    //widgets
+    compHeight = static_cast<double>(objheight)/1000;
+    compWidth = static_cast<double>(width)/1920;
+    foreach(QObject *wid, objectList){
+        //Pego a posição relativa dos objetos
+        double a = static_cast<double>(thisWid->pos().rx())/1920;
+        double b = static_cast<double>(thisWid->pos().ry())/1000;
+        //Variáveis que não precisavam existir. Posso não usar elas, mas deixaria o código mais difícil de se ler
+        double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
+        double objHei = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->height());
+        //Multiplico o tamanho real do objeto pelo tamanho relativo do objeto.
+        //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
+        //Nova resolução
+        thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
+                                                              qCeil(static_cast<int>(compHeight*objHei)));
+        //Faço os objetos entrarem na posição certa;
+        thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
+    }
+    objectList = ui->preFiltros->children();
+    foreach(QObject *wid, objectList){
+        //Pego a posição relativa dos objetos
+        double a = static_cast<double>(thisWid->pos().rx())/1920;
+        double b = static_cast<double>(thisWid->pos().ry())/1000;
+        //Variáveis que não precisavam existir. Posso não usar elas, mas deixaria o código mais difícil de se ler
+        double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
+        //Multiplico o tamanho real do objeto pelo tamanho relativo do objeto.
+        //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
+        //Nova resolução
+//        thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
+//                                                              qCeil(static_cast<int>(compHeight*objHei)));
+        if(!thisWid->objectName().contains("texto", Qt::CaseInsensitive) ||
+                !thisWid->objectName().contains("box", Qt::CaseInsensitive))
+            thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)), thisWid->height());
+        //Faço os objetos entrarem na posição certa;
+        thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
+    }
+    objectList = ui->prefTorrent->children();
+    foreach(QObject *wid, objectList){
+        //Pego a posição relativa dos objetos
+        double a = static_cast<double>(thisWid->pos().rx())/1920;
+        double b = static_cast<double>(thisWid->pos().ry())/1000;
+        //Variáveis que não precisavam existir. Posso não usar elas, mas deixaria o código mais difícil de se ler
+        double objWid = static_cast<double>(this->findChild<QWidget *>(wid->objectName())->width());
+        //Multiplico o tamanho real do objeto pelo tamanho relativo do objeto.
+        //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
+        //Nova resolução
+//        thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
+//                                                              qCeil(static_cast<int>(compHeight*objHei)));
+        if(!thisWid->objectName().contains("texto", Qt::CaseInsensitive) ||
+                !thisWid->objectName().contains("box", Qt::CaseInsensitive))
+            thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)), thisWid->height());
+        //Faço os objetos entrarem na posição certa;
+        thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
+    }
+    if(width <= 1366){
+        fontSizeTitulo = "8";
+        fontSizeTituloAlternativo = "8";
+        fontSizeStatus = "10";
+        fontSizeInfo = "9";
+        fontSizeMensagem = "7";
+        ui->tabelaAnimes->setColumnWidth(0,ui->tabelaAnimes->width());
+        ui->tabelaAnimesSelecionados->setColumnWidth(0,ui->tabelaAnimesSelecionados->width());
+        ui->tabelaFiltros->setColumnWidth(1,ui->tabelaFiltros->width());
+    }
+}
+
+void janeladeconfig::on_boxFonte_currentFontChanged(const QFont &f)
+{
+    fontName = "\""+f.toString()+"\"";
+    QString vfonteTitulo = "background: transparent;font: 75 "+fontSizeTitulo+"pt " + fontName +";"
+                                                                                    "font-weight: bold; color: rgb(20, 20, 20);";
+    QString vfonteSubtitulo = "background: transparent;font: 75 "+fontSizeTituloAlternativo+"pt " + fontName +"; "
+                                                                                                        "color: rgb(20, 20, 20);";
+    QString vfonteStatus = "background: transparent;font: 75 "+fontSizeStatus+"pt " + fontName +"; "
+                                                                                           "color: rgb(20, 20, 20);";
+    QString vfonteInfo = "background: transparent;font: 75 "+fontSizeInfo+"pt " + fontName +";"
+                                                                                "font-weight: bold; color: rgb(20, 20, 20);";
+    QString vfonteMensagem = "background: transparent;font: 75 "+fontSizeMensagem+"pt " + fontName +";"
+                                                                                "font-weight: bold; color: rgb(20, 20, 20);";
+    ui->labelInfoNomeAnime_2->setStyleSheet(vfonteTitulo);
+    ui->labelInfoNomeAnimeIngles_2->setStyleSheet(vfonteSubtitulo);
+    ui->labelInfoStatusTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoNotaTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoMediaTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoSeasonTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoAirTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoReleasedTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoTypeTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoSinopseTop_2->setStyleSheet(vfonteStatus);
+    ui->labelInfoStatus_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoNota_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoMediaSite_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoSeason_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoRelease_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoEpisodiosLancados_2->setStyleSheet(vfonteInfo);
+    ui->labelInfoTipo_2->setStyleSheet(vfonteInfo);
+    ui->labelMensagem_2->setStyleSheet(vfonteMensagem);
+}
+
+void janeladeconfig::on_boxSizeTitulo_valueChanged(const QString &arg1)
+{
+    fontSizeTitulo = arg1;
+    QString vfonte = "background: transparent;font: 75 "+fontSizeTitulo+"pt " + fontName +";"
+                                                                                    "font-weight: bold; color: rgb(20, 20, 20);";
+    ui->labelInfoNomeAnime_2->setStyleSheet(vfonte);
+}
+
+void janeladeconfig::on_boxSizeTituloAlternativo_valueChanged(const QString &arg1)
+{
+    fontSizeTituloAlternativo = arg1;
+    QString vfonte = "background: transparent;font: 75 "+fontSizeTituloAlternativo+"pt " + fontName +";"
+                                                                                    "color: rgb(20, 20, 20);";
+    ui->labelInfoNomeAnimeIngles_2->setStyleSheet(vfonte);
+}
+
+void janeladeconfig::on_boxSizeStatus_valueChanged(const QString &arg1)
+{
+    fontSizeStatus = arg1;
+    QString vfonte = "background: transparent;font: 75 "+fontSizeStatus+"pt " + fontName +";"
+                                                                                    "color: rgb(20, 20, 20);";
+    ui->labelInfoStatusTop_2->setStyleSheet(vfonte);
+    ui->labelInfoNotaTop_2->setStyleSheet(vfonte);
+    ui->labelInfoMediaTop_2->setStyleSheet(vfonte);
+    ui->labelInfoSeasonTop_2->setStyleSheet(vfonte);
+    ui->labelInfoAirTop_2->setStyleSheet(vfonte);
+    ui->labelInfoReleasedTop_2->setStyleSheet(vfonte);
+    ui->labelInfoTypeTop_2->setStyleSheet(vfonte);
+    ui->labelInfoSinopseTop_2->setStyleSheet(vfonte);
+}
+
+void janeladeconfig::on_boxSizeInfo_valueChanged(const QString &arg1)
+{
+    fontSizeInfo = arg1;
+    QString vfonte = "background: transparent;font: 75 "+fontSizeInfo+"pt " + fontName +";"
+                                                                                    "font-weight: bold; color: rgb(20, 20, 20);";
+    ui->labelInfoStatus_2->setStyleSheet(vfonte);
+    ui->labelInfoNota_2->setStyleSheet(vfonte);
+    ui->labelInfoMediaSite_2->setStyleSheet(vfonte);
+    ui->labelInfoSeason_2->setStyleSheet(vfonte);
+    ui->labelInfoRelease_2->setStyleSheet(vfonte);
+    ui->labelInfoEpisodiosLancados_2->setStyleSheet(vfonte);
+    ui->labelInfoTipo_2->setStyleSheet(vfonte);
+}
+
+void janeladeconfig::on_boxSizeAvisos_valueChanged(const QString &arg1)
+{
+    fontSizeMensagem = arg1;
+    QString vfonte = "background: transparent;font: 75 "+fontSizeMensagem+"pt " + fontName +";"
+                                                                                    "color: rgb(20, 20, 20);";
+    ui->labelMensagem_2->setStyleSheet(vfonte);
 }

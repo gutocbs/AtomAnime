@@ -15,6 +15,7 @@
 #include <QtMath> //Também resolução
 #include <QMutex> //Pra lidar com os mapas nas threads
 #include <QMutexLocker> //Pra lidar com os mapas nas threads
+#include <QThread>
 
 #include "leitorlistaanimes.h"
 #include "confbase.h"
@@ -114,7 +115,8 @@ private slots:
     void on_botaoDownloadListImages_clicked();
     void on_botaoAddAlternativeTitle_clicked();
     void on_botaoAjuda_clicked();
-    void on_botaoAnimeCerto_clicked();
+    void on_botaoDownloadNovaImagem_clicked();
+    void on_botaoAnimeAssistindoCerto_clicked();
 
     void fretryAnilist();
     void fcarregouListaTeste(bool);
@@ -132,7 +134,7 @@ private slots:
     void fsalvaNomesAlternativos();
     void fleNomesAlternativos();
     void fresetaRequestCounter();
-    void on_botaoDownloadNovaImagem_clicked();
+    void fatualizaFontes();
 
 private:
     Ui::MainWindow *ui;
@@ -176,8 +178,29 @@ private:
     QString dirMedio;
     QString dirPequeno;
     QString vnomeAnimeAberto;
+    QString vtituloNormalMedio;
+    QString vtituloNormalPequeno;
+    QString vfonteNormal;
+    QString vfonteNormalNota;
+    QString vfonteNormalAnimeEncontrado;
+    QString vfonteNormalAnimeNaoComecou;
+    QString vfonteNormalPagina;
+    QString vfonteTitulo;
+    QString vfonteSubtitulo;
+    QString vfonteStatus;
+    QString vfonteInfo;
+    QString vfonteMensagem;
+    QString vfonteMensagemAnime;
+    QString fontName;
+    QString fontSizeTitulo;
+    QString fontSizeTituloAlternativo;
+    QString fontSizeStatus;
+    QString fontSizeInfo;
+    QString fontSizeMensagem;
+    QString fontSizeMensagemAnime;
     QStringList vPlayers;
     QStringList vStreamLanguages;
+    QStringList vhistoricoAnilist;
     bool vrefreshAcontecendo = false;
     bool vlistaLidaSucesso = false;
     bool vlistaBaixada = false;
@@ -191,6 +214,8 @@ private:
     bool vJanelaSeason = false;
     bool vbaixandoImagensAno = false;
     bool vbaixaECarregaAnos = false;
+    double compHeight;
+    double compWidth;
 
     //Cofigurações
     bool vusarImagensBaixaQualidade;

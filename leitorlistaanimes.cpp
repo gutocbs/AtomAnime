@@ -189,8 +189,13 @@ bool leitorlistaanimes::fleJson(){
                     lstatus = "Finished Airing";
                 else if(llinha == "RELEASING")
                     lstatus = "Ongoing";
-                else
+                else{
                     lstatus = "Not Aired Yet";
+                    ldataEpisodioFinal = QLocale(QLocale::English).toString(ldataEpisodioConvertida,"MMMM d ");
+                    ldataEpisodioFinal.append(lhoraLancamentoEpisodio.toString("hh:mm"));
+                    if(ldataEpisodioFinal.isEmpty())
+                        ldataEpisodioFinal = "-";
+                }
             }
             else if(llinha.contains("\"synonyms\":")){
                 llinha = json.readLine();
@@ -545,6 +550,9 @@ bool leitorlistaanimes::fleJson(){
                 lformato.clear();
                 lstreamCrunchyroll.clear();
                 lsiteAnilist.clear();
+                ldataEpisodioFinal.clear();
+                ldataEpisodioConvertida = QDate();
+                lhoraLancamentoEpisodio = QTime();
             }
         }
         lleJson.close();
@@ -1665,8 +1673,10 @@ QString leitorlistaanimes::fprocuraAnimeNasListas(const QString &rnomeAnime)
     //o nome procurado nas informações do anime, quando encontrar.
     foreach(QString key, vHashNomeAnimesPorId.keys()){
         for(int i = 0; i < vHashNomeAnimesPorId[key].size(); i++){
-            if(vHashNomeAnimesPorId[key].at(i) == rnomeAnime)
+            if(vHashNomeAnimesPorId[key].at(i) == rnomeAnime){
+                qDebug() << vHashNomeAnimesPorId[key].at(i);
                 return key;
+            }
         }
     }
     QStringList tempNomeAnime;
@@ -1674,6 +1684,7 @@ QString leitorlistaanimes::fprocuraAnimeNasListas(const QString &rnomeAnime)
         if(formatador.fcomparaNomes(vlistaWatching[i]->vnome, rnomeAnime) ||
                 formatador.fcomparaNomes(vlistaWatching[i]->vnomeIngles, rnomeAnime)){
             tempNomeAnime.append(rnomeAnime);
+            qDebug() << vlistaWatching[i]->vnome;
             if(!vHashNomeAnimesPorId.contains(vlistaWatching[i]->vid))
                 vHashNomeAnimesPorId.insert(vlistaWatching[i]->vid, tempNomeAnime);
             else

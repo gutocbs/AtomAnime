@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     janeladeconfig jconfig;
     if(!jconfig.fretornaUsuario().isEmpty())
-        w.setWindowTitle("Atom - " + jconfig.fretornaUsuario());
+        w.setWindowTitle(jconfig.fretornaUsuario()+" - Atom");
     else
         w.setWindowTitle("Atom");
 //    w.setWindowIcon();

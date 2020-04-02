@@ -13,6 +13,9 @@
 #include <QCheckBox>
 #include <QWidget>
 #include <QPointer>
+#include <QDesktopWidget> //Pra resolução
+#include <QScreen> //Resolução também
+#include <QtMath> //Também resolução
 
 #include "filtros.h"
 #include "leitorlistaanimes.h"
@@ -45,6 +48,7 @@ public:
     QByteArray fretornaFiltrosDownload();
     QStringList fretornaPlayers();
     QStringList fretornaStreamLanguages();
+    QString fretornaFontes();
     void fleArquivoConfig();
     void frecebeListasAnimes(leitorlistaanimes*);
     void fgetAnimeLists();
@@ -53,6 +57,7 @@ public:
     void fsalvaFiltros();
     void fgetStreamLanguages();
     void fsetHistorico(const QStringList &rhistorico);
+    void fmudaResolucao();
 
     QVector<Filtros*> vfiltrosAnimes;
 signals:
@@ -83,6 +88,13 @@ private slots:
     void on_botaoprefTorrent_clicked();
     void on_botaoprefDiretorios_clicked();
     void on_botaoprefFiltros_clicked();
+    void on_boxFonte_currentFontChanged(const QFont &f);
+    void on_boxSizeTitulo_valueChanged(const QString &arg1);
+    void on_boxSizeTituloAlternativo_valueChanged(const QString &arg1);
+    void on_boxSizeStatus_valueChanged(const QString &arg1);
+    void on_boxSizeInfo_valueChanged(const QString &arg1);
+    void on_boxSizeAvisos_valueChanged(const QString &arg1);
+    void on_botaoprefFontes_clicked();
 
 private:
     Ui::janeladeconfig *ui;
@@ -98,6 +110,12 @@ private:
     QString vquality;
     QString vtorrentFeed;
     QString vanimeTorrentFeed;
+    QString fontName;
+    QString fontSizeTitulo;
+    QString fontSizeTituloAlternativo;
+    QString fontSizeStatus;
+    QString fontSizeInfo;
+    QString fontSizeMensagem;
     QStringList vPlayers;
     QStringList vStreamLanguages;
     QStringList vhistorico;
