@@ -45,7 +45,7 @@
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -80,7 +80,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -163,7 +163,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -212,7 +212,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -263,7 +263,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -351,7 +351,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -488,7 +488,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -507,7 +507,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);
 </string>
       </property>
@@ -543,7 +543,7 @@ color: rgb(220, 220, 220);
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -594,7 +594,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -643,7 +643,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -662,7 +662,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -737,7 +737,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -772,7 +772,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 18pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -794,7 +794,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -881,7 +881,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -925,7 +925,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -950,7 +950,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1072,7 +1072,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 18pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1164,7 +1164,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1205,7 +1205,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 11pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1229,7 +1229,7 @@ color: rgb(20, 20, 20);</string>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1280,7 +1280,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1331,7 +1331,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1350,7 +1350,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1369,7 +1369,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1391,7 +1391,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1410,7 +1410,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1432,7 +1432,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1451,7 +1451,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1470,7 +1470,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1489,7 +1489,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1508,7 +1508,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1527,7 +1527,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1546,7 +1546,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1565,7 +1565,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(220, 220, 220);</string>
       </property>
       <property name="text">
@@ -1584,7 +1584,7 @@ color: rgb(220, 220, 220);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1603,7 +1603,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1622,7 +1622,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1641,7 +1641,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1660,7 +1660,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1679,7 +1679,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1698,7 +1698,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1717,7 +1717,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1736,7 +1736,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1755,7 +1755,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1774,7 +1774,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1863,7 +1863,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 11pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -1888,7 +1888,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1910,7 +1910,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1932,7 +1932,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1954,7 +1954,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1976,7 +1976,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -1998,7 +1998,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2020,7 +2020,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2042,7 +2042,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2064,7 +2064,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2086,7 +2086,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2108,7 +2108,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2130,7 +2130,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -2782,7 +2782,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -2834,7 +2834,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -3089,7 +3089,7 @@ QPushButton#clickAnime1:hover:!pressed
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -3201,7 +3201,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
       </property>
       <property name="text">
@@ -3239,7 +3239,7 @@ color: rgb(20, 20, 20);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
       </property>
       <property name="text">
@@ -3258,7 +3258,7 @@ color: rgb(53, 68, 120);</string>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);
 </string>
       </property>
@@ -3857,7 +3857,7 @@ color: rgb(53, 68, 120);
     <property name="styleSheet">
      <string notr="true">background: transparent;
 font: 75 30pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(53, 68, 120);</string>
     </property>
     <property name="text">

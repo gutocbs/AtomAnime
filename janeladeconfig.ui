@@ -1623,7 +1623,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 11pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1648,7 +1648,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 18pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1673,7 +1673,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 8pt &quot;Calibri&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1698,7 +1698,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 18pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1720,7 +1720,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1796,7 +1796,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1821,7 +1821,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1948,7 +1948,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 12pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
@@ -1976,7 +1976,7 @@ color: rgb(20, 20, 20);</string>
      <property name="styleSheet">
       <string notr="true">background: transparent;
 font: 75 11pt &quot;MS Shell Dlg 2&quot;;
-font-weight: bold; 
+font-weight: bold;
 color: rgb(20, 20, 20);</string>
      </property>
      <property name="text">
