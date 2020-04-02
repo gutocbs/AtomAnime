@@ -9,28 +9,28 @@ confUsuario::confUsuario(QObject *parent) : QObject(parent)
 }
 
 
-QString confUsuario::fretornaDiretorioEspecifico(int id){
+QString confUsuario::fretornaDiretorioEspecifico(int id) {
     if(vterminouChecagem)
         return vdiretorioEspecificoAnime[QString::number(id)];
     return "";
 }
 
-QVector<QString> confUsuario::fretornaDiretoriosAnimes(){
+QVector<QString> confUsuario::fretornaDiretoriosAnimes() {
     return vdiretorioAnimes;
 }
 
-void confUsuario::fbuscaDiretoriosAnimes(){
+void confUsuario::fbuscaDiretoriosAnimes() {
     anitomy::Anitomy lanitomy;
-    if(this->thread()->isInterruptionRequested()){
+    if(this->thread()->isInterruptionRequested()) {
         this->thread()->exit(0);
         return;
     }
     qDebug() << "Searching for anime folders";
     //Busca cada diretorio existente nas configurações
-    for(int i = 0; i < vdiretorioAnimes.size(); i++){
+    for(int i = 0; i < vdiretorioAnimes.size(); i++) {
         //Procura apenas por diretorios e subdiretorios
         QDirIterator lit(vdiretorioAnimes[i], QDir::Dirs| QDir::NoDotAndDotDot, QDirIterator::Subdirectories);
-        while(lit.hasNext()){
+        while(lit.hasNext()) {
             QFile lfile(lit.next());
             lanitomy.Parse(lit.fileName().toStdWString());
             const auto& lelements = lanitomy.elements();
@@ -41,16 +41,16 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                 lfileName.append(QString(" " + vtemporada));
             //Pega o nome de cada diretorio e divide, pegando apenas o nome do anime
             //Compara o nome do anime com os animes da lista
-            for(int w = 0; w < vlistaAnimes.size(); w++){
-                if(this->thread()->isInterruptionRequested()){
+            for(int w = 0; w < vlistaAnimes.size(); w++) {
+                if(this->thread()->isInterruptionRequested()) {
                     this->thread()->exit(0);
                     return;
                 }
                 //Anitomy, aqui, simplifica os nomes dos anime para garantir que a função vai comparar os nomes certos
                 //Compara os nomes, sempre ignorando letras maiusculas e minusculas para garantir que o anime será encontrado.
-                if(vdiretorioEspecificoAnime.contains(vlistaAnimes[w]->vid)){
-                    if(!vdiretorioEspecificoAnime[vlistaAnimes[w]->vid].isEmpty()){
-                        if(QFile::exists(vdiretorioEspecificoAnime[vlistaAnimes[w]->vid])){
+                if(vdiretorioEspecificoAnime.contains(vlistaAnimes[w]->vid)) {
+                    if(!vdiretorioEspecificoAnime[vlistaAnimes[w]->vid].isEmpty()) {
+                        if(QFile::exists(vdiretorioEspecificoAnime[vlistaAnimes[w]->vid])) {
                             vlistaAnimes.remove(w);
                             break;
                         }
@@ -58,26 +58,26 @@ void confUsuario::fbuscaDiretoriosAnimes(){
                             vdiretorioEspecificoAnime.remove(vlistaAnimes[w]->vid);
                     }
                 }
-                if(this->thread()->isInterruptionRequested()){
+                if(this->thread()->isInterruptionRequested()) {
                     this->thread()->exit(0);
                     return;
                 }
-                if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnome)){
+                if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnome)) {
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeIngles)){
+                else if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeIngles)) {
                     vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                     vlistaAnimes.remove(w);
                     break;
                 }
-                else{
+                else {
                     //Compara os nomes alternativos dos animes, pro caso de serem usados nos arquivos
                     //Ex: Okaa-san Online em vez de Tsuujou Kougeki ga Zentai Kougeki de Ni-kai Kougeki no Okaasan wa Suki Desu ka?
-                    if(!vlistaAnimes[w]->vnomeAlternativo.isEmpty()){
-                        for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++){
-                            if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeAlternativo.at(z))){
+                    if(!vlistaAnimes[w]->vnomeAlternativo.isEmpty()) {
+                        for(int z = 0; z < vlistaAnimes[w]->vnomeAlternativo.size(); z++) {
+                            if(formatador.fcomparaNomes(lfileName,vlistaAnimes[w]->vnomeAlternativo.at(z))) {
                                 vdiretorioEspecificoAnime.insert(vlistaAnimes[w]->vid, lfile.fileName());
                                 vlistaAnimes.remove(w);
                                 break;
@@ -100,15 +100,15 @@ void confUsuario::fbuscaPastasThread(QThread &dThread)
 void confUsuario::fsalvaPastasArquivos()
 {
     QFile t("Configurações/Temp/animeFoldersTemp.txt");
-    if(t.open(QIODevice::WriteOnly)){
+    if(t.open(QIODevice::WriteOnly)) {
         QTextStream lstreamTexto(&t);
         lstreamTexto.setCodec("UTF-8");
-        foreach(QString key, vdiretorioEspecificoAnime.keys()){
+        foreach(QString key, vdiretorioEspecificoAnime.keys()) {
             lstreamTexto << key << ";" << vdiretorioEspecificoAnime[key] << endl;
         }
         t.close();
     }
-    if(QFile::exists("Configurações/Temp/animeFolders.txt")){
+    if(QFile::exists("Configurações/Temp/animeFolders.txt")) {
         if(QFile::remove("Configurações/Temp/animeFolders.txt"))
             t.rename("Configurações/Temp/animeFolders.txt");
     }
@@ -121,8 +121,8 @@ void confUsuario::flePastasArquivos()
     QFile t("Configurações/Temp/animeFolders.txt");
     QTextStream lstreamTexto(&t);
     lstreamTexto.setCodec("UTF-8");
-    if(t.open(QIODevice::ReadOnly)){
-        while(!lstreamTexto.atEnd()){
+    if(t.open(QIODevice::ReadOnly)) {
+        while(!lstreamTexto.atEnd()) {
             QStringList llinha = lstreamTexto.readLine().split(";");
             vdiretorioEspecificoAnime.insert(llinha.at(0),llinha.at(1));
         }
@@ -143,8 +143,8 @@ void confUsuario::fselecionaPastaEspecificaAnime(const QString &ridAnime, const 
 void confUsuario::fsetupListasPraBusca()
 {
     qDebug() << "Setup Pastas";
-    if(vlista == 0){
-        if(this->thread()->isInterruptionRequested()){
+    if(vlista == 0) {
+        if(this->thread()->isInterruptionRequested()) {
             this->thread()->exit(0);
             return;
         }
@@ -152,8 +152,8 @@ void confUsuario::fsetupListasPraBusca()
         vlista++;
         fbuscaDiretoriosAnimes();
     }
-    else if(vlista == 1){
-        if(this->thread()->isInterruptionRequested()){
+    else if(vlista == 1) {
+        if(this->thread()->isInterruptionRequested()) {
             this->thread()->exit(0);
             return;
         }
@@ -161,8 +161,8 @@ void confUsuario::fsetupListasPraBusca()
         vlista++;
         fbuscaDiretoriosAnimes();
     }
-    else if(vlista == 2){
-        if(this->thread()->isInterruptionRequested()){
+    else if(vlista == 2) {
+        if(this->thread()->isInterruptionRequested()) {
             this->thread()->exit(0);
             return;
         }
@@ -170,8 +170,8 @@ void confUsuario::fsetupListasPraBusca()
         vlista++;
         fbuscaDiretoriosAnimes();
     }
-    else if(vlista == 3){
-        if(this->thread()->isInterruptionRequested()){
+    else if(vlista == 3) {
+        if(this->thread()->isInterruptionRequested()) {
             this->thread()->exit(0);
             return;
         }
@@ -179,8 +179,8 @@ void confUsuario::fsetupListasPraBusca()
         vlista++;
         fbuscaDiretoriosAnimes();
     }
-    else if(vlista == 4){
-        if(this->thread()->isInterruptionRequested()){
+    else if(vlista == 4) {
+        if(this->thread()->isInterruptionRequested()) {
             this->thread()->exit(0);
             return;
         }
@@ -188,7 +188,7 @@ void confUsuario::fsetupListasPraBusca()
         vlista++;
         fbuscaDiretoriosAnimes();
     }
-    else if(vlista == 5){
+    else if(vlista == 5) {
         emit schecouPastas();
         vterminouChecagem = true;
         qDebug() << "All animes in the computer were found";

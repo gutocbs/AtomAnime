@@ -8,7 +8,7 @@ class torrentinfo : public QObject
 {
     Q_OBJECT
 public:
-    explicit torrentinfo(QObject *parent = nullptr){
+    explicit torrentinfo(QObject *parent = nullptr) {
         Q_UNUSED(parent)
         vbaixar = false;
     }

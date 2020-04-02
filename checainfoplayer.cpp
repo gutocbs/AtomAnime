@@ -14,9 +14,9 @@ void ChecaInfoPlayer::fgetStreamLanguages()
 void ChecaInfoPlayer::fchecaStream(const QString &player, const QString &janela)
 {
     fgetStreamLanguages();
-    if(!janela.isEmpty()){
+    if(!janela.isEmpty()) {
         vnomeDaJanela = janela;
-        if(vnomeDaJanela.contains(player, Qt::CaseInsensitive)){
+        if(vnomeDaJanela.contains(player, Qt::CaseInsensitive)) {
             int indexPrograma = vnomeDaJanela.lastIndexOf("-");
             vnomeDaJanela.remove(indexPrograma,vnomeDaJanela.size() - indexPrograma);
             vnomeDaJanela = vnomeDaJanela.simplified();
@@ -52,20 +52,20 @@ QString ChecaInfoPlayer::fretornaEpisodio()
 
 void ChecaInfoPlayer::fchecaCrunchyroll()
 {
-    if(!vStreamLanguages.isEmpty()){
+    if(!vStreamLanguages.isEmpty()) {
         vnomeDaJanela.remove(vStreamLanguages.at(0));
     }
     vnomeDaJanela = vnomeDaJanela.simplified();
     QStringList nomeJanela = vnomeDaJanela.split(QRegExp("\\b"));
     int indexOfEpisode = 0;
-    if(!vStreamLanguages.isEmpty()){
-        for(int i = 1; i < vStreamLanguages.size(); i++){
-            if(nomeJanela.contains(vStreamLanguages.at(i)) && vStreamLanguages.at(i).compare("الحلقة") != 0){
+    if(!vStreamLanguages.isEmpty()) {
+        for(int i = 1; i < vStreamLanguages.size(); i++) {
+            if(nomeJanela.contains(vStreamLanguages.at(i)) && vStreamLanguages.at(i).compare("الحلقة") != 0) {
                 indexOfEpisode = nomeJanela.indexOf(vStreamLanguages.at(i));
                 vepisodio = nomeJanela.at(indexOfEpisode+2);
                 break;
             }
-            else if(nomeJanela.contains(vStreamLanguages.at(i)) && vStreamLanguages.at(i).compare("الحلقة") == 0){
+            else if(nomeJanela.contains(vStreamLanguages.at(i)) && vStreamLanguages.at(i).compare("الحلقة") == 0) {
                 indexOfEpisode = nomeJanela.indexOf(vStreamLanguages.at(i));
                 vepisodio = nomeJanela.at(indexOfEpisode-2);
                 break;
@@ -73,7 +73,7 @@ void ChecaInfoPlayer::fchecaCrunchyroll()
         }
     }
     int tamanho = nomeJanela.size();
-    for(int i = indexOfEpisode; i < tamanho; i++){
+    for(int i = indexOfEpisode; i < tamanho; i++) {
         nomeJanela.removeAt(indexOfEpisode);
     }
     vanime = nomeJanela.join("");
@@ -88,7 +88,7 @@ void ChecaInfoPlayer::fchecaAnimeLab()
 
     vanime = nomeAnime.at(0);
     vanime = vanime.simplified();
-    if(nomeAnime.size() > 1){
+    if(nomeAnime.size() > 1) {
         vepisodio= nomeAnime.at(1);
         vepisodio.remove("E");
         vepisodio = vepisodio.simplified();
@@ -100,12 +100,12 @@ void ChecaInfoPlayer::fchecaFunimation()
     vnomeDaJanela = vnomeDaJanela.simplified();
     QStringList nomeJanela = vnomeDaJanela.split(QRegExp("\\b"));
     int indexOfEpisode = 0;
-    if(nomeJanela.contains("Episode")){
+    if(nomeJanela.contains("Episode")) {
         indexOfEpisode = nomeJanela.indexOf("Episode");
         vepisodio = nomeJanela.at(indexOfEpisode+1);
     }
     int tamanho = nomeJanela.size();
-    for(int i = indexOfEpisode; i < tamanho; i++){
+    for(int i = indexOfEpisode; i < tamanho; i++) {
         nomeJanela.removeAt(indexOfEpisode);
     }
     vanime = nomeJanela.join(" ");
@@ -120,12 +120,12 @@ void ChecaInfoPlayer::fchecaKissAnime()
     QStringList nomeJanela = vnomeDaJanela.split(QRegExp("\\b"));
     nomeJanela.removeDuplicates();
     int indexOfEpisode = 0;
-    if(nomeJanela.contains("Episode")){
+    if(nomeJanela.contains("Episode")) {
         indexOfEpisode = nomeJanela.indexOf("Episode");
         vepisodio = nomeJanela.at(indexOfEpisode+1);
     }
     int tamanho = nomeJanela.size();
-    for(int i = indexOfEpisode; i < tamanho; i++){
+    for(int i = indexOfEpisode; i < tamanho; i++) {
         nomeJanela.removeAt(indexOfEpisode);
     }
     //as vezes o episódio é 000001. Assim, ele converte o nome pra ficar certo.

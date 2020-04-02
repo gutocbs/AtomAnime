@@ -136,12 +136,12 @@ void janelatorrent::fleXML()
                 link.remove("]]>");
                 llinkTorrent = link;
             }
-            if(stream.name() == "description"){
+            if(stream.name() == "description") {
                 QString description = stream.readElementText();
                 if(description.contains("Torrent Listing"))
                     break;
                 QStringList comment = description.split("/>");
-                if(comment.size() > 2){
+                if(comment.size() > 2) {
                     llinkInfoTorrent = comment.at(2);
                     llinkInfoTorrent.remove(0,1);
                     llinkInfoTorrent.remove("<a href=\"");
@@ -151,7 +151,7 @@ void janelatorrent::fleXML()
                     description.remove(0,10);
                     ldescricaoTorrent = description;
                 }
-                else{
+                else {
                     comment = description.split(" | ");
                     llinkInfoTorrent = comment.at(0);
                     llinkInfoTorrent = llinkInfoTorrent.split("\"").at(1);
@@ -176,20 +176,20 @@ void janelatorrent::fleXML()
                 ltorrentAux->vlista = lista;
 
                 //Checamos se já existe um anime na lista de downloads com esse nome e episódio
-                if(vbaixar.contains(lnomeAnime+lepisodioAnime)){
+                if(vbaixar.contains(lnomeAnime+lepisodioAnime)) {
                     //Caso o torrent existente tenha menos prioridade do que o torrent atual, ele é substituido
                     //A prioridade mínima é 14. Com 14, posso ter um conjunto de dois:
                     //sub, resolução e (lingua+keyword)
                     //E sempre tem que não ter sido baixado
-                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 16 && lprioridade == 16){
+                    if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 16 && lprioridade == 16) {
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                         vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                     }
-                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 15 && lprioridade == 15){
+                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 15 && lprioridade == 15) {
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                         vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                     }
-                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 14 && lprioridade == 14){
+                    else if(vbaixar.value(lnomeAnime+lepisodioAnime).at(0).toInt() < 14 && lprioridade == 14) {
                         QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                         vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                     }
@@ -197,11 +197,11 @@ void janelatorrent::fleXML()
                 //Caso não exista nenhum torrent na lista de downloads com o anime certo, é colocado um, mesmo que
                 //Não esteja nas condições ideiais.
                 //Filtros com NOT não deixam chegar aqui.
-                else if(lprioridade >= 12){
+                else if(lprioridade >= 12) {
                     QStringList value = (QString::number(lprioridade)+":"+QString::number(torrent.size())).split(":");
                     vbaixar.insert(lnomeAnime+lepisodioAnime, value);
                 }
-                if(!ltorrentAux->vnomeTorrent.contains("Torrent File RSS")){
+                if(!ltorrentAux->vnomeTorrent.contains("Torrent File RSS")) {
                     torrent.append(ltorrentAux);
                 }
                 lprioridade = 0;
@@ -211,9 +211,9 @@ void janelatorrent::fleXML()
             break;
         }
     }
-    for(int i = 0; i < torrent.size(); i++){
+    for(int i = 0; i < torrent.size(); i++) {
         foreach (QString key, vbaixar.keys()) {
-            if(vbaixar[key].at(1).toInt() == i){
+            if(vbaixar[key].at(1).toInt() == i) {
                 torrent[i]->vbaixar = true;
             }
         }
@@ -226,38 +226,38 @@ void janelatorrent::fpreencheTabela()
     //Criamos o número de linhas necessário
     ui->listaTorrents->setRowCount(torrent.size());
     ui->listaTorrents->verticalHeader()->hide();
-    for(int i = 0; i < torrent.size(); i++){
-        for(int w = 0; w < ui->listaTorrents->columnCount(); w++){
+    for(int i = 0; i < torrent.size(); i++) {
+        for(int w = 0; w < ui->listaTorrents->columnCount(); w++) {
             QTableWidgetItem *litem = new QTableWidgetItem;
             switch (w) {
             case 0:
-                if(torrent[i]->vlista.compare("Watching") == 0){
+                if(torrent[i]->vlista.compare("Watching") == 0) {
                     litem->setForeground(QBrush(QColor("forestgreen")));
                     litem->setText("W");
                 }
-                else if(torrent[i]->vlista.compare("On Hold") == 0){
+                else if(torrent[i]->vlista.compare("On Hold") == 0) {
                     litem->setForeground(QBrush(QColor("darkorange")));
                     litem->setText("OH");
                 }
-                else if(torrent[i]->vlista.compare("Dropped") == 0){
+                else if(torrent[i]->vlista.compare("Dropped") == 0) {
                     litem->setForeground(QBrush(QColor("navy")));
                     litem->setText("D");
                 }
-                else if(torrent[i]->vlista.compare("Plan to Watch") == 0){
+                else if(torrent[i]->vlista.compare("Plan to Watch") == 0) {
                     litem->setForeground(QBrush(QColor("darkorchid")));
                     litem->setText("PTW");
                 }
-                else if(torrent[i]->vlista.compare("Completed") == 0){
+                else if(torrent[i]->vlista.compare("Completed") == 0) {
                     litem->setForeground(QBrush(QColor("indianred")));
                     litem->setText("C");
                 }
                 litem->setTextAlignment(Qt::AlignCenter);
                 litem->setFont(QFont("Times", 10, QFont::Bold));
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 1: {
                 foreach (QString key, vbaixar.keys()) {
-                    if(vbaixar[key].at(1).toInt() == i){
+                    if(vbaixar[key].at(1).toInt() == i) {
                         torrent[i]->vbaixar = true;
                         vbaixar.remove(key);
                     }
@@ -283,19 +283,19 @@ void janelatorrent::fpreencheTabela()
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w,litem);
-            break;
+                break;
             case 3:
                 litem->setText(torrent[i]->vfansub);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 4:
                 litem->setText(torrent[i]->vresolucao);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 5:
                 if(torrent[i]->vepisodioAnime.toInt() < 10 && !torrent[i]->vepisodioAnime.contains("0"))
                     torrent[i]->vepisodioAnime.insert(0,"0");
@@ -303,26 +303,26 @@ void janelatorrent::fpreencheTabela()
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 6:
                 litem->setText(torrent[i]->vnomeTorrent);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 7:
                 litem->setText(torrent[i]->vdescricaoTorrent);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
+                break;
             case 8:
                 litem->setText(torrent[i]->vtorrentInfoLink);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
                 ui->listaTorrents->setItem(i,w, litem);
-            break;
-            case 9:{
+                break;
+            case 9: {
                 int prioridade = 0;
                 if(torrent[i]->vlista.compare("Watching") == 0 && cconfig->fretornaDownloadListasAnimes().contains("w"))
                     prioridade+=8;
@@ -363,11 +363,11 @@ void janelatorrent::fpassaPonteiros(leitorlistaanimes *lleitor,  janeladeconfig 
 }
 
 void janelatorrent::on_botaoDownload_clicked()
-{////CHECAR SE É WINDOWS OU LINUX NESSA PARTE
+{   ////CHECAR SE É WINDOWS OU LINUX NESSA PARTE
     bool achouPraDownload = false;
 
-    for(int i = 0; i < torrent.size(); i++){
-        if(torrent[i]->vbaixar){
+    for(int i = 0; i < torrent.size(); i++) {
+        if(torrent[i]->vbaixar) {
             vlistaDownload.append(i);
             QPointer<filedownloader> qdown(new filedownloader);
             qdown->fdownloadTorrent(torrent[i]->vlinkTorrent, torrent[i]->vnomeTorrent);
@@ -376,7 +376,7 @@ void janelatorrent::on_botaoDownload_clicked()
             connect(qdown, &filedownloader::storrent, this, &janelatorrent::fesperaTorrent);
         }
     }
-    if(achouPraDownload){
+    if(achouPraDownload) {
         QProcess lprocesso;
         if(cconfig->fretornaTorrentEscolhido() == "uTorrent")
             lprocesso.setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
@@ -388,33 +388,33 @@ void janelatorrent::on_botaoDownload_clicked()
     fpreencheTabela();
 }
 
-void janelatorrent::fesperaTorrent(){
+void janelatorrent::fesperaTorrent() {
     QTimer::singleShot(5000, this, &janelatorrent::fbaixaTorrent);
 }
 
 void janelatorrent::fbaixaTorrent()
 {
-    if(cconfig->fretornaPastaSalvarAnimes().isEmpty()){
+    if(cconfig->fretornaPastaSalvarAnimes().isEmpty()) {
         qWarning() << "Error: Trying to download without setting a download folder";
         emit error("No download folder");
         return;
     }
     QPointer<QProcess> lprocesso(new QProcess);
     QStringList argumentos;
-    if(cconfig->fretornaTorrentEscolhido() == "uTorrent"){
+    if(cconfig->fretornaTorrentEscolhido() == "uTorrent") {
         lprocesso->setProgram(QDir::homePath() + "/AppData/Roaming/uTorrent/uTorrent.exe");
         argumentos.append("/DIRECTORY");
         argumentos.append(cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime);
         argumentos.append(QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent +
-                ".torrent");
+                          ".torrent");
     }
-    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent"){
+    else if(cconfig->fretornaTorrentEscolhido() == "qBittorrent") {
         lprocesso->setProgram(QDir::rootPath() + "/Program Files/qBittorrent/qbittorrent.exe");
         argumentos.append("--add-paused=false");
         argumentos.append("--skip-dialog=true");
         argumentos.append("--save-path=" + cconfig->fretornaPastaSalvarAnimes() + "/" + torrent[vlistaDownload[0]]->vnomeAnime);
         argumentos.append(QDir::currentPath() + "/Configurações/Temp/Torrents/" + torrent[vlistaDownload[0]]->vnomeTorrent
-                + ".torrent");
+                          + ".torrent");
     }
     lprocesso->setArguments(argumentos);
     if(lprocesso->startDetached())
@@ -431,7 +431,7 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
         torrent.clear();
 
     QList<QTableWidgetItem*> item;
-    for(int i = 0; i < ui->listaTorrents->rowCount(); i++){
+    for(int i = 0; i < ui->listaTorrents->rowCount(); i++) {
         item.append(ui->listaTorrents->takeItem(i,1));
     }
     ui->listaTorrents->clearContents();
@@ -442,13 +442,13 @@ void janelatorrent::on_botaoAtualizaLista_clicked()
     connect(lbaixaXML, &filedownloader::sxml, this, &janelatorrent::fpreparaLeituraArquivoTorrent);
 }
 
-void janelatorrent::fprocuraAnimeEspecifico(const QString &rnomeAnimeBuscado){
+void janelatorrent::fprocuraAnimeEspecifico(const QString &rnomeAnimeBuscado) {
     ui->botaoAtualizaLista->blockSignals(true);
     if(!torrent.isEmpty())
         torrent.clear();
 
     QList<QTableWidgetItem*> item;
-    for(int i = 0; i < ui->listaTorrents->rowCount(); i++){
+    for(int i = 0; i < ui->listaTorrents->rowCount(); i++) {
         item.append(ui->listaTorrents->takeItem(i,1));
     }
     ui->listaTorrents->clearContents();
@@ -470,9 +470,9 @@ void janelatorrent::fautoDownload()
 
 QString janelatorrent::fchecaFiltroFansub(const QString &lid)
 {
-    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
-        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++) {
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++) {
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0) {
                 if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("fansub", Qt::CaseInsensitive))
                     return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
             }
@@ -483,9 +483,9 @@ QString janelatorrent::fchecaFiltroFansub(const QString &lid)
 
 QString janelatorrent::fchecaFiltroDownloadFromList(const QString &lid)
 {
-    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
-        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++) {
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++) {
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0) {
                 if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("list", Qt::CaseInsensitive))
                     return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
             }
@@ -496,9 +496,9 @@ QString janelatorrent::fchecaFiltroDownloadFromList(const QString &lid)
 
 QString janelatorrent::fchecaFiltroResolution(const QString &lid)
 {
-    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
-        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++) {
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++) {
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0) {
                 if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("resolution", Qt::CaseInsensitive))
                     return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
             }
@@ -509,9 +509,9 @@ QString janelatorrent::fchecaFiltroResolution(const QString &lid)
 
 QString janelatorrent::fchecaFiltroLaguage(const QString &lid)
 {
-    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
-        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++) {
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++) {
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0) {
                 if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("language", Qt::CaseInsensitive))
                     return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
             }
@@ -522,9 +522,9 @@ QString janelatorrent::fchecaFiltroLaguage(const QString &lid)
 
 QString janelatorrent::fchecaFiltroHasKeyword(const QString &lid)
 {
-    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++){
-        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++){
-            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0){
+    for(int i = 0; i < cconfig->vfiltrosAnimes.size(); i++) {
+        for(int w = 0; w < cconfig->vfiltrosAnimes[i]->idAnimesAfetados.size(); w++) {
+            if(cconfig->vfiltrosAnimes[i]->idAnimesAfetados[w].compare(lid) == 0) {
                 if(cconfig->vfiltrosAnimes[i]->filtroDeCondicao.contains("keyword", Qt::CaseInsensitive))
                     return cconfig->vfiltrosAnimes[i]->filtroDeCondicao+";"+cconfig->vfiltrosAnimes[i]->filtroEspecifico;
             }
@@ -536,7 +536,7 @@ QString janelatorrent::fchecaFiltroHasKeyword(const QString &lid)
 
 void janelatorrent::on_botaoInfoAnime_clicked()
 {
-    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()){
+    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()) {
         QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
         emit infoAnime(ui->listaTorrents->item(select.at(0).row(),2)->text());
     }
@@ -544,7 +544,7 @@ void janelatorrent::on_botaoInfoAnime_clicked()
 
 void janelatorrent::on_botaoLinkTorrent_clicked()
 {
-    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()){
+    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()) {
         QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
         QString llink = ui->listaTorrents->item(select.at(0).row(),8)->text();
         QDesktopServices::openUrl(QUrl(llink,QUrl::TolerantMode));
@@ -553,7 +553,7 @@ void janelatorrent::on_botaoLinkTorrent_clicked()
 
 void janelatorrent::on_botaoSearchThisanime_clicked()
 {
-    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()){
+    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()) {
         QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
         QString lnome = ui->listaTorrents->item(select.at(0).row(),2)->text();
         fprocuraAnimeEspecifico(lnome);
@@ -562,7 +562,7 @@ void janelatorrent::on_botaoSearchThisanime_clicked()
 
 void janelatorrent::on_botaoSelectSubForTorrent_clicked()
 {
-    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()){
+    if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()) {
         QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
         QString lnome = ui->listaTorrents->item(select.at(0).row(),1)->text();
         QString lsub = ui->listaTorrents->item(select.at(0).row(),3)->text();
@@ -581,18 +581,18 @@ void janelatorrent::fpreparaLeituraArquivoTorrent()
 void janelatorrent::fchecaEstado(int estado)
 {
     Q_UNUSED(estado)
-    for(int i = 0; i < vcontroladorCheckbox.size(); i++){
-        if(vcontroladorCheckbox[i]->isChecked() && torrent.size() > i){
+    for(int i = 0; i < vcontroladorCheckbox.size(); i++) {
+        if(vcontroladorCheckbox[i]->isChecked() && torrent.size() > i) {
             torrent[i]->vbaixar = true;
         }
-        else if(!vcontroladorCheckbox[i]->isChecked() && torrent.size() > i){
+        else if(!vcontroladorCheckbox[i]->isChecked() && torrent.size() > i) {
             torrent[i]->vbaixar = false;
         }
     }
 }
 
 int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, const QString &repisodioAime,
-                                          const QString &repisodiosAssistidos, const QString &rlista, int rposicaoNaLista)
+        const QString &repisodiosAssistidos, const QString &rlista, int rposicaoNaLista)
 {
     QStringList filtros = fchecaFiltroDownloadFromList(ridAnime).split(";");
     filtros.removeAll(QString(""));
@@ -601,30 +601,30 @@ int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, const QString &repis
     {
         if(filtros.at(0).contains("not", Qt::CaseInsensitive))
             return -10;
-        else if(rlista.compare(filtros.at(1), Qt::CaseInsensitive) == 0){
-            if(rlista.compare("Watching", Qt::CaseInsensitive) == 0){
+        else if(rlista.compare(filtros.at(1), Qt::CaseInsensitive) == 0) {
+            if(rlista.compare("Watching", Qt::CaseInsensitive) == 0) {
                 vlistaAtual = cleitor->retornaListaWatching();
             }
-            else if(rlista.compare("Plan to Watch", Qt::CaseInsensitive) == 0){
+            else if(rlista.compare("Plan to Watch", Qt::CaseInsensitive) == 0) {
                 vlistaAtual = cleitor->retornaListaPlanToWatch();
             }
-            else if(rlista.compare("On Hold", Qt::CaseInsensitive) == 0){
+            else if(rlista.compare("On Hold", Qt::CaseInsensitive) == 0) {
                 vlistaAtual = cleitor->retornaListaOnHold();
             }
-            else if(rlista.compare("Completed", Qt::CaseInsensitive) == 0){
+            else if(rlista.compare("Completed", Qt::CaseInsensitive) == 0) {
                 vlistaAtual = cleitor->retornaListaCompleted();
             }
-            else if(rlista.compare("Dropped", Qt::CaseInsensitive) == 0){
+            else if(rlista.compare("Dropped", Qt::CaseInsensitive) == 0) {
                 vlistaAtual = cleitor->retornaListaDropped();
             }
             else
                 vlistaAtual.clear();
-            if(repisodioAime.toInt() > repisodiosAssistidos.toInt()){
+            if(repisodioAime.toInt() > repisodiosAssistidos.toInt()) {
                 //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
                 //Se não estiver, o episódio já existe no computador.
-                if(rposicaoNaLista != -1 || vlistaAtual.isEmpty()){
+                if(rposicaoNaLista != -1 || vlistaAtual.isEmpty()) {
                     QString lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
-                            (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
+                                                     (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
                     //Caso não exista o episódio na pasta, a string retorna vazia.
                     lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
                     if(lultimoEpisodioBaixado.isEmpty())
@@ -638,34 +638,34 @@ int janelatorrent::fcalculaPrioridadeNome(QString ridAnime, const QString &repis
     else
     {
         if(rlista.compare("Watching", Qt::CaseInsensitive) == 0 &&
-                cconfig->fretornaDownloadListasAnimes().contains("w")){
+                cconfig->fretornaDownloadListasAnimes().contains("w")) {
             vlistaAtual = cleitor->retornaListaWatching();
         }
         else if(rlista.compare("Plan to Watch", Qt::CaseInsensitive) == 0 &&
-                cconfig->fretornaDownloadListasAnimes().contains("p")){
+                cconfig->fretornaDownloadListasAnimes().contains("p")) {
             vlistaAtual = cleitor->retornaListaPlanToWatch();
         }
         else if(rlista.compare("On Hold", Qt::CaseInsensitive) == 0 &&
-                cconfig->fretornaDownloadListasAnimes().contains("o")){
+                cconfig->fretornaDownloadListasAnimes().contains("o")) {
             vlistaAtual = cleitor->retornaListaOnHold();
         }
         else if(rlista.compare("Dropped", Qt::CaseInsensitive) == 0 &&
-                cconfig->fretornaDownloadListasAnimes().contains("d")){
+                cconfig->fretornaDownloadListasAnimes().contains("d")) {
             vlistaAtual = cleitor->retornaListaDropped();
         }
         else
             vlistaAtual.clear();
-        if(repisodioAime.toInt() > repisodiosAssistidos.toInt()){
+        if(repisodioAime.toInt() > repisodiosAssistidos.toInt()) {
             //Checa se é o próximo episódio que deve ser assistido. Se estiver vazio, o episódio não foi baixado
             //Se não estiver, o episódio já existe no computador.
-            if(rposicaoNaLista != -1){
+            if(rposicaoNaLista != -1) {
                 QString lultimoEpisodioBaixado = "NotEmpty";
                 if(!vlistaAtual.isEmpty())
                     lultimoEpisodioBaixado = carquivos->fprocuraEpisodioEspecifico
-                            (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
+                                             (vlistaAtual[rposicaoNaLista],repisodioAime.toInt());
                 //Caso não exista o episódio na pasta, a string retorna vazia.
                 lultimoEpisodioBaixado = lultimoEpisodioBaixado.mid(lultimoEpisodioBaixado.lastIndexOf("/")+1);
-                if(lultimoEpisodioBaixado.isEmpty()){
+                if(lultimoEpisodioBaixado.isEmpty()) {
                     //                                qDebug() << vlistaAtual[lposicaoAnimeNaLista]->vid << vlistaAtual[lposicaoAnimeNaLista]->vnome;
                     return 10;
                 }
@@ -683,16 +683,16 @@ int janelatorrent::fcalculaPrioridadeSub(const QString &rfansub, const QString &
 {
     QStringList filtros = fchecaFiltroFansub(rid).split(";");
     filtros.removeAll(QString(""));
-    if(!filtros.isEmpty()){
-        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
-            if(filtros.at(1).compare(rfansub, Qt::CaseInsensitive) == 0){
+    if(!filtros.isEmpty()) {
+        if(filtros.at(0).contains("not", Qt::CaseInsensitive)) {
+            if(filtros.at(1).compare(rfansub, Qt::CaseInsensitive) == 0) {
                 return -10;
             }
         }
         else if(rfansub.compare(filtros.at(1), Qt::CaseInsensitive) == 0)
             return 2;
     }
-    else{
+    else {
         if(rfansub.compare(cconfig->fretornaSubEscolhido(), Qt::CaseInsensitive) == 0)
             return 2;
     }
@@ -703,16 +703,16 @@ int janelatorrent::fcalculaPrioridadeQualidade(const QString &resolucao, const Q
 {
     QStringList filtros = fchecaFiltroResolution(id).split(";");
     filtros.removeAll(QString(""));
-    if(!filtros.isEmpty()){
-        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
-            if(filtros.at(1).contains(resolucao, Qt::CaseInsensitive)){
+    if(!filtros.isEmpty()) {
+        if(filtros.at(0).contains("not", Qt::CaseInsensitive)) {
+            if(filtros.at(1).contains(resolucao, Qt::CaseInsensitive)) {
                 return -10;
             }
         }
         else if(filtros.at(1).contains(resolucao, Qt::CaseInsensitive))
             return 2;
     }
-    else{
+    else {
         if(cconfig->fretornaQualidadeEscolhida().compare(resolucao.toUtf8(), Qt::CaseInsensitive) == 0)
             return 2;
     }
@@ -723,9 +723,9 @@ int janelatorrent::fcalculaPrioridadeFiltros(const QString &description, const Q
 {
     QStringList filtros = fchecaFiltroLaguage(rid).split(";");
     filtros.removeAll(QString(""));
-    if(!filtros.isEmpty()){
-        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
-            if(description.contains(filtros.at(1), Qt::CaseInsensitive)){
+    if(!filtros.isEmpty()) {
+        if(filtros.at(0).contains("not", Qt::CaseInsensitive)) {
+            if(description.contains(filtros.at(1), Qt::CaseInsensitive)) {
                 return -10;
             }
         }
@@ -734,9 +734,9 @@ int janelatorrent::fcalculaPrioridadeFiltros(const QString &description, const Q
     }
     filtros = fchecaFiltroHasKeyword(rid).split(";");
     filtros.removeAll(QString(""));
-    if(!filtros.isEmpty()){
-        if(filtros.at(0).contains("not", Qt::CaseInsensitive)){
-            if(description.contains(filtros.at(1), Qt::CaseInsensitive)){
+    if(!filtros.isEmpty()) {
+        if(filtros.at(0).contains("not", Qt::CaseInsensitive)) {
+            if(description.contains(filtros.at(1), Qt::CaseInsensitive)) {
                 return -10;
             }
         }
@@ -763,7 +763,7 @@ void janelatorrent::fmudaResolucao()
     //widgets
     compHeight = static_cast<double>(objheight)/1000;
     compWidth = static_cast<double>(width)/1920;
-    foreach(QObject *wid, objectList){
+    foreach(QObject *wid, objectList) {
         //Pego a posição relativa dos objetos
         double a = static_cast<double>(thisWid->pos().rx())/1920;
         double b = static_cast<double>(thisWid->pos().ry())/1000;
@@ -774,7 +774,7 @@ void janelatorrent::fmudaResolucao()
         //Ex: Se o objeto ocupa, originalmente, 5% do tamanho da página, faço o novo objeto ocupar 5% do tamanho da página com a
         //Nova resolução
         thisWid->resize(qCeil(static_cast<int>(compWidth*objWid)),
-                                                              qCeil(static_cast<int>(compHeight*objHei)));
+                        qCeil(static_cast<int>(compHeight*objHei)));
         //Faço os objetos entrarem na posição certa;
         thisWid->move(qCeil(static_cast<int>(a*width)), qCeil(static_cast<int>(b*objheight)));
     }
