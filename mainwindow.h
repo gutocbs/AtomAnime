@@ -135,6 +135,7 @@ private slots:
     void fleNomesAlternativos();
     void fresetaRequestCounter();
     void fatualizaFontes();
+    void fupdateMessage(const QString &mensagem);
 
 private:
     Ui::MainWindow *ui;

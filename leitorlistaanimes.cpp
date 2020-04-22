@@ -201,20 +201,38 @@ bool leitorlistaanimes::fleJson(){
                 llinha = json.readLine();
                 while(!llinha.contains("],")){
                     llinha.remove("\",");
-                    llinha.remove("\"");
+
+                    //Checa se existem aspas no título do anime, como Sing "YESTERDAY" to me
+                    //e mantem apenas as aspas do título
+                    if(llinha.contains("\\\"")){
+                        llinha.remove("\"");
+                        llinha.replace("\\","\"");
+                    }
+                    else
+                        llinha.remove("\"");
                     lnomeAlternativo.append(llinha.trimmed());
                     llinha = json.readLine();
                 }
             }
             else if(llinha.contains("\"english\":")){
                 llinha.remove(",");
-                llinha.remove("\"");
+                if(llinha.contains("\\\"")){
+                    llinha.remove("\"");
+                    llinha.replace("\\","\"");
+                }
+                else
+                    llinha.remove("\"");
                 llinha.remove("english:");
                 lnomeIngles = llinha.trimmed();
             }
             else if(llinha.contains("\"romaji\":")){
                 llinha.remove(",");
-                llinha.remove("\"");
+                if(llinha.contains("\\\"")){
+                    llinha.remove("\"");
+                    llinha.replace("\\","\"");
+                }
+                else
+                    llinha.remove("\"");
                 llinha.remove("romaji:");
                 lnome = llinha.trimmed();
                 if(lnome.endsWith("2"))

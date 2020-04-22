@@ -48,6 +48,9 @@ bool FormataPalavras::fcomparaNomes(const QString &rnome1, const QString &rnome2
     if(fremoveCaracteresExtras(rnome1).compare(fremoveCaracteresExtras(rnome2)) == 0)
         return true;
 
+    if(fremoveTV(rnome1).compare(fremoveTV(rnome2)) == 0)
+        return true;
+
     if(rnome1.contains("OVA") || rnome1.contains("Special") || rnome2.contains("OVA") || rnome2.contains("Special")){
         if(fmudaOVAPraSpecials(rnome1).compare(fmudaOVAPraSpecials(rnome2)) == 0)
             return true;
@@ -75,6 +78,7 @@ QString FormataPalavras::fremoveTudo(QString rpalavra)
     rpalavra = fremoveSeason(rpalavra);
     rpalavra = fremoveNumeracao(rpalavra);
     rpalavra = fremoveNumeracaoRomana(rpalavra);
+    rpalavra = fremoveTV(rpalavra);
     rpalavra = fremoveCaracteresExtras(rpalavra);
     rpalavra = fremoveOVAEspecial(rpalavra);
     return rpalavra;
@@ -83,6 +87,7 @@ QString FormataPalavras::fremoveTudo(QString rpalavra)
 QString FormataPalavras::fremovePontuacao(QString rpalavra)
 {
     rpalavra = rpalavra.toLower();
+    rpalavra.remove("...");
     rpalavra.remove(".");
     rpalavra.remove(",");
     rpalavra.remove("?");
@@ -101,6 +106,7 @@ QString FormataPalavras::fremoveCaracteresEspeciais(QString rpalavra)
     rpalavra.replace("△", " ");
     rpalavra.replace("♥", " ");
     rpalavra.replace("○", " ");
+    rpalavra.replace("…", " ");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -112,6 +118,7 @@ QString FormataPalavras::fmudaCaracteresEspeciais(QString rpalavra)
     rpalavra.replace("△", "-");
     rpalavra.replace("♥", "-");
     rpalavra.replace("○", "-");
+    rpalavra.replace("…", "-");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 }
@@ -279,6 +286,7 @@ QString FormataPalavras::fremoveCaracteresExtras(QString rpalavra)
     rpalavra.remove("_");
     rpalavra.remove("=");
     rpalavra.remove(":");
+    rpalavra.remove("|");
     rpalavra = rpalavra.simplified();
     return rpalavra;
 

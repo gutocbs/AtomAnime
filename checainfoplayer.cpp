@@ -36,10 +36,6 @@ void ChecaInfoPlayer::fchecaStream(const QString &player, const QString &janela)
     }
 }
 
-void ChecaInfoPlayer::fremoveReprodutor()
-{
-}
-
 QString ChecaInfoPlayer::fretornaAnime()
 {
     return vanime;
@@ -98,18 +94,28 @@ void ChecaInfoPlayer::fchecaAnimeLab()
 void ChecaInfoPlayer::fchecaFunimation()
 {
     vnomeDaJanela = vnomeDaJanela.simplified();
-    QStringList nomeJanela = vnomeDaJanela.split(QRegExp("\\b"));
+//    QStringList nomeJanela = vnomeDaJanela.split(QRegExp("\\b"));
+    QStringList nomeJanela = vnomeDaJanela.split(" ");
+    nomeJanela.takeFirst();
     int indexOfEpisode = 0;
+    int indexOfSeason = 0;
+    QString vtemporada = "1";
+    if(nomeJanela.contains("Season")){
+        indexOfSeason = nomeJanela.indexOf("Season");
+        vtemporada = nomeJanela.at(indexOfSeason+1);
+    }
     if(nomeJanela.contains("Episode")){
         indexOfEpisode = nomeJanela.indexOf("Episode");
         vepisodio = nomeJanela.at(indexOfEpisode+1);
     }
     int tamanho = nomeJanela.size();
-    for(int i = indexOfEpisode; i < tamanho; i++){
-        nomeJanela.removeAt(indexOfEpisode);
+    for(int i = indexOfSeason; i < tamanho; i++){
+        nomeJanela.removeAt(indexOfSeason);
     }
     vanime = nomeJanela.join(" ");
     vanime = vanime.simplified();
+    if(vtemporada.compare("1") != 0)
+        vanime.append(QString(" " + vtemporada));
 }
 
 void ChecaInfoPlayer::fchecaKissAnime()
