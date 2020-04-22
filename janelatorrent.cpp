@@ -291,6 +291,8 @@ void janelatorrent::fpreencheTabela()
                 ui->listaTorrents->setItem(i,w, litem);
             break;
             case 4:
+                if(torrent[i]->vresolucao.compare("1080p") != 0)
+                    torrent[i]->vresolucao.insert(0,"0");
                 litem->setText(torrent[i]->vresolucao);
                 if(torrent[i]->vbaixar)
                     litem->setTextColor("royalblue");
@@ -395,10 +397,12 @@ void janelatorrent::fesperaTorrent(){
 void janelatorrent::fbaixaTorrent()
 {
     if(cconfig->fretornaPastaSalvarAnimes().isEmpty()){
+        ui->labelMensagem->setText("Error: Trying to download without setting a download folder");
         qWarning() << "Error: Trying to download without setting a download folder";
         emit error("No download folder");
         return;
     }
+    this->thread()->wait(700);
     QPointer<QProcess> lprocesso(new QProcess);
     QStringList argumentos;
     if(cconfig->fretornaTorrentEscolhido() == "uTorrent"){
@@ -546,6 +550,8 @@ void janelatorrent::on_botaoLinkTorrent_clicked()
 {
     if(!ui->listaTorrents->selectionModel()->selectedRows().isEmpty()){
         QModelIndexList select = ui->listaTorrents->selectionModel()->selectedRows();
+        //Pra dar tempo de processar tudo. Aparentemente crasha sem isso
+        this->thread()->wait(300);
         QString llink = ui->listaTorrents->item(select.at(0).row(),8)->text();
         QDesktopServices::openUrl(QUrl(llink,QUrl::TolerantMode));
     }

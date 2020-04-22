@@ -25,7 +25,7 @@ void confUsuario::fbuscaDiretoriosAnimes(){
         this->thread()->exit(0);
         return;
     }
-    qDebug() << "Searching for anime folders";
+//    qDebug() << "Searching for anime folders";
     //Busca cada diretorio existente nas configurações
     for(int i = 0; i < vdiretorioAnimes.size(); i++){
         //Procura apenas por diretorios e subdiretorios
@@ -95,6 +95,7 @@ void confUsuario::fbuscaPastasThread(QThread &dThread)
 {
     vlista = 0;
     connect(&dThread, &QThread::started, this, &confUsuario::fsetupListasPraBusca, Qt::QueuedConnection);
+    qDebug()<< "Buscando diretorios";
 }
 
 void confUsuario::fsalvaPastasArquivos()
@@ -142,7 +143,6 @@ void confUsuario::fselecionaPastaEspecificaAnime(const QString &ridAnime, const 
 //Aparentemente nunca entra aqui
 void confUsuario::fsetupListasPraBusca()
 {
-    qDebug() << "Setup Pastas";
     if(vlista == 0){
         if(this->thread()->isInterruptionRequested()){
             this->thread()->exit(0);
@@ -150,6 +150,7 @@ void confUsuario::fsetupListasPraBusca()
         }
         vlistaAnimes = cleitorlistaanimes->retornaListaWatching();
         vlista++;
+        qDebug() << "Searching for animes from list Watching";
         fbuscaDiretoriosAnimes();
     }
     else if(vlista == 1){
@@ -159,6 +160,7 @@ void confUsuario::fsetupListasPraBusca()
         }
         vlistaAnimes = cleitorlistaanimes->retornaListaCompleted();
         vlista++;
+        qDebug() << "Searching for animes from list Completed";
         fbuscaDiretoriosAnimes();
     }
     else if(vlista == 2){
@@ -168,6 +170,7 @@ void confUsuario::fsetupListasPraBusca()
         }
         vlistaAnimes = cleitorlistaanimes->retornaListaDropped();
         vlista++;
+        qDebug() << "Searching for animes from list Dropped";
         fbuscaDiretoriosAnimes();
     }
     else if(vlista == 3){
@@ -177,6 +180,7 @@ void confUsuario::fsetupListasPraBusca()
         }
         vlistaAnimes = cleitorlistaanimes->retornaListaOnHold();
         vlista++;
+        qDebug() << "Searching for animes from list On Hold";
         fbuscaDiretoriosAnimes();
     }
     else if(vlista == 4){
@@ -186,16 +190,21 @@ void confUsuario::fsetupListasPraBusca()
         }
         vlistaAnimes = cleitorlistaanimes->retornaListaPlanToWatch();
         vlista++;
+        qDebug() << "Searching for animes from list Plan to Watch";
         fbuscaDiretoriosAnimes();
     }
     else if(vlista == 5){
+        if(this->thread()->isInterruptionRequested()){
+            this->thread()->exit(0);
+            return;
+        }
+        fsalvaPastasArquivos();
+        cleitorlistaanimes->fcarregaListaAnoEmThread();
         emit schecouPastas();
         vterminouChecagem = true;
         qDebug() << "All animes in the computer were found";
         this->thread()->exit(0);
-        fsalvaPastasArquivos();
     }
-    cleitorlistaanimes->fcarregaListaAnoEmThread();
 }
 
 void confUsuario::frecebeListaAnime(leitorlistaanimes *rlistaAnime)
